@@ -325,8 +325,10 @@ Refer to the config example: [aggkit-prover.toml](config/aggkit-prover.toml)
 NETWORK_RPC_URL=@@replace
 NETWORK_PRIVATE_KEY=@@replace
 ```
-> NETWORK_RPC_URL: SP1 network url
-> NETWORK_PRIVATE_KEY: SP1 network private key
+> **NETWORK_RPC_URL**: SP1 network url
+
+> **NETWORK_PRIVATE_KEY**: SP1 network private key
+
 > update the placeholders marked with `@@replace` with the appropriate values.
 
 ### aggkit
@@ -357,7 +359,7 @@ RequireNoFEPBlockGap = true
 ...
 ```
 
-> AggchainProofURL: aggkit-prover url
+> **AggchainProofURL**: aggkit-prover url
 
 > update the placeholders marked with `@@replace` with the appropriate values.
 
