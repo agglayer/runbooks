@@ -108,8 +108,9 @@ jq \
     > ./tools/updateRollup/updateRollup.json
 ```
 
-> timelockDelay: the duration of the timelock. It's advisable to use a short delay for devnets (e.g., 60) for convenience
-> deployerPvtKey: the private key used for executing smart contract operations
+> **timelockDelay**: the duration of the timelock. It's advisable to use a short delay for devnets (e.g., 60) for convenience
+
+> **deployerPvtKey**: the private key used for executing smart contract operations
 
 Review the content of `./tools/updateRollup/updateRollup.json` and update the placeholders marked with `@@replace` with the appropriate values. 
 
@@ -231,9 +232,12 @@ jq \
 '  ./tools/initializeRollup/initialize_rollup.json.example > ./tools/initializeRollup/initialize_rollup.json
 ```
 
-> trustedSequencer: can be retrieved by invoking the trustedSequencer function of the rollup smart contract. See [important notes](./pp-to-fep.md#important-notes) for more details
-> timelockDelay: the duration of the timelock. It's advisable to use a short delay for devnets (e.g., 60) for convenience
-> deployerPvtKey: the private key used for executing smart contract operations
+> *trustedSequencer*: can be retrieved by invoking the trustedSequencer function of the rollup smart contract. See [important notes](./pp-to-fep.md#important-notes) for more details
+
+> *timelockDelay*: the duration of the timelock. It's advisable to use a short delay for devnets (e.g., 60) for convenience
+
+> *deployerPvtKey*: the private key used for executing smart contract operations
+
 
 Review the content of `./tools/initializeRollup/initialize_rollup.json` and update the placeholders marked with `@@replace` with the appropriate values.
 
@@ -289,18 +293,28 @@ PRIVATE_KEY=@@replace
 NETWORK_RPC_URL=@@replace
 NETWORK_PRIVATE_KEY=@@replace
 ```
-> DATABASE_URL: PostgreSQL database connection URL
-> L1_BEACON_RPC: l1 rpc url
-> L1_RPC: l1 rpc url
-> L2_NODE_RPC: op-node url
-> L2_RPC: op-geth url
-> L2OO_ADDRESS: rollup smart contract address
-> PROVER_ADDRESS: must match the `trustedSequencer` and the address used by the `aggsender`. See [important notes](./pp-to-fep.md#important-notes) for further details
-> PRIVATE_KEY: must match the private key of the `trustedSequencer` and the one used by the `aggsender`. See [important notes](./pp-to-fep.md#important-notes) for further details
-> NETWORK_RPC_URL: SP1 network url
-> NETWORK_PRIVATE_KEY: SP1 network private key
+> *DATABASE_URL*: PostgreSQL database connection URL
 
-> update the placeholders marked with `@@replace` with the appropriate values.
+> *L1_BEACON_RPC*: l1 rpc url
+
+> *L1_RPC*: l1 rpc url
+
+> *L2_NODE_RPC*: op-node url
+
+> *L2_RPC*: op-geth url
+
+> *L2OO_ADDRESS*: rollup smart contract address
+
+> *PROVER_ADDRESS*: must match the `trustedSequencer` and the address used by the `aggsender`. See [important notes](./pp-to-fep.md#important-notes) for further details
+
+> *PRIVATE_KEY*: must match the private key of the `trustedSequencer` and the one used by the `aggsender`. See [important notes](./pp-to-fep.md#important-notes) for further
+details
+> *NETWORK_RPC_URL*: SP1 network url
+
+> *NETWORK_PRIVATE_KEY*: SP1 network private key
+
+
+Update the placeholders marked with `@@replace` with the appropriate values.
 
 ### aggkit-prover
 #### General info
@@ -329,7 +343,7 @@ NETWORK_PRIVATE_KEY=@@replace
 
 > **NETWORK_PRIVATE_KEY**: SP1 network private key
 
-> update the placeholders marked with `@@replace` with the appropriate values.
+Update the placeholders marked with `@@replace` with the appropriate values.
 
 ### aggkit
 #### General info
@@ -361,7 +375,7 @@ RequireNoFEPBlockGap = true
 
 > **AggchainProofURL**: aggkit-prover url
 
-> update the placeholders marked with `@@replace` with the appropriate values.
+Update the placeholders marked with `@@replace` with the appropriate values.
 
 ### Important notes
 - The `trustedSequencer` (set in the rollup smart contract) needs to match:
