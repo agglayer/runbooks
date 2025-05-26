@@ -282,7 +282,7 @@ RequireNoFEPBlockGap = true
 | Disk     | 500Gi      |
 
 #### Config
-Config example at ./config/aggkit-prover.toml
+Refer to the config example: [aggkit-prover.toml](config/aggkit-prover.toml)
 #### Environment variables
 ```
 NETWORK_PRIVATE_KEY=@@replace
