@@ -25,19 +25,19 @@ upgrade % tree .
 ## Environment
 ```
 cat << EOF > .env
-export network_name="" # replace
+export network_name="" # replace by the network name. Can be retrieved by invoking the networkName function of the rollup smart contract
 
 # services
-export agglayer_url=http:// # replace
-export l2_rpc_url=http:// # replace
-export l2_node_url=http:// # replace
-export l1_rpc_url=http:// # replace
+export agglayer_url=http:// # readrpc agglayer url (e.g.: https://agglayer-dev.polygon.technology for Bali)
+export l2_rpc_url=http:// # op-geth url
+export l2_node_url=http:// # op-node url
+export l1_rpc_url=http:// # l1 rpc url
 
 # wallet
-export admin_address=0x # replace
+export admin_address=0x # replace by the rollup admin address
 
-# to be provided
-export new_rollup_type_id=0 # replace
+# rollup
+export new_rollup_type_id=0 # to be provided by Polygon labs
 
 # fetched from the combined.json file
 export l2_chain_id=$(cat combined.json | jq -r .l2ChainID)
@@ -107,6 +107,9 @@ jq \
   ' ./tools/updateRollup/updateRollup.json.example \
     > ./tools/updateRollup/updateRollup.json
 ```
+
+> timelockDelay: the duration of the timelock. It's advisable to use a short delay for devnets (e.g., 60) for convenience
+> deployerPvtKey: the private key used for executing smart contract operations
 
 Review the content of `./tools/updateRollup/updateRollup.json` and update the placeholders marked with `@@replace` with the appropriate values. 
 
@@ -200,11 +203,11 @@ jq \
     --slurpfile o ../output.json \
     --slurpfile s ../opsuccinctl2ooconfig.json \
     --slurpfile c ../combined.json \
-   '.trustedSequencerURL = "@@replace" |
+   '.trustedSequencerURL = "http://" |
     .networkName = $network_name |
     .trustedSequencer = "@@replace" |
     .chainID = $c[0].l2ChainID |
-    .rollupAdminAddress = "@@replace" |
+    .rollupAdminAddress = $admin_address |
     .gasTokenAddress = $c[0].gasTokenAddress |
     .deployerPvtKey = "@@replace" |
     .timelockDelay = "@@replace" |
@@ -227,6 +230,10 @@ jq \
     .consensusContractName = "AggchainFEP"
 '  ./tools/initializeRollup/initialize_rollup.json.example > ./tools/initializeRollup/initialize_rollup.json
 ```
+
+> trustedSequencer: can be retrieved by invoking the trustedSequencer function of the rollup smart contract. See [important notes](./pp-to-fep.md#important-notes) for more details
+> timelockDelay: the duration of the timelock. It's advisable to use a short delay for devnets (e.g., 60) for convenience
+> deployerPvtKey: the private key used for executing smart contract operations
 
 Review the content of `./tools/initializeRollup/initialize_rollup.json` and update the placeholders marked with `@@replace` with the appropriate values.
 
@@ -272,7 +279,6 @@ WITNESS_GEN_TIMEOUT="1200"
 RUST_LOG="debug"
 RANGE_PROOF_INTERVAL="1800"
 DATABASE_URL=@@replace
-DB_PATH=@@replace
 L1_BEACON_RPC=@@replace
 L1_RPC=@@replace
 L2_NODE_RPC=@@replace
@@ -280,8 +286,20 @@ L2_RPC=@@replace
 L2OO_ADDRESS=@@replace
 PROVER_ADDRESS=@@replace
 PRIVATE_KEY=@@replace
+NETWORK_RPC_URL=@@replace
 NETWORK_PRIVATE_KEY=@@replace
 ```
+> DATABASE_URL: PostgreSQL database connection URL
+> L1_BEACON_RPC: l1 rpc url
+> L1_RPC: l1 rpc url
+> L2_NODE_RPC: op-node url
+> L2_RPC: op-geth url
+> L2OO_ADDRESS: rollup smart contract address
+> PROVER_ADDRESS: must match the `trustedSequencer` and the address used by the `aggsender`. See [important notes](./pp-to-fep.md#important-notes) for further details
+> PRIVATE_KEY: must match the private key of the `trustedSequencer` and the one used by the `aggsender`. See [important notes](./pp-to-fep.md#important-notes) for further details
+> NETWORK_RPC_URL: SP1 network url
+> NETWORK_PRIVATE_KEY: SP1 network private key
+
 > update the placeholders marked with `@@replace` with the appropriate values.
 
 ### aggkit-prover
@@ -304,8 +322,11 @@ NETWORK_PRIVATE_KEY=@@replace
 Refer to the config example: [aggkit-prover.toml](config/aggkit-prover.toml)
 #### Environment variables
 ```
+NETWORK_RPC_URL=@@replace
 NETWORK_PRIVATE_KEY=@@replace
 ```
+> NETWORK_RPC_URL: SP1 network url
+> NETWORK_PRIVATE_KEY: SP1 network private key
 > update the placeholders marked with `@@replace` with the appropriate values.
 
 ### aggkit
@@ -335,10 +356,12 @@ UseAgglayerTLS = true
 RequireNoFEPBlockGap = true
 ...
 ```
+
+> AggchainProofURL: aggkit-prover url
+
 > update the placeholders marked with `@@replace` with the appropriate values.
 
 ### Important notes
 - The `trustedSequencer` (set in the rollup smart contract) needs to match:
   - `PROVER_ADDRESS` and `PRIVATE_KEY` environment variables of the op-succinct-proposer 
   - Private key used by the aggsender in the `AggsenderPrivateKey` field
-- The `L2OO_ADDRESS` environment variable should contain the rollup address
