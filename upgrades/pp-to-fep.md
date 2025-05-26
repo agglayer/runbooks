@@ -4,6 +4,9 @@
 - All paths in this guide are relative to the `upgrade` directory:
 ```
 mkdir upgrade
+```
+
+```
 cd upgrade
 ```
 
@@ -26,6 +29,7 @@ export network_name="" # replace
 
 # services
 export agglayer_url=http:// # replace
+export l2_rpc_url=http:// # replace
 export l2_node_url=http:// # replace
 export l1_rpc_url=http:// # replace
 
@@ -74,7 +78,13 @@ cast rpc --rpc-url "$l2_node_url" admin_stopSequencer
 
 ```
 git clone https://github.com/agglayer/agglayer-contracts
+```
+
+```
 cd agglayer-contracts
+```
+
+```
 git checkout feature/ongoing-v0.3.0
 ```
 
@@ -158,6 +168,7 @@ cat << EOF > .env
 L1_RPC="${l1_rpc_url}"
 L1_BEACON_RPC="${l1_rpc_url}"
 L2_NODE_RPC="${l2_node_url}"
+L2_RPC="${l2_rpc_url}"
 EOF
 ```
 
@@ -166,7 +177,6 @@ cargo run --bin fetch-rollup-config --release -- --env-file .env
 ```
 
 ```
-mv "configs/${l2_chain_id}.json" ../rollup_config.json
 mv "contracts/opsuccinctl2ooconfig.json" ../opsuccinctl2ooconfig.json
 ```
 
@@ -182,16 +192,16 @@ cd agglayer-contracts
 
 ```
 jq \
-    --arg network_name "${network_name}" \
-    --arg admin_address "${admin_address}" \
-    --arg aggchain_vkey "${aggchain_vkey}" \
-    --arg aggchain_vkey_selector "${aggchain_vkey_selector}" \
-    --arg new_rollup_type_id "${new_rollup_type_id}" \
+    --arg network_name ${network_name} \
+    --arg admin_address ${admin_address} \
+    --arg aggchain_vkey ${aggchain_vkey} \
+    --arg aggchain_vkey_selector ${aggchain_vkey_selector} \
+    --arg new_rollup_type_id ${new_rollup_type_id} \
     --slurpfile o ../output.json \
     --slurpfile s ../opsuccinctl2ooconfig.json \
     --slurpfile c ../combined.json \
    '.trustedSequencerURL = "@@replace" |
-    .networkName = "$network_name" |
+    .networkName = $network_name |
     .trustedSequencer = "@@replace" |
     .chainID = $c[0].l2ChainID |
     .rollupAdminAddress = "@@replace" |
@@ -200,19 +210,19 @@ jq \
     .timelockDelay = "@@replace" |
     .rollupManagerAddress = $c[0].polygonRollupManagerAddress |
     .rollupTypeId = $new_rollup_type_id |
-    .aggchainParams.aggchainManager = "$admin_address" |
-    .aggchainParams.initOwnedAggchainVKey = "$aggchain_vkey" |
-    .aggchainParams.initAggchainVKeySelector = "$aggchain_vkey_selector" |
+    .aggchainParams.aggchainManager = $admin_address |
+    .aggchainParams.initOwnedAggchainVKey = $aggchain_vkey |
+    .aggchainParams.initAggchainVKeySelector = $aggchain_vkey_selector |
     .aggchainParams.initParams.l2BlockTime = $s[0].l2BlockTime |
-    .aggchainParams.initParams.startingOutputRoot = "$o[0].outputRoot" |
+    .aggchainParams.initParams.startingOutputRoot = $o[0].outputRoot |
     .aggchainParams.initParams.startingBlockNumber = $s[0].startingBlockNumber |
     .aggchainParams.initParams.startingTimestamp = $o[0].blockRef.timestamp |
     .aggchainParams.initParams.submissionInterval = 1 |
-    .aggchainParams.initParams.optimisticModeManager = "$admin_address" |
-    .aggchainParams.initParams.aggregationVkey = "$s[0].aggregationVkey"  |
-    .aggchainParams.initParams.rangeVkeyCommitment = "$s[0].rangeVkeyCommitment" |
+    .aggchainParams.initParams.optimisticModeManager = $admin_address |
+    .aggchainParams.initParams.aggregationVkey = $s[0].aggregationVkey  |
+    .aggchainParams.initParams.rangeVkeyCommitment = $s[0].rangeVkeyCommitment |
     .aggchainParams.initParams.rollupConfigHash = $s[0].rollupConfigHash |
-    .aggchainParams.vKeyManager = "$admin_address" |
+    .aggchainParams.vKeyManager = $admin_address |
     .realVerifier = true |
     .consensusContractName = "AggchainFEP"
 '  ./tools/initializeRollup/initialize_rollup.json.example > ./tools/initializeRollup/initialize_rollup.json
