@@ -236,59 +236,6 @@ npx hardhat run ./tools/initializeRollup/initializeRollup.ts --network sepolia
 ```
 
 ## Deployment
-### aggkit
-#### General info
-| Item               | Description |
-|--------------------|-------------|
-| **Repository**      | [agglayer/aggkit](https://github.com/agglayer/aggkit) |
-| **Docker Image**    | `ghcr.io/agglayer/aggkit:0.3.0` |
-| **Run Command**     | `/usr/local/bin/aggkit run --cfg=/path/to/config.toml --components=aggsender,aggoracle` |
-| **Endpoints**       | This service doesn’t expose any endpoints |
-
-#### Capacity
-| Resource | Allocation |
-|----------|------------|
-| CPU      | 100m       |
-| Memory   | 4Gi        |
-| Disk     | 500Gi      |
-
-#### Config
-The config file looks almost identical; except for the AggSender section. In addition to the other fields, make it sure to add these new ones:
-```
-[AggSender]
-...
-Mode="AggchainProof"
-AggchainProofURL="@@replace"
-UseAgglayerTLS = true
-RequireNoFEPBlockGap = true
-...
-```
-> update the placeholders marked with `@@replace` with the appropriate values.
-
-### aggkit-prover
-#### General info
-| Item               | Description |
-|--------------------|-------------|
-| **Repository**      | [agglayer/provers](https://github.com/agglayer/provers) |
-| **Docker Image**    | `ghcr.io/agglayer/aggkit-prover:0.1.0-rc.28` |
-| **Run Command**     | `/usr/local/bin/aggkit-prover --config-path /path/to/config.toml` |
-| **Endpoints**       | This service exposes a gRPC endpoint (port `4446` in this example) |
-
-#### Capacity
-| Resource | Allocation |
-|----------|------------|
-| CPU      | 100m       |
-| Memory   | 2Gi        |
-| Disk     | 500Gi      |
-
-#### Config
-Refer to the config example: [aggkit-prover.toml](config/aggkit-prover.toml)
-#### Environment variables
-```
-NETWORK_PRIVATE_KEY=@@replace
-```
-> update the placeholders marked with `@@replace` with the appropriate values.
-
 ### op-succinct-proposer
 #### General info
 | Item               | Description |
@@ -334,6 +281,59 @@ L2OO_ADDRESS=@@replace
 PROVER_ADDRESS=@@replace
 PRIVATE_KEY=@@replace
 NETWORK_PRIVATE_KEY=@@replace
+```
+> update the placeholders marked with `@@replace` with the appropriate values.
+
+### aggkit-prover
+#### General info
+| Item               | Description |
+|--------------------|-------------|
+| **Repository**      | [agglayer/provers](https://github.com/agglayer/provers) |
+| **Docker Image**    | `ghcr.io/agglayer/aggkit-prover:0.1.0-rc.28` |
+| **Run Command**     | `/usr/local/bin/aggkit-prover --config-path /path/to/config.toml` |
+| **Endpoints**       | This service exposes a gRPC endpoint (port `4446` in this example) |
+
+#### Capacity
+| Resource | Allocation |
+|----------|------------|
+| CPU      | 100m       |
+| Memory   | 2Gi        |
+| Disk     | 500Gi      |
+
+#### Config
+Refer to the config example: [aggkit-prover.toml](config/aggkit-prover.toml)
+#### Environment variables
+```
+NETWORK_PRIVATE_KEY=@@replace
+```
+> update the placeholders marked with `@@replace` with the appropriate values.
+
+### aggkit
+#### General info
+| Item               | Description |
+|--------------------|-------------|
+| **Repository**      | [agglayer/aggkit](https://github.com/agglayer/aggkit) |
+| **Docker Image**    | `ghcr.io/agglayer/aggkit:0.3.0` |
+| **Run Command**     | `/usr/local/bin/aggkit run --cfg=/path/to/config.toml --components=aggsender,aggoracle` |
+| **Endpoints**       | This service doesn’t expose any endpoints |
+
+#### Capacity
+| Resource | Allocation |
+|----------|------------|
+| CPU      | 100m       |
+| Memory   | 4Gi        |
+| Disk     | 500Gi      |
+
+#### Config
+The config file looks almost identical; except for the AggSender section. In addition to the other fields, make it sure to add these new ones:
+```
+[AggSender]
+...
+Mode="AggchainProof"
+AggchainProofURL="@@replace"
+UseAgglayerTLS = true
+RequireNoFEPBlockGap = true
+...
 ```
 > update the placeholders marked with `@@replace` with the appropriate values.
 
