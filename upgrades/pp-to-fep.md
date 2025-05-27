@@ -85,7 +85,7 @@ cd agglayer-contracts
 ```
 
 ```
-git checkout feature/ongoing-v0.3.0
+git checkout v10.1.0-rc.6
 ```
 
 ```
