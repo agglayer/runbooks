@@ -293,7 +293,7 @@ PRIVATE_KEY=@@replace
 NETWORK_RPC_URL=@@replace
 NETWORK_PRIVATE_KEY=@@replace
 ```
-> ***DATABASE_URL**: PostgreSQL database connection URL
+> **DATABASE_URL**: PostgreSQL database connection URL
 
 > **L1_BEACON_RPC**: l1 rpc url
 
