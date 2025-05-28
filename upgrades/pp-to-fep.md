@@ -219,7 +219,7 @@ jq \
     .aggchainParams.initAggchainVKeySelector = $aggchain_vkey_selector |
     .aggchainParams.initParams.l2BlockTime = $s[0].l2BlockTime |
     .aggchainParams.initParams.startingOutputRoot = $o[0].outputRoot |
-    .aggchainParams.initParams.startingBlockNumber = $s[0].startingBlockNumber |
+    .aggchainParams.initParams.startingBlockNumber = $o[0].blockRef.number |
     .aggchainParams.initParams.startingTimestamp = $o[0].blockRef.timestamp |
     .aggchainParams.initParams.submissionInterval = 1 |
     .aggchainParams.initParams.optimisticModeManager = $admin_address |
