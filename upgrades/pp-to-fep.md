@@ -85,7 +85,7 @@ cd agglayer-contracts
 ```
 
 ```
-git checkout feature/ongoing-v0.3.0
+git checkout v10.1.0-rc.6
 ```
 
 ```
@@ -277,7 +277,6 @@ METRICS_ENABLED="true"
 METRICS_PORT="7300"
 OP_SUCCINCT_MOCK="false"
 POLL_INTERVAL=20s
-SAFE_DB_FALLBACK="true"
 USE_CACHED_DB="false"
 WITNESS_GEN_TIMEOUT="1200"
 RUST_LOG="debug"
