@@ -14,7 +14,7 @@ If you are updating the parameters with an EOA `ADMIN` key, you will execute the
 
 ### Updating Parameters with an EOA `ADMIN` key
 
-To update the parameters of the `OPSuccinctL2OutputOracle` contract with an EOA `ADMIN` key, run the following command in `/contracts`.
+To update the parameters of the `AggchainFEP` contract with an EOA `ADMIN` key, run the following command in `/contracts`.
 
 ```bash
 just update-parameters
@@ -22,7 +22,7 @@ just update-parameters
 
 ### Updating Parameters with a non-EOA `ADMIN` key
 
-If the owner of the `OPSuccinctL2OutputOracle` is not an EOA (e.g. multisig, contract), set `EXECUTE_UPGRADE_CALL` to `false` in your `.env` file. This will output the raw calldata for the parameter update calls, which can be executed by the owner in a separate context.
+If the owner of the `AggchainFEP` is not an EOA (e.g. multisig, contract), set `EXECUTE_UPGRADE_CALL` to `false` in your `.env` file. This will output the raw calldata for the parameter update calls, which can be executed by the owner in a separate context.
 
 | Parameter | Description |
 |-----------|-------------|
