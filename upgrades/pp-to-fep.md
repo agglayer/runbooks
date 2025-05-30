@@ -281,6 +281,7 @@ USE_CACHED_DB="false"
 WITNESS_GEN_TIMEOUT="1200"
 RUST_LOG="debug"
 RANGE_PROOF_INTERVAL="1800"
+PRIVATE_KEY="0xc797616a567ffd3f7d80f110f4c19900e55258ac2aa96d96ded790e0bd727458"
 DATABASE_URL=@@replace
 L1_BEACON_RPC=@@replace
 L1_RPC=@@replace
@@ -288,7 +289,6 @@ L2_NODE_RPC=@@replace
 L2_RPC=@@replace
 L2OO_ADDRESS=@@replace
 PROVER_ADDRESS=@@replace
-PRIVATE_KEY=@@replace
 NETWORK_RPC_URL=@@replace
 NETWORK_PRIVATE_KEY=@@replace
 ```
@@ -306,13 +306,11 @@ NETWORK_PRIVATE_KEY=@@replace
 
 > **PROVER_ADDRESS**: must match the `trustedSequencer` and the address used by the `aggsender`. See [important notes](./pp-to-fep.md#important-notes) for further details
 
-> **PRIVATE_KEY**: must match the private key of the `trustedSequencer` and the one used by the `aggsender`. See [important notes](./pp-to-fep.md#important-notes) for further
-details
-
 > **NETWORK_RPC_URL**: SP1 network url
 
 > **NETWORK_PRIVATE_KEY**: SP1 network private key
 
+> 💡 **PRIVATE_KEY** is an arbitrary private key. You may use a hardcoded value, as it is not currently used and is planned for deprecation in future releases
 
 Update the placeholders marked with `@@replace` with the appropriate values.
 
@@ -379,5 +377,5 @@ Update the placeholders marked with `@@replace` with the appropriate values.
 
 ### Important notes
 - The `trustedSequencer` (set in the rollup smart contract) needs to match:
-  - `PROVER_ADDRESS` and `PRIVATE_KEY` environment variables of the op-succinct-proposer 
+  - `PROVER_ADDRESS` environment variable of the op-succinct-proposer
   - Private key used by the aggsender in the `AggsenderPrivateKey` field
