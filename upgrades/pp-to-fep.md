@@ -156,7 +156,17 @@ sqlite3 aggsender.sqlite
 ```
 
 ```
-select from_block, to_block from certificate_info;
+SELECT
+    height,
+    from_block,
+    to_block
+FROM
+    certificate_info
+WHERE
+    status = 4
+ORDER BY
+    height DESC
+LIMIT 1;
 ```
 
 ```
