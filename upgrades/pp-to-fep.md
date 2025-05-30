@@ -320,7 +320,7 @@ Update the placeholders marked with `@@replace` with the appropriate values.
 #### General info
 | Item               | Description |
 |--------------------|-------------|
-| **Repository**      | [agglayer/provers](https://github.com/agglayer/provers) |
+| **Repository**      | [agglayer/op-succinct](https://github.com/agglayer/op-succinct) |
 | **Docker Image**    | `ghcr.io/agglayer/aggkit-prover:0.1.0-rc.28` |
 | **Run Command**     | `/usr/local/bin/aggkit-prover --config-path /path/to/config.toml` |
 | **Endpoints**       | This service exposes a gRPC endpoint (port `4446` in this example) |
