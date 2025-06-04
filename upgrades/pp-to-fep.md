@@ -150,6 +150,25 @@ latest_settled_l2_block=$(
 ```
 > 💡 It's very **important** to get the correct number
 
+Validate the block ranges recorded in the aggsender database to enhance confidence
+```
+sqlite3 aggsender.sqlite
+```
+
+```
+SELECT
+    height,
+    from_block,
+    to_block
+FROM
+    certificate_info
+WHERE
+    status = 4
+ORDER BY
+    height DESC
+LIMIT 1;
+```
+
 ```
 cast rpc --rpc-url "$l2_node_url" optimism_outputAtBlock $(printf "0x%x" $latest_settled_l2_block) | jq '.' > output.json
 ```
