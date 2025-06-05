@@ -2,11 +2,11 @@
 
 This runbook aims at describing the complete Agglayer stack and how L2 interact with it.
 
-The stack is divided into what Polygon Labs runs (Agglayer node) and what each L2 runs (Aggkit).
+The stack is divided into what Polygon Labs runs (Agglayer) and what each L2 runs (Aggkit).
 
-## Agglayer node
+## Agglayer
 
-Polygon Labs runs the Agglayer node which consists in these two components:
+Polygon Labs runs the Agglayer which consists in these two components:
 - agglayer-node
 - agglayer-prover
 
@@ -32,13 +32,14 @@ agglayer-prover computes the PP by running the PP program on the SP1 network.
 ## Aggkit
 
 Each L2 runs Aggkit, which consists in these two components:
-- aggkit (aggsender, bridge, etc.)
+- aggkit (aggsender, aggoracle, bridge, etc.)
 - aggkit-prover
 
 ### aggkit
 
 aggkit runs with a configurable list of internal features:
-- aggsender: sends certificates to agglayer-node via JSON-RPC
+- aggsender: sends certificates to agglayer-node via JSON-RPC (pre-v0.3) / gRPC (post-v0.3)
+- aggoracle: reads the GER from L1 and sets it on L2
 - bridge: unified bridge service
 
 ### aggkit-prover
