@@ -276,11 +276,11 @@ npx hardhat run ./tools/initializeRollup/initializeRollup.ts --network sepolia
 | **Endpoints**       | This service exposes a gRPC endpoint (port `4446` in this example) |
 
 #### Capacity
-| Resource | Allocation |
-|----------|------------|
-| CPU      | 4000m      |
-| Memory   | 4Gi        |
-| Disk     | 500Gi      |
+| Resource | Allocation  |
+|----------|-------------|
+| CPU      | 4000m       |
+| Memory   | 16Gi        |
+| Disk     | 500Gi       |
 
 #### Dependencies
 This service depends on a PostgreSQL database.
@@ -343,11 +343,11 @@ Update the placeholders marked with `@@replace` with the appropriate values.
 | **Endpoints**       | This service exposes a gRPC endpoint (port `4446` in this example) |
 
 #### Capacity
-| Resource | Allocation |
-|----------|------------|
-| CPU      | 100m       |
-| Memory   | 2Gi        |
-| Disk     | 500Gi      |
+| Resource | Allocation  |
+|----------|-------------|
+| CPU      | 4000m       |
+| Memory   | 16Gi        |
+| Disk     | 500Gi       |
 
 #### Config
 Refer to the config example: [aggkit-prover.toml](config/aggkit-prover.toml)
