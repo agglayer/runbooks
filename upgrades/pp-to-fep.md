@@ -272,7 +272,7 @@ npx hardhat run ./tools/initializeRollup/initializeRollup.ts --network sepolia
 |--------------------|-------------|
 | **Repository**      | [agglayer/op-succinct](https://github.com/agglayer/op-succinct) |
 | **Docker Image**    | `ghcr.io/agglayer/op-succinct/op-succinct:v2.1.8-agglayer` |
-| **Run Command**     | `/usr/local/bin/aggkit-prover --config-path /path/to/config.toml` |
+| **Run Command**     | `/usr/local/bin/validity-proposer` |
 | **Endpoints**       | This service exposes a gRPC endpoint (port `4446` in this example) |
 
 #### Capacity
@@ -339,7 +339,7 @@ Update the placeholders marked with `@@replace` with the appropriate values.
 |--------------------|-------------|
 | **Repository**      | [agglayer/provers](https://github.com/agglayer/provers) |
 | **Docker Image**    | `ghcr.io/agglayer/aggkit-prover:0.1.0-rc.28` |
-| **Run Command**     | `/usr/local/bin/aggkit-prover --config-path /path/to/config.toml` |
+| **Run Command**     | `/usr/local/bin/aggkit-prover run --config-path /path/to/config.toml` |
 | **Endpoints**       | This service exposes a gRPC endpoint (port `4446` in this example) |
 
 #### Capacity
