@@ -1,42 +1,46 @@
-# Unlocking op-succinct in Case of an Unprovable Block
+[⚠️ Suspicious Content] # Toggle Optimistic Mode
 
-This runbook outlines the procedure to recover `op-succinct` when the proposer gets stuck on a block that cannot be proven within the SP1 cluster. This may occur due to data availability issues, state mismatches, or bugs in the proof generation.
+Optimistic mode is a feature that allows the system to accept outputs without verification. This is useful for testing and development purposes, and as a fallback for `AggchainFEP` in the event of an outage.
 
-## Problem Context
+When optimistic mode is enabled, the `aggkit-prover` service will skip Aggproofs and skip the verification of the FEP, only generating the BridgeProof as part of the Aggchain Proof, this proof will be sent to the Agglayer for verification included in a certificate.
 
-When the proposer is attempting to prove a block range that is unprovable (due to errors or constraints in the SP1 proving stack), it may repeatedly fail and get stuck. To resume proving past the offending block, follow the steps below.
+## Enable Optimistic Mode
 
----
+To enable optimistic mode, call the `enableOptimisticMode` function on the `AggchainFEP` contract.
 
-## Step-by-Step Recovery Procedure
+```solidity
+function enableOptimisticMode() external onlyOptimisticModeManager {
+   if (optimisticMode) {
+      revert OptimisticModeEnabled();
+   }
 
-1. **Stop the proposer**
-   - Use your orchestration tool or CLI to gracefully shut down the `op-succinct` proposer process.
+   optimisticMode = true;
+   emit EnableOptimisticMode();
+}
+```
 
-2. **Remove the failed block entry**
-   - Manually delete or clear the internal record or cache of the failed block.
-   - This ensures the proposer does not reattempt the same block upon restart.
+Example using cast:
 
-3. **Enable Optimistic Mode**
-   - Activate *Optimistic mode* to allow the chain to progress even without proof for the current block.
-   - Monitor the system until the settlement moves past the offending block height.
+```
+cast send --private-key [ROLLUP_ADMIN_KEY] [AGGCHAIN_FEP_CONTRACT_ADDRESS] "enableOptimisticMode()"
+```
 
-4. **Disable Optimistic Mode**
-   - Once a sufficient number of safe blocks have been finalized past the faulty block, turn off *Optimistic mode* to resume normal operation.
 
-5. **Restart the proposer**
-   - Relaunch the proposer service. It should now skip the unprovable block and continue proving subsequent blocks as expected.
+## Disable Optimistic Mode
 
----
+By default, optimistic mode is disabled. To switch back to validity mode, call the `disableOptimisticMode` function on the `OPSuccinctL2OutputOracle` contract.
 
-## Expected Outcome
+```solidity
+   function disableOptimisticMode() external onlyOptimisticModeManager {
+   if (!optimisticMode) {
+      revert OptimisticModeNotEnabled();
+   }
 
-After following these steps, the proposer should bypass the offending block and resume regular proving operations.
+   optimisticMode = false;
+   emit DisableOptimisticMode();
+}
+```
 
----
-
-## Notes & Recommendations
-
-- Always validate the new settlement height before disabling Optimistic mode.
-- Document the offending block hash/height for incident tracking.
-- If multiple blocks are unprovable, consider deeper investigation into upstream issues.
+```
+cast send --private-key [ROLLUP_ADMIN_KEY] [AGGCHAIN_FEP_CONTRACT_ADDRESS] "disableOptimisticMode()"
+```
