@@ -1,4 +1,4 @@
-[⚠️ Suspicious Content] # Toggle Optimistic Mode
+# Toggle Optimistic Mode
 
 Optimistic mode is a feature that allows the system to accept outputs without verification. This is useful for testing and development purposes, and as a fallback for `AggchainFEP` in the event of an outage.
 
