@@ -174,17 +174,6 @@ cast rpc --rpc-url "$l2_node_url" optimism_outputAtBlock $(printf "0x%x" $latest
 ```
 
 #### Retrieve the rollup configuration
-```
-git clone https://github.com/agglayer/op-succinct
-```
-
-```
-cd op-succinct
-```
-
-```
-git checkout v2.1.8-agglayer
-```
 
 ```
 cat << EOF > .env
@@ -196,15 +185,7 @@ EOF
 ```
 
 ```
-cargo run --bin fetch-rollup-config --release -- --env-file .env
-```
-
-```
-mv "contracts/opsuccinctl2ooconfig.json" ../opsuccinctl2ooconfig.json
-```
-
-```
-cd ..
+docker run -ti -v `pwd`:/tmp/env ghcr.io/agglayer/op-succinct/op-succinct:v2.3.1-agglayer fetch-rollup-config --env-file /tmp/env/.env --output-dir /tmp/env
 ```
 
 #### Initialize
