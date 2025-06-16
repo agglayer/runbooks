@@ -46,13 +46,13 @@ export rollup_id=$(cat combined.json | jq -r .rollupID)
 # fetched from the docker images
 export aggchain_vkey=$(
   docker run --rm -it \
-    ghcr.io/agglayer/aggkit-prover:0.1.0-rc.28 \
+    ghcr.io/agglayer/aggkit-prover:1.1.2 \
     /usr/local/bin/aggkit-prover vkey
 )
 
 export aggchain_vkey_selector=$(
   docker run --rm -it \
-    ghcr.io/agglayer/aggkit-prover:0.1.0-rc.28 \
+    ghcr.io/agglayer/aggkit-prover:1.1.2 \
     /usr/local/bin/aggkit-prover vkey-selector
 )
 EOF
