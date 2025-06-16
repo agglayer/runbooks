@@ -85,7 +85,7 @@ cd agglayer-contracts
 ```
 
 ```
-git checkout v10.1.0-rc.6
+git checkout v10.1.0-rc.8
 ```
 
 ```
@@ -174,13 +174,13 @@ cast rpc --rpc-url "$l2_node_url" optimism_outputAtBlock $(printf "0x%x" $latest
 ```
 
 #### Retrieve the rollup configuration
-
 ```
 cat << EOF > .env
 L1_RPC="${l1_rpc_url}"
 L1_BEACON_RPC="${l1_rpc_url}"
 L2_NODE_RPC="${l2_node_url}"
 L2_RPC="${l2_rpc_url}"
+STARTING_BLOCK_NUMBER="${latest_settled_l2_block}"
 EOF
 ```
 
@@ -214,7 +214,7 @@ jq \
     .networkName = $network_name |
     .trustedSequencer = "@@replace" |
     .chainID = $c[0].l2ChainID |
-    .rollupAdminAddress = $admin_address |
+    .rollupAdminAddress = "@@replace" |
     .gasTokenAddress = $c[0].gasTokenAddress |
     .deployerPvtKey = "@@replace" |
     .timelockDelay = "@@replace" |
