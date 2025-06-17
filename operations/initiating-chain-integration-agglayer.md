@@ -39,7 +39,8 @@ The `attachAggchainToAL` function requires the following parameters:
 | `chainID` | `uint64` | The chain ID of the chain |
 | `initializeBytesAggchain` | `bytes` | Initialization data for the chain |
 
-> **Note**: Please verify the exact function signature and parameters on [Etherscan](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#writeProxyContract#F4) before execution.
+> [!NOTE]
+> Please verify the exact function signature and parameters on [Etherscan](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#writeProxyContract#F4) before execution.
 
 ## Step-by-Step Instructions
 
