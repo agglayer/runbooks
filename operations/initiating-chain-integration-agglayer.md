@@ -147,7 +147,7 @@ function decodeTuple(tuple: any): [string, string, string, string, string] | nul
 <summary>Using cast (Foundry)</summary>
 
 ```shell
-# The sed piping is there to remove the first unecessary 4 bytes (func signature)
+# The sed command removes the first 4 bytes (function signature) from the output
 $ cast calldata "test(address,address,address,string,string)" \
   <adminAddress> \
   <sequencerAddress> \
@@ -159,8 +159,8 @@ $ cast calldata "test(address,address,address,string,string)" \
 Decode with:
 
 ```shell
-# bytes here below are the full bytes with the function signature, i.e., 
-# the output of the command above without the sed piping
+# The bytes below represent the complete calldata including the function signature,
+# which is the raw output from the cast command before any sed processing
 $ cast calldata-decode 'test(address,address,address,string,string)' <bytes>
 ```
 
