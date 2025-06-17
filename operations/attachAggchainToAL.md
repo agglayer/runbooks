@@ -58,7 +58,8 @@ The `attachAggchainToAL` function requires the following parameters:
 3. Enter the contract address: `0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff`
 4. The interface should automatically load the contract ABI and available functions. If the contract is detected as a proxy, you must select "Implementation ABI" to access the correct functions.
 
-> **Note**: If the contract ABI fails to load automatically, you can manually add it by:
+> [!TIP]
+> If the contract ABI fails to load automatically, you can manually add it by:
 > 1. Clicking on the implementation contract link on Etherscan
 > 2. Scrolling down to find the "Contract ABI" section
 > 3. Copying the entire ABI
@@ -71,8 +72,9 @@ The `attachAggchainToAL` function requires the following parameters:
    - **rollupTypeID**: Enter the rollup type identifier (uint32)
    - **chainID**: Enter the chain ID for the chain (uint64)
    - **initializeBytesAggchain**: Enter the initialization data as hex-encoded bytes
-> **Note**: When selecting the `rollupTypeID`, visit [Etherscan](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F28) to find the number of rollupTypeIds and get details about each rollupTypeId [here](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F29). Review the rollupTypeIds from the latest one going backwards until you find the appropriate one based on these criteria:
 
+> [!IMPORTANT]
+> When selecting the `rollupTypeID`, visit [Etherscan](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F28) to find the number of rollupTypeIds and get details about each rollupTypeId [here](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F29). Review the rollupTypeIds from the latest one going backwards until you find the appropriate one based on these criteria:
 > - For chains using Pessimistic Proofs (PP) with OP-FEP Aggchain proofs (CONSENSUS_TYPE = 1 and AGGCHAIN_TYPE = 1): Select a rollupTypeId with `rollupVerifierType = 2`
 > - For chains using PP to prove valid ECDSA signatures of certificates (CONSENSUS_TYPE = 0): Select a rollupTypeId with `rollupVerifierType = 1`
 > - For legacy chains using zkEVM-prover proofs without PP: Select a rollupTypeId with `rollupVerifierType = 0`
