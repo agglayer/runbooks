@@ -1,4 +1,4 @@
-# Attach chain to Agglayer
+# Initiating Chain Integration with the Agglayer
 
 This document provides instructions for public users to propose and execute the `attachAggchainToAL` function from the `RollupManagerContract` using a Gnosis Safe multisig wallet.
 
