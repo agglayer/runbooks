@@ -95,7 +95,7 @@ The `attachAggchainToAL` function requires the following parameters:
 <details>
 <summary>Using JavaScript</summary>
 
-```js
+```javascript
 const ethers = require('ethers');
 
 /**
@@ -129,7 +129,7 @@ function encodeInitializeBytes(
 
 Decode with:
 
-```js
+```javascript
 function decodeTuple(tuple: any): [string, string, string, string, string] | null {
   try {
     const values = abiCoder.decode(["address", "address", "address", "string", "string"], tuple);
@@ -206,7 +206,6 @@ If you are a full signer and want to propose and execute in one workflow:
 
 - **Double-check all parameters** before signing - blockchain transactions are irreversible
 - **Verify the contract address** to ensure you're interacting with the correct contract
-- **Test with small values** if possible before executing with production parameters
 - **Ensure all signers understand** what the transaction will do
 - **Keep transaction records** for audit and reference purposes
 - **For proposers**: Provide clear documentation and context when sharing proposals with signers
@@ -217,11 +216,9 @@ If you are a full signer and want to propose and execute in one workflow:
 ### For Proposers
 When sharing a transaction proposal with signers, include:
 
-1. **Transaction Purpose**: Clear explanation of why this chain attachment is needed
-2. **Parameter Details**: Explanation of each parameter value and its significance
-3. **Timeline**: Any urgency or scheduling requirements
-4. **Contact Information**: How signers can reach you for questions
-5. **Supporting Documentation**: Any relevant technical specifications or approval documents
+1. **Parameter Details**: Explanation of each parameter value and its significance
+2. **Timeline**: Any urgency or scheduling requirements
+3. **Contact Information**: How signers can reach you for questions
 
 ### For Signers
 Before signing a proposed transaction:
