@@ -185,7 +185,13 @@ EOF
 ```
 
 ```
-docker run -ti -v `pwd`:/tmp/env ghcr.io/agglayer/op-succinct/op-succinct:v2.3.1-agglayer fetch-rollup-config --env-file /tmp/env/.env --output-dir /tmp/env
+docker run --rm -it \
+  --platform linux/amd64 \
+  -v "$(pwd)":/tmp/env \
+  ghcr.io/agglayer/op-succinct/op-succinct:v2.3.1-agglayer \
+  fetch-rollup-config \
+  --env-file /tmp/env/.env \
+  --output-dir /tmp/env
 ```
 
 #### Initialize
