@@ -147,19 +147,20 @@ function decodeTuple(tuple: any): [string, string, string, string, string] | nul
 <summary>Using cast (Foundry)</summary>
 
 ```shell
+# The sed piping is there to remove the first unecessary 4 bytes (func signature)
 $ cast calldata "test(address,address,address,string,string)" \
   <adminAddress> \
   <sequencerAddress> \
   <gasTokenAddress> \
   "<trustedSequencerRPCURL>" \
-  "<chainName>"
+  "<chainName>" | sed 's/^\(0x\)[0-9a-fA-F]\{8\}/\1/'
 ```
-
-IMPORTANT: Remove the first 4 bytes to discard the function signature from the actual encoded bytes
 
 Decode with:
 
 ```shell
+# bytes here below are the full bytes with the function signature, i.e., 
+# the output of the command above without the sed piping
 $ cast calldata-decode 'test(address,address,address,string,string)' <bytes>
 ```
 
