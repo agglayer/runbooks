@@ -81,6 +81,91 @@ The `attachAggchainToAL` function requires the following parameters:
 > - Ensure the selected rollupTypeId definition does not have `obsolete = true`
 > - Verify the `forkId` in the rollupTypeId definition matches your requirements
 
+> [!IMPORTANT]
+> The `initializeBytesAggchain` parameter requires encoding the following fields in order:
+> - Chain admin address (address)
+> - Chain sequencer address (address)
+> - Chain gas token address (address, use zero address for ETH)
+> - URL to the trusted RPC node run with the sequencer (string)
+> - Chain name (string)
+>
+> You can encode these parameters using one of the following methods:
+
+<details>
+<summary>Using JavaScript</summary>
+
+```js
+const ethers = require('ethers');
+
+/**
+ * Function to encode the initialize bytes for pessimistic or state transition rollups
+ * @param {String} admin Admin address
+ * @param {String} trustedSequencer Trusted sequencer address
+ * @param {String} gasTokenAddress Indicates the token address in mainnet that will be used as a gas token
+ * @param {String} trustedSequencerURL Trusted sequencer RPC URL
+ * @param {String} networkName Chain name
+ * @returns {String} encoded value in hexadecimal string
+ */
+function encodeInitializeBytes(
+    admin,
+    sequencer,
+    gasTokenAddress,
+    sequencerURL,
+    networkName,
+) {
+    return ethers.AbiCoder.defaultAbiCoder().encode(
+        ['address', 'address', 'address', 'string', 'string'],
+        [
+            admin,
+            sequencer,
+            gasTokenAddress,
+            sequencerURL,
+            networkName,
+        ],
+    );
+}
+```
+
+Decode with
+
+```js
+function decodeTuple(tuple: any): [string, string, string, string, string] | null {
+  try {
+    const values = abiCoder.decode(["address", "address", "address", "string", "string"], tuple);
+    return values;
+  } catch (error) {
+    console.error("Error decoding the tuple:", error);
+    return null;
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Using cast (Foundry)</summary>
+
+```shell
+$ cast calldata "test(address,address,address,string,string)" \
+  <adminAddress> \
+  <sequencerAddress> \
+  <gasTokenAddress> \
+  "<trustedSequencerRPCURL>" \
+  "<chainName>"
+```
+
+> [!IMPORTANT]
+> Remove the first 4 bytes to discard the function signature from the actual encoded bytes
+
+Decode with
+
+```shell
+$ cast calldata-decode 'test(address,address,address,string,string)' <bytes>
+```
+
+</details>
+
+
 #### 4. Submit Proposal
 
 1. **Review all parameters carefully** - incorrect values could cause the transaction to fail or have unintended consequences
