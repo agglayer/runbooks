@@ -126,7 +126,7 @@ function encodeInitializeBytes(
 }
 ```
 
-Decode with
+Decode with:
 
 ```js
 function decodeTuple(tuple: any): [string, string, string, string, string] | null {
@@ -154,10 +154,9 @@ $ cast calldata "test(address,address,address,string,string)" \
   "<chainName>"
 ```
 
-> [!IMPORTANT]
-> Remove the first 4 bytes to discard the function signature from the actual encoded bytes
+IMPORTANT: Remove the first 4 bytes to discard the function signature from the actual encoded bytes
 
-Decode with
+Decode with:
 
 ```shell
 $ cast calldata-decode 'test(address,address,address,string,string)' <bytes>
