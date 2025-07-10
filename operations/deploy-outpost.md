@@ -1,17 +1,8 @@
-[TOC]
-
 # Outposts Deployment Guideline
 
-|             Title             |  Author   | Status | Created At |
-|:-----------------------------:|:---------:|:------:|:----------:|
-| Outpost Deployment Guidelines | krlosMata | Draft  | 09-07-2025 |
+This document aims to provide a clear path for deploying the Agglayer smart contracts on an external network that is not native to the Agglayer.
 
----
-
-# Motivation
-This document aims to provide a clear path for deploying the AggLayer smart contracts on an external network that is not native to the AggLayer.
-
-A **non-native AggLayer chain** refers to one that has its own native bridge and finality mechanism—also called an **Outpost chain**.
+A **non-native Agglayer chain** refers to one that has its own native bridge and finality mechanism—also called an **Outpost chain**.
 
 This guideline includes:
 
@@ -19,16 +10,15 @@ This guideline includes:
 - Security analysis and recommendations on parameters used
 - Clear documentation and data required for proper auditing
 
----
-
 # Assumptions
-This document assumes the chain connected to AggLayer uses the [Pessimistic Consensus SC](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/consensus/pessimistic/PolygonPessimisticConsensus.sol), and is therefore secured only by the PP proof.
+
+This document assumes the chain connected to Agglayer uses the [Pessimistic Consensus SC](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/consensus/pessimistic/PolygonPessimisticConsensus.sol), and is therefore secured only by the PP proof.
 
 Using a different [consensus SC](https://github.com/agglayer/agglayer-contracts/tree/v11.0.0-rc.2/contracts/v2/consensus) may require additional parameter configuration.
 
----
 
 # Deployment Process
+
 ## Summary Table
 
 |            Step             |           Responsibility           |   Outcome    |
@@ -43,9 +33,8 @@ The first step, `attachAggchainToAL`, will output a [rollupID](https://github.co
 [This rollupID is then used to deploy the Sovereign SCs](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/sovereignChains/BridgeL2SovereignChain.sol#L187) on the outpost chain.
 :::
 
----
-
 ## attachAggchainToAL
+
 ### Summary Table
 
 |                Parameter                |                      Brief Description                       | Security Risks |
@@ -59,6 +48,7 @@ The first step, `attachAggchainToAL`, will output a [rollupID](https://github.co
 |   initializeBytesAggchain:networkName   |            Metadata. Network identifier on L1 SC             |     🟢 Low     |
 
 ### Detailed Parameter Explanation
+
 #### `rollupTypeID`
 - **Responsibility**: Polygon
 - **Security Assumption**: 🔴 Incorrect type could lead to unexpected L1 behavior.
@@ -89,15 +79,15 @@ The first step, `attachAggchainToAL`, will output a [rollupID](https://github.co
 - **Responsibility**: Chain
 - **Security Assumption**: 🟢 Metadata; consistency required.
 
----
-
 ## Deploy Sovereign Chains SCs
+
 Two smart contracts must be deployed:
 
 - [`BridgeL2SovereignChain`](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/sovereignChains/BridgeL2SovereignChain.sol)
 - [`GlobalExitRootManagerL2SovereignChain`](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/sovereignChains/GlobalExitRootManagerL2SovereignChain.sol)
 
 ### ⚠️ SC Deployment Guidelines
+
 - **Deployment Requirements**:
   - MUST use [TransparentProxy pattern](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/proxy/transparent/TransparentUpgradeableProxy.sol)
   - Proxy admin MUST be an [AdminProxy SC](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/proxy/transparent/ProxyAdmin.sol)
@@ -120,9 +110,8 @@ Two smart contracts must be deployed:
       - Precompute contract addresses.
       - Deploy with proper references.
 
----
-
 ### `BridgeL2SovereignChain`: Summary Table
+
 |              Parameter              |               Description                | Security Risks |
 |:-----------------------------------:|:----------------------------------------:|:--------------:|
 |             `networkID`             |   RollupID from `PolygonRollupManager`   |    🔴 High     |
@@ -139,6 +128,7 @@ Two smart contracts must be deployed:
 |       `proxiedTokensManager`        |    Owner of all wrapped token proxies    |    🔴 High     |
 
 #### Setup GasToken
+
 Three key parameters:
 - `gasTokenAddress`
 - `gasTokenNetwork`
@@ -154,18 +144,16 @@ Two scenarios:
   - `gasTokenNetwork`: chain rollupID
   - `gasTokenMetadata`: metadata shown when bridged
 
----
-
 ### `GlobalExitRootManagerL2SovereignChain`: Summary Table
+
 |          Parameter          |             Description             | Security Risks |
 |:---------------------------:|:-----------------------------------:|:--------------:|
 | `constructor:bridgeAddress` | Address of `BridgeL2SovereignChain` |    🔴 High     |
 |   `globalExitRootUpdater`   |        Address of AggOracle         |    🔴 High     |
 |   `globalExitRootRemover`   |  Can remove GERs and unset claims   |    🔴 High     |
 
----
-
 ### `GlobalExitRootManagerL2SovereignChain`: Detailed Parameter Explanation
+
 #### `constructor:bridgeAddress`
 - **Responsibility**: Chain
 - **Security**: 🔴 Blocking the LER update process causes DoS
@@ -180,9 +168,8 @@ Two scenarios:
 - **Security**: 🔴 Can allow double-spending
 - **Recommended Account**: Multisig
 
----
-
 # Audit Requirements
+
 - Use a GitHub issue (or similar) to track the audit process (**Slack threads are not acceptable**)
   - Example format: [Polygon audit issues](https://github.com/orgs/0xPolygon/projects/15)
 - Useful data to make the audit smooth
