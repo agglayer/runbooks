@@ -12,7 +12,7 @@ Polygon Labs runs the Agglayer which consists in these two components:
 
 ### agglayer-node
 
-agglayer-node syncs/pushes data from/to L1 (e.g., Pessimistic Proofs—aka PP). It also exposes a JSON-RPC API used by L2 to submit certificates.
+agglayer-node syncs/pushes data from/to L1 (e.g., Pessimistic Proofs—aka PP). It also exposes a JSON-RPC/gRPC API used by L2 to submit certificates.
 
 PP can be of various types, defined by `CONSENSUS_TYPE`:
 - `0`: Certificate ECDSA signature verification
