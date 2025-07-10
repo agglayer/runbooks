@@ -15,7 +15,7 @@ Polygon Labs runs the Agglayer which consists in these two components:
 agglayer-node syncs/pushes data from/to L1 (e.g., Pessimistic Proofs—aka PP). It also exposes a JSON-RPC/gRPC API used by L2 to submit certificates.
 
 Chains connected to Agglayer can be of various types, defined by `CONSENSUS_TYPE`. The `CONSENSUS_TYPE` defines how the PP will verify the state transition pushed by the chain:
-- `0`: Certificate ECDSA signature verification
+- `0`: ECDSA signature verification
 - `1`: Aggchain proof verification
 
 Aggchain proof can also be of various types, defined by `AGGCHAIN_TYPE`:
