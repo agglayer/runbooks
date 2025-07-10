@@ -12,7 +12,7 @@ This guideline includes:
 
 # Assumptions
 
-This document assumes the chain connected to Agglayer uses the [Pessimistic Consensus SC](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/consensus/pessimistic/PolygonPessimisticConsensus.sol), and is therefore secured only by the PP proof.
+This document assumes the chain connected to Agglayer uses the [Pessimistic Consensus SC](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/consensus/pessimistic/PolygonPessimisticConsensus.sol), and is therefore secured only by the Pessimistic Proof.
 
 Using a different [consensus SC](https://github.com/agglayer/agglayer-contracts/tree/v11.0.0-rc.2/contracts/v2/consensus) may require additional parameter configuration.
 
@@ -26,12 +26,12 @@ Using a different [consensus SC](https://github.com/agglayer/agglayer-contracts/
 |     attachAggchainToAL      |              Polygon               |   rollupID   |
 | Deploy Sovereign Chains SCs | Outpost chain - audited by Polygon | SC addresses |
 
-:::info
-The deployment process is **sequential**—each step must be completed in order.
-
-The first step, `attachAggchainToAL`, will output a [rollupID](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/PolygonRollupManager.sol#L632) that uniquely identifies the chain.
-[This rollupID is then used to deploy the Sovereign SCs](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/sovereignChains/BridgeL2SovereignChain.sol#L187) on the outpost chain.
-:::
+> [!NOTE]
+> The deployment process is **sequential**—each step must be completed in order.
+> 
+> The first step, `attachAggchainToAL`, will output a [rollupID](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/PolygonRollupManager.sol#L632) that uniquely identifies the chain.
+> [This rollupID is then used to deploy the Sovereign SCs](https://github.com/agglayer/agglayer-contracts/blob/v11.0.0-rc.2/contracts/v2/sovereignChains/BridgeL2SovereignChain.sol#L187) on the outpost chain.
+> 
 
 ## attachAggchainToAL
 
