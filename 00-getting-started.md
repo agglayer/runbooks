@@ -23,7 +23,7 @@ Aggchain proof can also be of various types, defined by `AGGCHAIN_TYPE`:
 
 When it receives a certificate, agglayer-node verifies it is valid with its own agglayer state, and executes the PP program to generate the witnesses (the output of the program execution).
 
-Additionally, agglayer-node retrieves the aggchain proof vkey from L1 via the Agglayer Gateway contract, and sends it to agglayer-prover for it to compute the PP.
+Additionally, agglayer-node retrieves the aggchain proof vkey hash from L1 via the Agglayer Gateway contract.
 
 ### agglayer-prover
 
