@@ -103,7 +103,7 @@ Two smart contracts must be deployed:
   - `GlobalExitRootManagerL2SovereignChain` constructor needs the bridge address.
   - A valid approach could be:
     - **Execute deploy atomically**
-      - deploy transactions and `initialize` transaction should be executed in a single transaction
+      - Deploy transactions and `initialize` transaction should be executed in a single transaction
     - **Precalculate addresses**:
       - Precompute contract addresses.
       - Deploy with proper references.
@@ -181,4 +181,4 @@ Two scenarios:
   - Tag/Commit on the script to deploy the SC
   - All addresses and parameters outlined in this document
 - Deployment validation
-  - proper script to get on-chain data that creates a report about the deployment 
+  - Proper script to get on-chain data that creates a report about the deployment 
