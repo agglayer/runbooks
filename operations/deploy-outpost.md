@@ -101,11 +101,9 @@ Two smart contracts must be deployed:
 - **Circular Dependency**:
   - `BridgeL2SovereignChain` needs `GlobalExitRootManagerL2SovereignChain` during initialization.
   - `GlobalExitRootManagerL2SovereignChain` constructor needs the bridge address.
-  - Two valid approaches:
-    - **Sequential**:
-      - Deploy `BridgeL2SovereignChain` without initializing.
-      - Deploy `GlobalExitRootManagerL2SovereignChain`.
-      - Initialize `BridgeL2SovereignChain`.
+  - A valid approach could be:
+    - **Execute deploy atomically**
+      - Deploy transactions and `initialize` transaction should be executed in a single transaction
     - **Precalculate addresses**:
       - Precompute contract addresses.
       - Deploy with proper references.
@@ -139,6 +137,9 @@ Two scenarios:
   - `gasTokenAddress`: address on origin chain
   - `gasTokenNetwork`: origin chain ID
   - `gasTokenMetadata`: encoded metadata
+> [!NOTE]
+> Example: if an outpost has an `L2_ETH` as a native token, it is not `L1_ETH` but its representation on the chain
+> If `L1_ETH` is set as the native token, the bridge should be funded with `L2_ETH` and efectivelly it acts as a liquidity pool
 - **Native L2 token**:
   - `gasTokenAddress`: derived from rollupID — repeat rollupID (32 bits) 5x → 160-bit address. i.e: `0x{rollupID}{rollupID}{rollupID}{rollupID}{rollupID}`
   - `gasTokenNetwork`: chain rollupID
@@ -179,3 +180,5 @@ Two scenarios:
 - Audit Scope
   - Tag/Commit on the script to deploy the SC
   - All addresses and parameters outlined in this document
+- Deployment validation
+  - Proper script to get on-chain data that creates a report about the deployment 
