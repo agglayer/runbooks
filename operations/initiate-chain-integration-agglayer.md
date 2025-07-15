@@ -1,4 +1,4 @@
-# Initiating Chain Integration with the Agglayer
+# Initiate Chain Integration with the Agglayer
 
 This document provides instructions for public users to propose and execute the `attachAggchainToAL` function from the `RollupManagerContract` using a Gnosis Safe multisig wallet.
 
@@ -147,21 +147,18 @@ function decodeTuple(tuple: any): [string, string, string, string, string] | nul
 <summary>Using cast (Foundry)</summary>
 
 ```shell
-# The sed command removes the first 4 bytes (function signature) from the output
-$ cast calldata "test(address,address,address,string,string)" \
+$ cast abi-encode "encode(address,address,address,string,string)" \
   <adminAddress> \
   <sequencerAddress> \
   <gasTokenAddress> \
   "<trustedSequencerRPCURL>" \
-  "<chainName>" | sed 's/^\(0x\)[0-9a-fA-F]\{8\}/\1/'
+  "<chainName>"
 ```
 
 Decode with:
 
 ```shell
-# The bytes below represent the complete calldata including the function signature,
-# which is the raw output from the cast command before any sed processing
-$ cast calldata-decode 'test(address,address,address,string,string)' <bytes>
+$ cast decode-abi --input 'encode(address,address,address,string,string)' <bytes>
 ```
 
 </details>
