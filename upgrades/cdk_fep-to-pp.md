@@ -18,7 +18,7 @@ Deploy Aggkit in sync only mode.
 
 * image: ghcr.io/agglayer/aggkit:0.4.0
 * command: aggkit run --cfg=/app/config/config.toml --components=l1infotreesync
-* persistance disk (at least 10gb): /app/data
+* persistance disk: /app/data
 * No environment variables
 
 Also, create the config.toml (TBD):
@@ -83,36 +83,41 @@ Once started, it will sync from the rollup manager deployment block. It may take
 
 > Note that L2_URL requieres **debug_** methods enabled.
 
-
 ## Upgrade procedure
 
 This process may take a couple hours to complete, but downtime from the point of view of the users should be ~30min. Ensure the aggkit is fully synced with the lastes block on L1. I also recommend to increase provers a couple hours before starting the procedure to minimize the trusted_verified batch gap.
 
 1. **Halt Sequencer**: (~15min)
-   1. Get the current batch from the sequencer: cast rpc zkevm_batchNumber 
-   2. Edit the sequencer command to add the following parameter -> --zkevm.sequencer-halt-on-batch-number=$batch+2
-   3. Restart the sequencer to apply this new parameter.
-   4. Wait (should take a bit over the batch_time configured on zkevm.sequencer-batch-seal-time) until the seqeuncer show logs about the Halt on the specified batch.
+   1. Get the current batch from the sequencer:
+```sh
+cast rpc zkevm_batchNumber
+```
+   3. Edit the sequencer command to add the following parameter -> --zkevm.sequencer-halt-on-batch-number=$batch+2
+   4. Restart the sequencer to apply this new parameter.
+   5. Wait (should take a bit over the batch_time configured on zkevm.sequencer-batch-seal-time) until the seqeuncer show logs about the Halt on the specified batch.
 2. **Wait for verficitation**: (~1h)
    1. Sequencer is halted on $batch+1. So, we need to wait till the sequence-sender includes this batch on a sequence and the aggregator generates the proof and send everything to L1. We need to wait until the verification transaction is finalized.
 3. **Stop all components**: (~15min)
    1. Once the las verification tx is finalized, stop all components.
    2. (optional) Backup erigon datadir.
 4. **Send upgrade Tx**:(~15min)
-   1. Send the transaction to perform the upgrade: cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x
-   2. Wait until the transaction is finalized (you can proceed with next step, but do not start any component yet).
+   1. Send the transaction to perform the upgrade: 
+```sh
+cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x
+```
+   3. Wait until the transaction is finalized (you can proceed with next step, but do not start any component yet).
 5. **Update configurations**: (~15min)
    1. Update to version X (TBD - for forkid compatibility) 
    2. Remove halt parameter on sequencer command.
    3. Update sequencer config with:
-```toml
+```yaml
 # zkevm.executor-urls: "${STATELESS_EXECUTOR}" # Remove executors
 zkevm.executor-strict: false
 zkevm.disable-virtual-counters: true
 zkevm.mock-witness-generation: true
 ```
    4. Update RPC config with:
-```toml
+```yaml
 # zkevm.pool-manager-url: "${POOL_MANAGER_URL}" # Remove pool-manager-url
 zkevm.mock-witness-generation: true
 zkevm.disable-virtual-counters: true
