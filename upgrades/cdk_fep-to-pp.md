@@ -81,6 +81,7 @@ InitialBlock = ${R_BLOCKNUMBER}
 
 Once started, it will sync from the rollup manager deployment block. It may take some hours to complete.
 
+> [!NOTE]
 > Note that L2_URL requieres **debug_** methods enabled.
 
 ## Upgrade procedure
