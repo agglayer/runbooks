@@ -4,7 +4,9 @@ This document provides instructions for public users to propose and execute the 
 
 ## Overview
 
-The `attachAggchainToAL` function allows authorized parties to attach an chain to the Agglayer (AL) infrastructure. This operation must be executed through a Gnosis Safe multisig for enhanced security and governance.
+The `attachAggchainToAL` function allows authorized parties to attach an chain to the Agglayer (AL) infrastructure. This operation must be executed through a Gnosis Safe multisig for enhanced security and governance. Proposers can find the relevant Safe wallet addresses directly in the Safe's UI interface.
+
+**Bali Contract Address (Sepolia):** `0xE2EF6215aDc132Df6913C8DD16487aBF118d1764`
 
 **Cardona Contract Address (Sepolia):** `0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff`
 
@@ -40,7 +42,9 @@ The `attachAggchainToAL` function requires the following parameters:
 | `initializeBytesAggchain` | `bytes` | Initialization data for the chain |
 
 > [!NOTE]
-> Please verify the exact function signature and parameters on [Etherscan](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#writeProxyContract#F4) before execution.
+> Please verify the exact function signature and parameters on Etherscan before execution:
+> - **Bali**: [Etherscan Link](https://sepolia.etherscan.io/address/0xE2EF6215aDc132Df6913C8DD16487aBF118d1764#writeProxyContract#F4)
+> - **Cardona**: [Etherscan Link](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#writeProxyContract#F4)
 
 ## Step-by-Step Instructions
 
@@ -56,7 +60,9 @@ The `attachAggchainToAL` function requires the following parameters:
 
 1. In the Safe interface, click on **"New Transaction"**
 2. Select **"Contract Interaction"**
-3. Enter the contract address: `0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff`
+3. Enter the appropriate contract address:
+   - **Bali**: `0xE2EF6215aDc132Df6913C8DD16487aBF118d1764`
+   - **Cardona**: `0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff`
 4. The interface should automatically load the contract ABI and available functions. If the contract is detected as a proxy, you must select "Implementation ABI" to access the correct functions.
 
 > [!TIP]
@@ -75,7 +81,11 @@ The `attachAggchainToAL` function requires the following parameters:
    - **initializeBytesAggchain**: Enter the initialization data as hex-encoded bytes
 
 > [!IMPORTANT]
-> When selecting the `rollupTypeID`, visit [Etherscan](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F28) to find the number of rollupTypeIds and get details about each rollupTypeId [here](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F29). Review the rollupTypeIds from the latest one going backwards until you find the appropriate one based on these criteria:
+> When selecting the `rollupTypeID`, visit Etherscan to find the number of rollupTypeIds and get details about each rollupTypeId. Use the appropriate contract address:
+> - **Bali**: [Number of rollupTypeIds](https://sepolia.etherscan.io/address/0xE2EF6215aDc132Df6913C8DD16487aBF118d1764#readProxyContract#F28) | [rollupTypeId details](https://sepolia.etherscan.io/address/0xE2EF6215aDc132Df6913C8DD16487aBF118d1764#readProxyContract#F29)
+> - **Cardona**: [Number of rollupTypeIds](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F28) | [rollupTypeId details](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F29)
+>
+> Review the rollupTypeIds from the latest one going backwards until you find the appropriate one based on these criteria:
 > - For chains using Pessimistic Proofs (PP) with OP-FEP Aggchain proofs (CONSENSUS_TYPE = 1 and AGGCHAIN_TYPE = 1): Select a rollupTypeId with `rollupVerifierType = 2`
 > - For chains using PP to prove valid ECDSA signatures of certificates (CONSENSUS_TYPE = 0): Select a rollupTypeId with `rollupVerifierType = 1`
 > - For legacy chains using zkEVM-prover proofs without PP: Select a rollupTypeId with `rollupVerifierType = 0`
