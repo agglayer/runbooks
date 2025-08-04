@@ -69,7 +69,7 @@ MaxCertSize = 0
 Once started, it will sync from the rollup manager deployment block. It may take a few hours to complete.
 
 > [!NOTE]
-> L2_URL requieres **debug_** methods enabled.
+> L2_URL requires **debug_** methods enabled.
 
 ## Upgrade procedure
 
