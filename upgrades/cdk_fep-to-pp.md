@@ -73,7 +73,7 @@ Once started, it will sync from the rollup manager deployment block. It may take
 
 ## Upgrade procedure
 
-This process may take a couple hours to complete, but downtime from the point of view of the users should be a simple restart. Ensure the aggkit is fully synced with the lastes block on L1.
+This process may take a couple hours to complete, but downtime from the point of view of the users should be equivalent to a simple node restart. Ensure the aggkit is fully synced with the latest block on L1.
 
 1. **Stop sequencing**: Stop the sequencer-sender component.
 2. **Wait for verification**: Wait until the aggregator verifies all sequenced batches. Wait until the last verification transaction is finalized.
