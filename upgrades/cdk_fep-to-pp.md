@@ -76,7 +76,7 @@ Once started, it will sync from the rollup manager deployment block. It may take
 This process may take a couple hours to complete, but downtime from the point of view of the users should be a simple restart. Ensure the aggkit is fully synced with the lastes block on L1.
 
 1. **Stop sequencing**: Stop the sequencer-sender component.
-2. **Wait for verficitation**: Wait till the aggregator verify all sequenced batches. Wait until the last verification transaction is finalized.
+2. **Wait for verification**: Wait until the aggregator verifies all sequenced batches. Wait until the last verification transaction is finalized.
 3. **Update components**:
    1. Update erigon version to _hermeznetwork/cdk-erigon:v2.61.23_
    2. Update sequencer config with:
