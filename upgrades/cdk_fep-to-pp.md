@@ -18,7 +18,7 @@ Deploy Aggkit in sync only mode.
 
 * image: ghcr.io/agglayer/aggkit:0.4.0
 * command: aggkit run --cfg=/app/config/config.toml --components=l1infotreesync
-* persistance disk: /app/data
+* persisted data: /app/data
 * No environment variables
 
 Also, create the config.toml (TBD):
