@@ -66,7 +66,7 @@ UseAgglayerTLS = true
 MaxCertSize = 0
 ```
 
-Once started, it will sync from the rollup manager deployment block. It may take some hours to complete.
+Once started, it will sync from the rollup manager deployment block. It may take a few hours to complete.
 
 > [!NOTE]
 > L2_URL requieres **debug_** methods enabled.
