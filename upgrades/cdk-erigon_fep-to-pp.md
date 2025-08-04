@@ -1,11 +1,6 @@
-# CDK FEP to PP Upgrade
+# CDK Erigon FEP to PP Upgrade
 
 This document provides a comprehensive guide for upgrading from CDK Erigon FEP (Fork 12 or 13) to PP (Pessimistic Proofs) mode.
-
-- [CDK FEP to PP Upgrade](#cdk-fep-to-pp-upgrade)
-  - [Key Changes](#key-changes)
-  - [Prerequisites](#prerequisites)
-  - [Upgrade procedure](#upgrade-procedure)
 
 ## Key Changes
 - Proof generation moved from trusted infrastructure to agglayer-prover (run by Polygon).
@@ -21,7 +16,10 @@ Deploy Aggkit in sync only mode.
 * persisted data: /app/data
 * No environment variables
 
-Also, create the config.toml (TBD):
+Also, create the config.toml file with the following template:
+<details>
+<summary>config.toml template</summary>
+  
 ```toml
 PathRWData = "/app/data"
 
@@ -65,6 +63,7 @@ CertificateSendInterval = "1m"
 UseAgglayerTLS = true
 MaxCertSize = 0
 ```
+</details>
 
 Once started, it will sync from the rollup manager deployment block. It may take a few hours to complete.
 
