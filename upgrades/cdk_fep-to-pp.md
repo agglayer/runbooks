@@ -10,7 +10,7 @@ This document provides a comprehensive guide for upgrading from CDK Erigon FEP (
 ## Key Changes
 - Proof generation moved from trusted infrastructure to agglayer-prover (run by Polygon).
 - No pool-manager or executors required from erigon trusted infrastructure.
-- Changing cdk-node component for aggkit to verify batches.
+- Changing cdk-node component for aggkit to verify batches and submit certificates to the Agglayer.
 
 ## Prerequisites
 
