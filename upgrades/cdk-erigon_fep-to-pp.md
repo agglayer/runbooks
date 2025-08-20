@@ -11,7 +11,7 @@ This document provides a comprehensive guide for upgrading from CDK Erigon FEP (
 
 Deploy Aggkit in sync only mode.
 
-* image: ghcr.io/agglayer/aggkit:0.4.0
+* image: ghcr.io/agglayer/aggkit:0.5.0
 * command: aggkit run --cfg=/app/config/config.toml --components=l1infotreesync
 * persisted data: /app/data
 * No environment variables
@@ -60,8 +60,10 @@ InitialBlock = "${R_BLOCKNUMBER}"
 
 [AggSender]
 CertificateSendInterval = "1m"
-UseAgglayerTLS = true
+RetryCertAfterInError = true
 MaxCertSize = 0
+  [AgglayerClient]
+  UseTLS = ${AGGLAYER_USE_TLS}
 ```
 </details>
 
