@@ -62,7 +62,8 @@ InitialBlock = "${R_BLOCKNUMBER}"
 CertificateSendInterval = "1m"
 RetryCertAfterInError = true
 MaxCertSize = 0
-  [AgglayerClient]
+  [AggSender.AgglayerClient]
+  URL = "${AGGLAYER_URL}"
   UseTLS = ${AGGLAYER_USE_TLS}
 ```
 </details>
