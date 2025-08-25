@@ -1,14 +1,19 @@
 # Initiate Chain Integration with the Agglayer
 
-This document provides instructions for public users to propose and execute the `attachAggchainToAL` function from the `RollupManagerContract` using a Gnosis Safe multisig wallet.
+This document provides comprehensive instructions for integrating a chain with the Agglayer, covering both the chain attachment process and subsequent genesis file generation. The process involves two main phases:
+
+1. **Chain Integration**: Proposing and executing the `attachAggchainToAL` function from the `RollupManagerContract` using a Gnosis Safe multisig wallet
+2. **Genesis Generation**: Creating the appropriate genesis file for your network based on the client type
 
 ## Overview
 
-The `attachAggchainToAL` function allows authorized parties to attach an chain to the Agglayer (AL) infrastructure. This operation must be executed through a Gnosis Safe multisig for enhanced security and governance. Proposers can find the relevant Safe wallet addresses directly in the Safe's UI interface.
+### Chain Integration Process
 
-**Bali Contract Address (Sepolia):** `0xE2EF6215aDc132Df6913C8DD16487aBF118d1764`
+The `attachAggchainToAL` function allows authorized parties to attach a chain to the Agglayer (AL) infrastructure. This operation must be executed through a Gnosis Safe multisig for enhanced security and governance. Proposers can find the relevant Safe wallet addresses directly in the Safe's UI interface.
 
-**Cardona Contract Address (Sepolia):** `0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff`
+### Genesis File Generation
+
+After successful chain integration, you'll need to generate a network genesis file. The procedure differs depending on whether your network uses CDK-Erigon or vanilla clients, with specific tools available for each type.
 
 ### User Access Levels
 
@@ -21,15 +26,31 @@ There are different types of users with varying levels of access to the Gnosis S
 
 ## Prerequisites
 
-Before proceeding, ensure you have:
+### For Chain Integration
 
-1. **Gnosis Safe Access**: 
+Before proceeding with the chain attachment, ensure you have:
+
+1. **Gnosis Safe Access**:
    - **For Proposers**: Access to propose transactions to the Gnosis Safe multisig
    - **For Signers**: Must be a signer/owner of the Gnosis Safe multisig
 2. **Required Threshold**: (For execution) Sufficient signers must be available to meet the Safe's signature threshold
 3. **Network Access**: Connection to the Sepolia testnet
 4. **Function Parameters**: All required parameters for the `attachAggchainToAL` function
 5. **Coordination**: (For proposers) Coordination with Safe signers for transaction review and approval
+
+### For Genesis Generation
+
+Depending on your client type, you'll need:
+
+**For CDK-Erigon Networks:**
+- Go installed
+- Access to an L1 network RPC endpoint
+- Knowledge of the rollup manager and rollup details
+
+**For Vanilla Client Networks:**
+- Node.js and npm installed
+- Access to an L1 network RPC endpoint
+- Knowledge of your rollup details
 
 ## Function Parameters
 
@@ -46,7 +67,7 @@ The `attachAggchainToAL` function requires the following parameters:
 > - **Bali**: [Etherscan Link](https://sepolia.etherscan.io/address/0xE2EF6215aDc132Df6913C8DD16487aBF118d1764#writeProxyContract#F4)
 > - **Cardona**: [Etherscan Link](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#writeProxyContract#F4)
 
-## Step-by-Step Instructions
+## Part 1: Chain Integration Process
 
 ### For Proposers Only (e.g., Polygon IPs)
 
@@ -182,7 +203,7 @@ $ cast decode-abi --input 'encode(address,address,address,string,string)' <bytes
 4. If everything looks correct, click **"Submit"** to create the transaction proposal
 5. **Share the transaction link** with the Safe signers for review and approval
 
-### For Full Signers/Owners
+### For Signers/Owners
 
 #### 5. Review and Sign the Proposal
 
@@ -245,6 +266,115 @@ After successful execution, you can verify the transaction:
 2. Verify the transaction status shows "Success"
 3. Check the contract state to confirm the chain has been properly attached
 4. Monitor for any relevant events emitted by the contract
+
+## Part 2: Network Genesis File Generation
+
+After successfully attaching the chain to the Agglayer and verifying the transaction, the next step is to generate the network genesis file for your chain. The procedure differs depending on the client that the network is based on.
+
+### For CDK-Erigon Networks
+
+If your network runs with `cdk-erigon`, use the [cdk-contracts-tooling](https://github.com/0xPolygon/cdk-contracts-tooling) project to generate the genesis file.
+
+#### Steps
+
+1. **Clone and setup the cdk-contracts-tooling repository:**
+   ```bash
+   git clone https://github.com/0xPolygon/cdk-contracts-tooling.git
+   cd cdk-contracts-tooling
+   ```
+
+2. **Configure RPCs and wallets:**
+   ```bash
+   # Copy and configure RPC endpoints
+   cp rpcs.example.toml rpcs.toml
+   # Edit rpcs.toml to include your L1 network RPC configuration
+   ```
+
+3. **Import the rollup manager:**
+   ```bash
+   go run ./cmd import-rm -l1 <L1_NETWORK> -addr <ROLLUP_MANAGER_ADDRESS> -alias <ALIAS>
+   ```
+
+   Example:
+   ```bash
+   go run ./cmd import-rm -l1 sepolia -addr 0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff -alias cardona
+   ```
+
+4. **Import the rollup (if not automatically imported):**
+   ```bash
+   go run ./cmd import-r -l1 <L1_NETWORK> -rm <RM_ALIAS> -r <ROLLUP_NAME> -chainid <CHAIN_ID>
+   ```
+
+   Example:
+   ```bash
+   go run ./cmd import-r -l1 sepolia -rm cardona -r MyChain -chainid 1234567
+   ```
+
+5. **Generate the genesis file:**
+   ```bash
+   go run ./cmd genesis -l1 <L1_NETWORK> -rm <RM_ALIAS> -r <ROLLUP_ALIAS> -output <OUTPUT_FILE>
+   ```
+
+   Example:
+   ```bash
+   go run ./cmd genesis -l1 sepolia -rm cardona -r MyChain -output MyChain-genesis.json
+   ```
+
+6. **Generate bridge service configuration (optional):**
+   ```bash
+   go run ./cmd bridge -l1 <L1_NETWORK> -rm <RM_ALIAS> -r <ROLLUP_ALIAS> -output <OUTPUT_FILE>
+   ```
+
+7. **Generate combined json file (optional, contains various information about the network):**
+   ```bash
+   go run ./cmd import-combined-json -l1 <L1_NETWORK> -rm <RM_ALIAS> -r <ROLLUP_ALIAS>
+   ```
+
+### For Vanilla Client Networks
+
+If your network runs with vanilla clients (like standard geth, op-geth, etc.), use the [createSovereignGenesis tool](https://github.com/agglayer/agglayer-contracts/tree/v11.0.0-rc.3/tools/createSovereignGenesis) from the agglayer-contracts repository.
+
+#### Steps
+
+1. **Clone the agglayer-contracts repository:**
+   ```bash
+   git clone https://github.com/agglayer/agglayer-contracts.git
+   cd agglayer-contracts
+   git checkout v11.0.0-rc.3
+   ```
+
+2. **Navigate to the createSovereignGenesis tool:**
+   ```bash
+   cd tools/createSovereignGenesis
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+4. **Configure the tool:**
+   - Follow the tool's documentation to configure the necessary parameters
+   - Provide your L1 RPC endpoint and rollup contract details
+   - Specify your chain configuration parameters
+
+5. **Generate the genesis file:**
+   ```bash
+   # Follow the specific commands provided in the tool's README
+   # The exact command will depend on the tool's interface
+   npm run generate-genesis -- --config <your-config-file>
+   ```
+
+> [!NOTE]
+> Refer to the [createSovereignGenesis documentation](https://github.com/agglayer/agglayer-contracts/tree/v11.0.0-rc.3/tools/createSovereignGenesis) for detailed usage instructions and configuration options.
+
+### Important Considerations
+
+- **Client Compatibility**: Ensure you're using the correct tool for your client type
+- **Network Configuration**: Verify that all network parameters match your chain's configuration
+- **Genesis Validation**: Always validate the generated genesis file before deploying
+- **Backup**: Keep backups of your genesis files and configuration
+- **Documentation**: Document the parameters and tools used for future reference
 
 ## Troubleshooting
 
