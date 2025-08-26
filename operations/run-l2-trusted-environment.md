@@ -27,7 +27,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 **Purpose**: Database for bridge service
 
-**Docker Image**: `docker.io/bitnami/postgresql:16.2.1`
+**Docker Image**: e.g., `docker.io/bitnami/postgresql`
 
 **Startup Order**: Deploy first (dependency for other services)
 
@@ -37,7 +37,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 **Purpose**: Transaction pool management for CDK-Erigon
 
-**Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/pool-manager:0.3.0`
+**Docker Image**: `docker.io/hermeznetwork/zkevm-pool-manager:v0.1.2`
 
 **Startup Order**: Deploy after PostgreSQL
 
@@ -85,15 +85,15 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 - `bridge`: Bridge service component (when enabled)
 
 **Configuration**:
-- Agglayer client URL: `grpc-agglayer-dev.polygon.technology:443`
+- Agglayer client URL: `grpc-agglayer[-dev|-test|].polygon.technology:443`
 - Certificate send interval: `1m`
-- Mode: `PessimisticProof`
+- Mode: `PessimisticProof` | `FEP`
 
 ### 6. Bridge Service
 
 **Purpose**: Cross-chain asset transfers
 
-**Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge:v0.6.2-RC2`
+**Docker Image**: `docker.io/hermeznetwork/zkevm-bridge-service:v0.6.2-RC2`
 
 **Startup Order**: Deploy after CDK-Erigon RPC
 
@@ -105,7 +105,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 **Purpose**: Web interface for bridge operations
 
-**Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge-ui:0.4.0`
+**Docker Image**: `docker.io/hermeznetwork/zkevm-bridge-ui:multi-network`
 
 **Startup Order**: Deploy after AggKit
 
@@ -119,7 +119,7 @@ For networks using the standard OP Stack, the following components must be deplo
 
 **Purpose**: Database for bridge service
 
-**Docker Image**: `docker.io/bitnami/postgresql:16.2.1`
+**Docker Image**: e.g., `docker.io/bitnami/postgresql`
 
 **Startup Order**: Deploy first
 
@@ -161,15 +161,11 @@ For networks using the standard OP Stack, the following components must be deplo
 
 **Dependencies**: OP-Geth, secrets
 
-**Configuration**:
-- L2 OP-Geth URL: `http://op-geth:8545`
-- OP-Node URL: `http://op-node:9545`
-
 ### 5. AggKit (Agglayer Integration)
 
 **Purpose**: Agglayer integration and oracle services
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:dont-merge-disk-certs_2025_08_11_11_30_8e8657e`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.5.1`
 
 **Startup Order**: Deploy after OP-Batcher and OP-Geth
 
@@ -180,14 +176,14 @@ For networks using the standard OP Stack, the following components must be deplo
 - `aggoracle`: Oracle services for OP Stack
 
 **Configuration**:
-- Agglayer client URL: `34.76.187.110:9089` (development)
-- L2 RPC URL: `http://op-geth:8545`
+- Agglayer client URL: `grpc-agglayer[-dev|-test|].polygon.technology:443`
+- L2 RPC URL: op-geth URL
 
 ### 6. Bridge Service
 
 **Purpose**: Cross-chain asset transfers
 
-**Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge:0.7.0`
+**Docker Image**: `hermeznetwork/zkevm-bridge-service:v0.6.2-RC2`
 
 **Startup Order**: Deploy after PostgreSQL and OP-Geth
 
@@ -197,7 +193,7 @@ For networks using the standard OP Stack, the following components must be deplo
 
 **Purpose**: Web interface for bridge operations
 
-**Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge-ui:0.2.2`
+**Docker Image**: `docker.io/hermeznetwork/zkevm-bridge-ui:multi-network`
 
 **Startup Order**: Deploy after Bridge Service
 
@@ -210,11 +206,11 @@ For networks using the standard OP Stack, the following components must be deplo
 | Component | Docker Image |
 |-----------|--------------|
 | PostgreSQL | `docker.io/bitnami/postgresql:16.2.1` |
-| Pool Manager | `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/pool-manager:0.3.0` |
+| Pool Manager | `docker.io/hermeznetwork/zkevm-pool-manager:v0.1.2` |
 | CDK-Erigon | `docker.io/hermeznetwork/cdk-erigon:v2.61.23` |
 | AggKit | `ghcr.io/agglayer/aggkit:0.5.1` |
-| Bridge | `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge:v0.6.2-RC2` |
-| Bridge UI | `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge-ui:0.4.0` |
+| Bridge | `docker.io/hermeznetwork/zkevm-bridge-service:v0.6.2-RC2` |
+| Bridge UI | `docker.io/hermeznetwork/zkevm-bridge-ui:multi-network` |
 
 ### Vanilla OP Stack Versions
 
@@ -224,9 +220,9 @@ For networks using the standard OP Stack, the following components must be deplo
 | OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1` |
 | OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.0` |
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5` |
-| AggKit | `ghcr.io/agglayer/aggkit:dont-merge-disk-certs_2025_08_11_11_30_8e8657e` |
-| Bridge | `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge:0.7.0` |
-| Bridge UI | `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge-ui:0.2.2` |
+| AggKit | `ghcr.io/agglayer/aggkit:0.5.1` |
+| Bridge | `docker.io/hermeznetwork/zkevm-bridge-service:v0.6.2-RC2` |
+| Bridge UI | `docker.io/hermeznetwork/zkevm-bridge-ui:multi-network` |
 
 ## Deployment Considerations
 
