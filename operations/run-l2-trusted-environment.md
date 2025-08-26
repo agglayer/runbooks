@@ -26,22 +26,31 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 ### 1. PostgreSQL Database
 
 **Purpose**: Database for bridge service
+
 **Docker Image**: `docker.io/bitnami/postgresql:16.2.1`
+
 **Startup Order**: Deploy first (dependency for other services)
+
 **Configuration**: Standard PostgreSQL setup
 
 ### 2. Pool Manager
 
 **Purpose**: Transaction pool management for CDK-Erigon
+
 **Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/pool-manager:0.3.0`
+
 **Startup Order**: Deploy after PostgreSQL
+
 **Dependencies**: PostgreSQL, secrets
 
 ### 3. CDK-Erigon Sequencer
 
 **Purpose**: Block production and sequencing
+
 **Docker Image**: `docker.io/hermeznetwork/cdk-erigon:v2.61.23`
+
 **Startup Order**: Deploy after secrets are available
+
 **Configuration**:
 - `is_sequencer: 1`
 - Chain specification and genesis configuration
@@ -50,9 +59,13 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 ### 4. CDK-Erigon RPC Node
 
 **Purpose**: JSON-RPC API server for L2 interactions
+
 **Docker Image**: `docker.io/hermeznetwork/cdk-erigon:v2.61.23`
+
 **Startup Order**: Deploy after pool-manager and cdk-erigon-sequencer
+
 **Dependencies**: Pool Manager, CDK-Erigon Sequencer
+
 **Configuration**:
 - `is_sequencer: 0`
 - RPC endpoints and API configuration
@@ -60,9 +73,13 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 ### 5. AggKit (Agglayer Integration)
 
 **Purpose**: Agglayer integration and certificate management
+
 **Docker Image**: `ghcr.io/agglayer/aggkit:0.5.1`
+
 **Startup Order**: Deploy after CDK-Erigon RPC
+
 **Dependencies**: CDK-Erigon RPC
+
 **Components**:
 - `aggsender`: Sends certificates to Agglayer
 - `bridge`: Bridge service component (when enabled)
@@ -75,16 +92,23 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 ### 6. Bridge Service
 
 **Purpose**: Cross-chain asset transfers
+
 **Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge:v0.6.2-RC2`
+
 **Startup Order**: Deploy after CDK-Erigon RPC
+
 **Dependencies**: CDK-Erigon RPC
+
 **Configuration**: L1 and L2 contract addresses, claim transaction management
 
 ### 7. Bridge UI (Optional)
 
 **Purpose**: Web interface for bridge operations
+
 **Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge-ui:0.4.0`
+
 **Startup Order**: Deploy after AggKit
+
 **Dependencies**: AggKit
 
 ## Vanilla OP Stack
@@ -94,14 +118,19 @@ For networks using the standard OP Stack, the following components must be deplo
 ### 1. PostgreSQL Database
 
 **Purpose**: Database for bridge service
+
 **Docker Image**: `docker.io/bitnami/postgresql:16.2.1`
+
 **Startup Order**: Deploy first
 
 ### 2. OP-Geth (Execution Layer)
 
 **Purpose**: Ethereum execution client (L2)
+
 **Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1`
+
 **Startup Order**: Deploy after secrets
+
 **Configuration**:
 - Archive or full node type
 - L2 chain ID and block time configuration
@@ -110,9 +139,13 @@ For networks using the standard OP Stack, the following components must be deplo
 ### 3. OP-Node (Consensus Layer)
 
 **Purpose**: Optimism consensus client
+
 **Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.0`
+
 **Startup Order**: Deploy after OP-Geth
+
 **Dependencies**: OP-Geth, secrets
+
 **Configuration**:
 - Rollup configuration JSON
 - L1 and L2 chain parameters
@@ -121,9 +154,13 @@ For networks using the standard OP Stack, the following components must be deplo
 ### 4. OP-Batcher
 
 **Purpose**: Batch submission to L1
+
 **Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5`
+
 **Startup Order**: Deploy after OP-Geth
+
 **Dependencies**: OP-Geth, secrets
+
 **Configuration**:
 - L2 OP-Geth URL: `http://op-geth:8545`
 - OP-Node URL: `http://op-node:9545`
@@ -131,9 +168,13 @@ For networks using the standard OP Stack, the following components must be deplo
 ### 5. AggKit (Agglayer Integration)
 
 **Purpose**: Agglayer integration and oracle services
+
 **Docker Image**: `ghcr.io/agglayer/aggkit:dont-merge-disk-certs_2025_08_11_11_30_8e8657e`
+
 **Startup Order**: Deploy after OP-Batcher and OP-Geth
+
 **Dependencies**: OP-Batcher, OP-Geth
+
 **Components**:
 - `aggsender`: Certificate management
 - `aggoracle`: Oracle services for OP Stack
@@ -145,15 +186,21 @@ For networks using the standard OP Stack, the following components must be deplo
 ### 6. Bridge Service
 
 **Purpose**: Cross-chain asset transfers
+
 **Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge:0.7.0`
+
 **Startup Order**: Deploy after PostgreSQL and OP-Geth
+
 **Dependencies**: PostgreSQL, OP-Geth
 
 ### 7. Bridge UI (Optional)
 
 **Purpose**: Web interface for bridge operations
+
 **Docker Image**: `europe-west2-docker.pkg.dev/prj-polygonlabs-shared-prod/polygonlabs-docker-prod/bridge-ui:0.2.2`
+
 **Startup Order**: Deploy after Bridge Service
+
 **Dependencies**: Bridge Service
 
 ## Component Version Matrix
