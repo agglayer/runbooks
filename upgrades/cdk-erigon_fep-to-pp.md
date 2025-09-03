@@ -28,7 +28,7 @@ L2URL = "${L2_URL}"
 
 AggLayerURL = "${AGGLAYER_URL}"
 
-NetworkID = "${L2_CHAINID}"
+NetworkID = "${ROLLUP_ID}"
 SequencerPrivateKeyPath = "/app/config/sequencer.keystore"
 SequencerPrivateKeyPassword = "${SEQ_KEYSTORE_PASSW}"
 
