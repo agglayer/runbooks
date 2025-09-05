@@ -56,7 +56,7 @@ GlobalExitRootAddr = "${GER_ADDR}"
 [L1InfoTreeSync]
 SyncBlockChunkSize = 1000
 BlockFinality = "FinalizedBlock"
-InitialBlock = "${R_BLOCKNUMBER}"
+InitialBlock = "${RM_BLOCKNUMBER}"
 
 [AggSender]
 CertificateSendInterval = "1m"
