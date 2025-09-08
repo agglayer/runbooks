@@ -47,11 +47,11 @@ Outputs = ["stdout"]
 chainId = "${L1_CHAINID}"
 polygonZkEVMAddress = "${ROLLUP_ADDR}"
 polygonRollupManagerAddress = "${ROLLUP_MANAGER_ADDR}"
-polygonZkEVMGlobalExitRootAddress = "${GER_ADDR}"
+polygonZkEVMGlobalExitRootAddress = "${L1_GER_ADDR}"
 polTokenAddress = "${POL_ADDR}"
 
 [L2Config]
-GlobalExitRootAddr = "${GER_ADDR}"
+GlobalExitRootAddr = "${L2_GER_ADDR}"
 
 [L1InfoTreeSync]
 SyncBlockChunkSize = 1000
