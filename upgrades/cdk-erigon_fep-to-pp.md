@@ -107,15 +107,16 @@ This process may take a couple hours to complete, but downtime from the point of
    1. Request Polygon (as the RollupManager Admin) to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x`
    2. Wait until the transaction is finalized.
 5. **Start aggsender**:
-   1. Get last l2 block verified
-      1. Get last verified batch number: `cast rpc zkevm_verifiedBatchNumber`
-      2. Get last block hash from that batch: `cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]`
-      3. Get block number from that block hash: `cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number`
-      4. Convert the block number from HEX to DEC: `export ETH_RPC_URL="https://zkevm-rpc.com" && printf "%d\n" $(cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number)`
+   1. Get last l2 block verified:
+      1. Set the correct ETH_RPC_URL for your network: `export ETH_RPC_URL="https://zkevm-rpc.com"`
+      2. Get the last verified batch number: `cast rpc zkevm_verifiedBatchNumber`
+      3. Get the last block hash from previous batch: `cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]`
+      4. Get the block number from previous block hash: `cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number`
+      5. Convert the block number from HEX to DEC: `printf "%d\n" $(cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number)`
    3. Update aggkit config:
       ```toml
       [AggSender]
-      MaxL2BlockNumber = <last_verified_block_number>
+      MaxL2BlockNumber = 0 # <- Set the last verified L2 block number
       ```
    4. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
    5. Start the aggkit instance with the new config and command changes.
