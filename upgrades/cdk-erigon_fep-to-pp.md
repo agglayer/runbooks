@@ -61,6 +61,7 @@ InitialBlock = "${RM_BLOCKNUMBER}"
 [AggSender]
 CertificateSendInterval = "1m"
 RetryCertAfterInError = true
+MaxL2BlockNumber = 0
 MaxCertSize = 0
   [AggSender.AgglayerClient]
   URL = "${AGGLAYER_URL}"
@@ -80,7 +81,7 @@ This process may take a couple hours to complete, but downtime from the point of
 1. **Stop sequencing**: Stop the sequencer-sender component.
 2. **Wait for verification**: Wait until the aggregator verifies all sequenced batches. Wait until the last verification transaction is finalized.
 3. **Update components**:
-   1. Update erigon version to _hermeznetwork/cdk-erigon:v2.61.23_
+   1. Update erigon version to _hermeznetwork/cdk-erigon:v2.61.24_
    2. Update sequencer config with:
       ```yaml
       # zkevm.executor-urls: "${STATELESS_EXECUTOR}" # Remove executors
@@ -102,8 +103,19 @@ This process may take a couple hours to complete, but downtime from the point of
       5. provers
       6. pool-manager
 4. **Migrate to PP**:
-   1. Send the transaction to perform the upgrade: `cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x`
-   2. Wait until the transaction is finalized.
+   1. Contact with Polygon as the Rollup Manager Admin needs to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x`
+   3. Wait until the transaction is finalized.
 5. **Start aggsender**:
-   1. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
-   2. Monitor the first certificate is correctly sent to the agglayer.
+   1. Update aggkit config with:
+      ```toml
+      [AggSender]
+      MaxL2BlockNumber = X # Set the last L2 block verified
+      ```
+   2. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
+   3. Start the aggkit instance with the new config and command changes.
+   4. Monitor the first certificate is correctly sent to the agglayer.
+   5. Once the first certificate is settled, you can rollback configuration change.
+      ```toml
+      [AggSender]
+      MaxL2BlockNumber = 0
+      ```
