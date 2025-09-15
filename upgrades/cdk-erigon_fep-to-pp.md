@@ -109,7 +109,7 @@ This process may take a couple hours to complete, but downtime from the point of
    1. Update aggkit config with:
       ```toml
       [AggSender]
-      MaxL2BlockNumber = X # Set the last L2 block verified
+      MaxL2BlockNumber = <last_verified_block_number> # Set this to the number of the last L2 block that was verified before the upgrade. You can obtain this value by checking the latest verified L2 block in your explorer or via the appropriate RPC call.
       ```
    2. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
    3. Start the aggkit instance with the new config and command changes.
