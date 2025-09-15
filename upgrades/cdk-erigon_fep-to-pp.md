@@ -95,7 +95,8 @@ This process may take a couple hours to complete, but downtime from the point of
       zkevm.mock-witness-generation: true
       zkevm.disable-virtual-counters: true
       ```
-   4. Stop the following components:
+   4. Update aggkit config with:
+   6. Stop the following components:
       1. dac
       2. sequence-sender
       3. aggregator
@@ -106,15 +107,20 @@ This process may take a couple hours to complete, but downtime from the point of
    1. Request Polygon (as the RollupManager Admin) to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x`
    2. Wait until the transaction is finalized.
 5. **Start aggsender**:
-   1. Update aggkit config with:
+   1. Get last l2 block verified
+      1. Get last verified batch number: `cast rpc zkevm_verifiedBatchNumber`
+      2. Get last block hash from that batch: `cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]`
+      3. Get block number from that block hash: `cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number`
+      4. Convert the block number from HEX to DEC: `export ETH_RPC_URL="https://zkevm-rpc.com" && printf "%d\n" $(cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number)`
+   3. Update aggkit config:
       ```toml
       [AggSender]
-      MaxL2BlockNumber = <last_verified_block_number> # Set this to the number of the last L2 block that was verified before the upgrade. You can obtain this value by checking the latest verified L2 block in your explorer or via the appropriate RPC call.
+      MaxL2BlockNumber = <last_verified_block_number>
       ```
-   2. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
-   3. Start the aggkit instance with the new config and command changes.
-   4. Monitor the first certificate is correctly sent to the agglayer.
-   5. Once the first certificate is settled, you can rollback configuration change.
+   4. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
+   5. Start the aggkit instance with the new config and command changes.
+   6. Monitor the first certificate is correctly sent to the agglayer.
+   7. Once the first certificate is settled, you can rollback configuration change.
       ```toml
       [AggSender]
       MaxL2BlockNumber = 0
