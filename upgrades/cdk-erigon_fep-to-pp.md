@@ -61,6 +61,7 @@ InitialBlock = "${RM_BLOCKNUMBER}"
 [AggSender]
 CertificateSendInterval = "1m"
 RetryCertAfterInError = true
+MaxL2BlockNumber = 0
 MaxCertSize = 0
   [AggSender.AgglayerClient]
   URL = "${AGGLAYER_URL}"
@@ -80,7 +81,7 @@ This process may take a couple hours to complete, but downtime from the point of
 1. **Stop sequencing**: Stop the sequencer-sender component.
 2. **Wait for verification**: Wait until the aggregator verifies all sequenced batches. Wait until the last verification transaction is finalized.
 3. **Update components**:
-   1. Update erigon version to _hermeznetwork/cdk-erigon:v2.61.23_
+   1. Update erigon version to _hermeznetwork/cdk-erigon:v2.61.24_
    2. Update sequencer config with:
       ```yaml
       # zkevm.executor-urls: "${STATELESS_EXECUTOR}" # Remove executors
@@ -94,7 +95,8 @@ This process may take a couple hours to complete, but downtime from the point of
       zkevm.mock-witness-generation: true
       zkevm.disable-virtual-counters: true
       ```
-   4. Stop the following components:
+   4. Update aggkit config with:
+   6. Stop the following components:
       1. dac
       2. sequence-sender
       3. aggregator
@@ -102,8 +104,25 @@ This process may take a couple hours to complete, but downtime from the point of
       5. provers
       6. pool-manager
 4. **Migrate to PP**:
-   1. Send the transaction to perform the upgrade: `cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x`
+   1. Request Polygon (as the RollupManager Admin) to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x`
    2. Wait until the transaction is finalized.
 5. **Start aggsender**:
-   1. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
-   2. Monitor the first certificate is correctly sent to the agglayer.
+   1. Get last l2 block verified:
+      1. Set the correct ETH_RPC_URL for your network: `export ETH_RPC_URL="https://zkevm-rpc.com"`
+      2. Get the last verified batch number: `cast rpc zkevm_verifiedBatchNumber`
+      3. Get the last block hash from previous batch: `cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]`
+      4. Get the block number from previous block hash: `cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number`
+      5. Convert the block number from HEX to DEC: `printf "%d\n" $(cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number)`
+   3. Update aggkit config:
+      ```toml
+      [AggSender]
+      MaxL2BlockNumber = 0 # <- Set the last verified L2 block number
+      ```
+   4. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
+   5. Start the aggkit instance with the new config and command changes.
+   6. Monitor the first certificate is correctly sent to the agglayer.
+   7. Once the first certificate is settled, you can rollback configuration change.
+      ```toml
+      [AggSender]
+      MaxL2BlockNumber = 0
+      ```
