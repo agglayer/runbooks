@@ -103,7 +103,7 @@ This process may take a couple hours to complete, but downtime from the point of
       5. provers
       6. pool-manager
 4. **Migrate to PP**:
-   1. Contact with Polygon as the Rollup Manager Admin needs to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x`
+   1. Request Polygon (as the RollupManager Admin) to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x`
    2. Wait until the transaction is finalized.
 5. **Start aggsender**:
    1. Update aggkit config with:
