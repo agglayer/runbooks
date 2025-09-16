@@ -70,7 +70,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 - `is_sequencer: 0`
 - RPC endpoints and API configuration
 
-### 5. AggKit (Agglayer Integration)
+### 5. AggKit
 
 **Purpose**: Agglayer integration and certificate management
 
@@ -82,12 +82,151 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 **Components**:
 - `aggsender`: Sends certificates to Agglayer
-- `bridge`: Bridge service component (when enabled)
+- `bridge`: Bridge service component
 
 **Configuration**:
-- Agglayer client URL: `grpc-agglayer[-dev|-test|].polygon.technology:443`
-- Certificate send interval: `1m`
-- Mode: `PessimisticProof` | `FEP`
+
+AggKit requires a TOML configuration file.
+
+<details>
+<summary>Configuration template</summary>
+
+```toml
+# Network ID of the L2 chain
+NetworkID = 1
+
+# Path to read/write data directory
+PathRWData = "/data"
+
+# L1 RPC URL for Ethereum connectivity (use your L1 provider)
+L1URL = "https://your-l1-rpc-endpoint.com"
+
+# L2 RPC URL pointing to your CDK-Erigon RPC service
+L2URL = "http://cdk-erigon-rpc:8123"
+
+# Path to sequencer private key file (leave empty to use other auth methods)
+SequencerPrivateKeyPath = ""
+# Password for sequencer private key (leave empty if not using file-based keys)
+SequencerPrivateKeyPassword = ""
+
+# Polygon bridge contract address on L2
+polygonBridgeAddr = "0x0000000000000000000000000000000000000000"
+
+# RPC URL for general chain operations (typically same as L2URL)
+RPCURL = "http://cdk-erigon-rpc:8123"
+
+# Witness service URL (optional, leave empty if not using)
+WitnessURL = ""
+
+# Block number where the rollup was created on L1
+rollupCreationBlockNumber = 0
+# Block number where the rollup manager was deployed on L1
+rollupManagerCreationBlockNumber = 0
+# Genesis block number on L1 (typically same as rollup manager creation)
+genesisBlockNumber = 0
+
+# L1 chain configuration
+[L1Config]
+# L1 chain ID (11155111 for Sepolia, 1 for Mainnet)
+chainId = 11155111
+# Global exit root contract address on L1
+polygonZkEVMGlobalExitRootAddress = "0x0000000000000000000000000000000000000000"
+# Rollup manager contract address on L1
+polygonRollupManagerAddress = "0x0000000000000000000000000000000000000000"
+# POL token contract address on L1
+polTokenAddress = "0x0000000000000000000000000000000000000000"
+# Rollup contract address on L1
+polygonZkEVMAddress = "0x0000000000000000000000000000000000000000"
+
+# L2 chain configuration
+[L2Config]
+# Global exit root contract address on L2
+GlobalExitRootAddr = "0x0000000000000000000000000000000000000000"
+
+# Logging configuration
+[Log]
+# Environment setting (development, production)
+Environment = "production"
+# Log level (debug, info, warn, error)
+Level = "info"
+# Log output destinations
+Outputs = ["stderr"]
+
+# RPC server configuration
+[RPC]
+# Port for RPC server to listen on
+Port = 5576
+
+# Agglayer sender configuration
+[AggSender]
+# Private key configuration for aggsender service
+AggsenderPrivateKey = {Path = "/etc/aggkit/sequencer.keystore", Password = "***"}
+
+# Interval for trying to send certificates to agglayer
+CertificateSendInterval = "1m"
+# Interval for checking if certificates are settled
+CheckSettledInterval = "5s"
+# Maximum certificate size in bytes
+MaxCertSize = 8388608
+# Path to save certificate files for debugging
+SaveCertificatesToFilesPath = "/tmp"
+# Block finality requirement (LatestBlock, SafeBlock, FinalizedBlock)
+BlockFinality = "FinalizedBlock"
+# Proof mode (PessimisticProof, FEP)
+Mode = "PessimisticProof"
+# Require no gap between FEP blocks
+RequireNoFEPBlockGap = true
+
+# Agglayer client configuration
+[AggSender.AgglayerClient]
+# Agglayer service URL (use appropriate environment: dev, test, or production)
+URL = "grpc-agglayer-dev.polygon.technology:443"
+# Use TLS for secure connection
+UseTLS = "true"
+
+# Bridge L2 sync configuration
+[BridgeL2Sync]
+# Bridge contract address on L2 (should match polygonBridgeAddr for the CDK-Erigon stack)
+BridgeAddr = "0x0000000000000000000000000000000000000000"
+
+# L1 info tree sync configuration
+[L1InfoTreeSync]
+# Block finality requirement for L1 sync
+BlockFinality = "FinalizedBlock"
+# Number of blocks to sync in each chunk
+SyncBlockChunkSize = 1000
+# Initial block to start syncing from
+InitialBlock = 0
+
+# REST API configuration (bridge)
+[REST]
+# Port for the bridge REST API server
+Port = "5577"
+```
+</details>
+</br>
+
+**Command to run AggKit**:
+
+```bash
+aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,bridge
+```
+
+**Available Components**:
+- `aggsender`: Sends certificates to the Agglayer
+- `bridge`: Bridge service component
+- `aggoracle`: Oracle services (for OP Stack)
+
+**Component Selection**:
+- For CDK-Erigon: typically use `aggsender,bridge`
+- For OP Stack: typically use `aggsender,aggoracle,bridge`
+
+**Environment-specific URLs**:
+
+Agglayer URL
+- Bali: `grpc-agglayer-dev.polygon.technology:443`
+- Cardona: `grpc-agglayer-test.polygon.technology:443`
+- Mainnet: `grpc-agglayer.polygon.technology:443`
 
 ### 6. Bridge Service
 
@@ -174,10 +313,12 @@ For networks using the standard OP Stack, the following components must be deplo
 **Components**:
 - `aggsender`: Certificate management
 - `aggoracle`: Oracle services for OP Stack
+- `bridge`: Bridge service for cross-chain asset transfers
 
 **Configuration**:
 - Agglayer client URL: `grpc-agglayer[-dev|-test|].polygon.technology:443`
 - L2 RPC URL: op-geth URL
+- See AggKit Configuration section above for detailed config file template
 
 ### 6. Bridge Service
 
