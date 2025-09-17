@@ -1,13 +1,13 @@
 # Running Aggsender Validator
 
-This runbook provides guidance for Implementation Providers (IPs) on deploying and configuring the `aggsender-validator` component using AggKit. The aggsender-validator is responsible for validating and signing certificates in the Aggsender committee.
+This runbook provides guidance for Implementation Providers (IPs) on deploying and configuring the `aggsender-validator` component using AggKit. The `aggsender-validator` is responsible for validating and signing certificates in the Aggsender committee.
 
 ## Overview
 
 The `aggsender-validator` component serves two primary deployment scenarios for Implementation Providers:
 
-1. **Integrated Deployment**: IPs running their own L2 chain include aggsender-validator as part of their standard AggKit deployment (with the aggsender)
-2. **Standalone Deployment**: IPs run an isolated aggsender-validator instance to participate in the committee for L2 chains operated by other IPs
+1. **Integrated Deployment**: IPs running their own L2 chain include `aggsender-validator` as part of their standard AggKit deployment (with `aggsender`)
+2. **Standalone Deployment**: IPs run an isolated `aggsender-validator` instance to participate in the committee for L2 chains operated by other IPs
 
 Both scenarios contribute to the decentralized validation of certificates submitted to the Agglayer.
 
@@ -22,7 +22,7 @@ Both scenarios contribute to the decentralized validation of certificates submit
 aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,bridge
 ```
 
-> [!info]
+> [!NOTE]
 > **If your L2 stack is the OP Stack:**
 > You must also add the `aggoracle` component to your deployment.
 > Example:
@@ -56,7 +56,7 @@ aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender-validator
 
 ### Core Configuration Sections
 
-All aggsender-validator deployments require configuration of the validator-specific section:
+All `aggsender-validator` deployments require configuration of the validator-specific section:
 
 <details>
 <summary>Validator configuration section</summary>
@@ -98,7 +98,7 @@ Cached = true
 TTL = "5m"
 Capacity = 100
 [Validator.AgglayerClient.GRPC]
-URL = "https://agglayer-dev.polygon.technology"
+URL = "grpc.agglayer[-dev|-test|].polygon.technology:443"
 MinConnectTimeout = "5s"
 RequestTimeout = "300s"
 UseTLS = false
@@ -115,7 +115,7 @@ MaxAttempts = 20
 
 #### Integrated Deployment
 
-For IPs running their own L2 chain, the aggsender-validator runs alongside the standard AggKit components. The core validator configuration above is required, plus one additional configuration change to connect the aggsender to the local validator:
+For IPs running their own L2 chain, the `aggsender-validator` runs alongside the standard AggKit components. The core validator configuration above is required, plus one additional configuration change to connect the aggsender to the local validator:
 
 <details>
 <summary>Additional configuration for integrated deployment</summary>
@@ -131,7 +131,7 @@ UseTLS = false
 
 </details>
 
-The aggsender-validator will use the existing AggKit configuration for:
+The `aggsender-validator` will use the existing AggKit configuration for:
 - L1/L2 connectivity
 - Contract addresses
 - Logging settings
