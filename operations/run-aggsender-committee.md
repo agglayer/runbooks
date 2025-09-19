@@ -1,6 +1,10 @@
-# Running Aggsender Validator
+# Run Aggsender Committee
 
-This runbook provides guidance for Implementation Providers (IPs) on deploying and configuring the `aggsender-validator` component using AggKit. The `aggsender-validator` is responsible for validating and signing certificates in the Aggsender committee.
+This runbook provides guidance for Implementation Providers (IPs) on deploying and configuring the `aggsender-validator` component using AggKit as part of an **Aggsender committee**.
+
+The **Aggsender committee** is a decentralized group of validators responsible for verifying and signing certificates that attest to the state and activity of Layer 2 (L2) chains within the Agglayer ecosystem. By distributing trust among multiple independent Implementation Providers, the committee ensures the integrity, security, and reliability of cross-chain operations. Participation in the aggsender committee is open to qualified IPs, who may join either as part of their own L2 deployment or as standalone validators for other chains.
+
+The `aggsender-validator` is responsible for validating and signing certificates as a member of the Aggsender committee.
 
 ## Overview
 
