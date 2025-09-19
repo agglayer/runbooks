@@ -1,16 +1,16 @@
-# Certify Implementation Partners for OP Network Deployment
+# Certify Implementation Providers for OP Network Deployment
 
 ## Overview
 
-This runbook outlines the certification process for Implementation Partners (IPs) seeking approval to deploy on the OP network within the Polygon ecosystem. Certification ensures that IPs meet the operational, security, and technical standards required for reliable network deployment and ongoing operations.
+This runbook outlines the certification process for Implementation Providers (IPs) seeking approval to deploy on the OP network within the Agglayer ecosystem. Certification ensures that IPs meet the operational, security, and technical standards required for reliable network deployment and ongoing operations.
 
 ## Purpose
 
-Polygon will certify Implementation Partners for OP network deployment based on their ability to demonstrate compliance with critical operational requirements. The certification process involves comprehensive evaluation across multiple domains to ensure network integrity, security, and performance standards are maintained.
+Polygon will certify Implementation Providers for OP network deployment based on their ability to demonstrate compliance with critical operational requirements. The certification process involves comprehensive evaluation across multiple domains to ensure network integrity, security, and performance standards are maintained.
 
 ## Certification Criteria
 
-Implementation Partners must successfully demonstrate proficiency in the following areas to achieve certification:
+Implementation Providers must successfully demonstrate proficiency in the following areas to achieve certification:
 
 ### 1. Contract Interaction and State Management
 
@@ -105,7 +105,7 @@ Assessment of native bridge component management:
 
 ## Maintenance of Certification
 
-Certified Implementation Partners must:
+Certified Implementation Providers must:
 - Maintain compliance with all certification criteria on an ongoing basis
 - Participate in periodic re-certification reviews as network protocols evolve
 - Report any significant system changes that may impact certification status
@@ -113,7 +113,7 @@ Certified Implementation Partners must:
 
 ## Certification Benefits
 
-Successfully certified Implementation Partners will:
+Successfully certified Implementation Providers will:
 - Receive official recognition as approved OP network deployment partners
 - Gain access to priority technical support and network resources
 - Be eligible for participation in network governance and improvement initiatives
@@ -129,5 +129,5 @@ Throughout the certification process, Polygon provides:
 
 ## Conclusion
 
-The certification process ensures that Implementation Partners possess the technical expertise, operational capabilities, and security awareness necessary for successful OP network deployment. This rigorous evaluation protects network integrity while enabling qualified partners to contribute effectively to the Polygon ecosystem's growth and success.
+The certification process ensures that Implementation Providers possess the technical expertise, operational capabilities, and security awareness necessary for successful OP network deployment. This rigorous evaluation protects network integrity while enabling qualified partners to contribute effectively to the Polygon ecosystem's growth and success.
 
