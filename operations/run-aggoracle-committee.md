@@ -97,7 +97,7 @@ L2URL = "https://your-l2-rpc-endpoint"
 For direct injection mode, set `EnableAggOracleCommittee = false` and ensure:
 
 1. The oracle's private key corresponds to the address that is set as the `globalExitRootUpdater` in the L2 Global Exit Root Manager contract
-2. The `AggOracleCommitteeAddr` is not required in the config file for direct injection mode
+2. The `AggOracleCommitteeAddr` field should _not_ be set in the config file for direct injection mode
 
 #### AggOracle Committee Mode
 
