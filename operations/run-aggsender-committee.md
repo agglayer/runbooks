@@ -105,7 +105,7 @@ Capacity = 100
 URL = "grpc.agglayer[-dev|-test|].polygon.technology:443"
 MinConnectTimeout = "5s"
 RequestTimeout = "300s"
-UseTLS = false
+UseTLS = true
 [Validator.AgglayerClient.GRPC.Retry]
 InitialBackoff = "1s"
 MaxBackoff = "10s"
