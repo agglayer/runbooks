@@ -1,4 +1,4 @@
-# Running AggOracle and AggOracle Committee
+# Run AggOracle Committee
 
 This runbook provides guidance for Implementation Providers (IPs) on deploying and configuring the `aggoracle` component and managing the AggOracle Committee. The `aggoracle` is responsible for reading the Global Exit Root (GER) from L1 and proposing or injecting it into L2, either directly or through a decentralized committee.
 
