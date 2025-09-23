@@ -13,7 +13,7 @@ L2 trusted environments require different components and configurations based on
 
 Before deploying any L2 trusted environment, ensure you have:
 
-1. **Database**: PostgreSQL instance for bridge service
+1. **Database**: PostgreSQL instance for legacy bridge service
 2. **L1 Access**: RPC endpoint to the L1 network (Ethereum Sepolia for testnet)
 3. **Network Configuration**: Genesis file, chain specifications, and contract addresses
 4. **Secrets Management**: Private keys for sequencer, batcher, and other services
@@ -25,7 +25,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 ### 1. PostgreSQL Database
 
-**Purpose**: Database for bridge service
+**Purpose**: Database for legacy bridge service
 
 **Docker Image**: e.g., `docker.io/bitnami/postgresql`
 
@@ -37,7 +37,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 **Purpose**: Transaction pool management for CDK-Erigon
 
-**Docker Image**: `docker.io/hermeznetwork/zkevm-pool-manager:v0.1.2`
+**Docker Image**: `ghcr.io/0xpolygon/zkevm-pool-manager:v0.1.2`
 
 **Startup Order**: Deploy after PostgreSQL
 
@@ -47,7 +47,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 **Purpose**: Block production and sequencing
 
-**Docker Image**: `docker.io/hermeznetwork/cdk-erigon:v2.61.23`
+**Docker Image**: `ghcr.io/0xpolygon/cdk-erigon:v2.61.23`
 
 **Startup Order**: Deploy after secrets are available
 
@@ -60,7 +60,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 **Purpose**: JSON-RPC API server for L2 interactions
 
-**Docker Image**: `docker.io/hermeznetwork/cdk-erigon:v2.61.23`
+**Docker Image**: `ghcr.io/0xpolygon/cdk-erigon:v2.61.23`
 
 **Startup Order**: Deploy after pool-manager and cdk-erigon-sequencer
 
@@ -70,11 +70,11 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 - `is_sequencer: 0`
 - RPC endpoints and API configuration
 
-### 5. AggKit
+### 5. Aggkit
 
 **Purpose**: Agglayer integration and certificate management
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.5.1`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.5.4`
 
 **Startup Order**: Deploy after CDK-Erigon RPC
 
@@ -86,7 +86,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 **Configuration**:
 
-AggKit requires a TOML configuration file.
+Aggkit requires a TOML configuration file.
 
 <details>
 <summary>Configuration template</summary>
@@ -206,7 +206,7 @@ Port = "5577"
 </details>
 </br>
 
-**Command to run AggKit**:
+**Command to run Aggkit**:
 
 ```bash
 aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,bridge
@@ -228,11 +228,15 @@ Agglayer URL
 - Cardona: `grpc-agglayer-test.polygon.technology:443`
 - Mainnet: `grpc-agglayer.polygon.technology:443`
 
-### 6. Bridge Service
+**Networking**:
+
+The Aggkit bridge endpoint must be publicly resolvable on the Internet in order to work with Polygon's Bridge Hub application.
+
+### 6. Legacy Bridge Service
 
 **Purpose**: Cross-chain asset transfers
 
-**Docker Image**: `docker.io/hermeznetwork/zkevm-bridge-service:v0.6.2-RC2`
+**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4`
 
 **Startup Order**: Deploy after CDK-Erigon RPC
 
@@ -240,15 +244,15 @@ Agglayer URL
 
 **Configuration**: L1 and L2 contract addresses, claim transaction management
 
-### 7. Bridge UI (Optional)
+### 7. Legacy Bridge UI (Optional)
 
-**Purpose**: Web interface for bridge operations
+**Purpose**: Web interface for legacy bridge operations
 
-**Docker Image**: `docker.io/hermeznetwork/zkevm-bridge-ui:multi-network`
+**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network`
 
-**Startup Order**: Deploy after AggKit
+**Startup Order**: Deploy after Aggkit
 
-**Dependencies**: AggKit
+**Dependencies**: Aggkit
 
 ## Vanilla OP Stack
 
@@ -256,7 +260,7 @@ For networks using the standard OP Stack, the following components must be deplo
 
 ### 1. PostgreSQL Database
 
-**Purpose**: Database for bridge service
+**Purpose**: Database for legacy bridge service
 
 **Docker Image**: e.g., `docker.io/bitnami/postgresql`
 
@@ -300,11 +304,11 @@ For networks using the standard OP Stack, the following components must be deplo
 
 **Dependencies**: OP-Geth, secrets
 
-### 5. AggKit (Agglayer Integration)
+### 5. Aggkit
 
 **Purpose**: Agglayer integration and oracle services
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.5.1`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.5.4`
 
 **Startup Order**: Deploy after OP-Batcher and OP-Geth
 
@@ -318,27 +322,31 @@ For networks using the standard OP Stack, the following components must be deplo
 **Configuration**:
 - Agglayer client URL: `grpc-agglayer[-dev|-test|].polygon.technology:443`
 - L2 RPC URL: op-geth URL
-- See AggKit Configuration section above for detailed config file template
+- See Aggkit Configuration section above for detailed config file template
 
-### 6. Bridge Service
+**Networking**:
+
+The Aggkit bridge endpoint must be publicly resolvable on the Internet in order to work with Polygon's Bridge Hub application.
+
+### 6. Legacy Bridge Service
 
 **Purpose**: Cross-chain asset transfers
 
-**Docker Image**: `hermeznetwork/zkevm-bridge-service:v0.6.2-RC2`
+**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4`
 
 **Startup Order**: Deploy after PostgreSQL and OP-Geth
 
 **Dependencies**: PostgreSQL, OP-Geth
 
-### 7. Bridge UI (Optional)
+### 7. Legacy Bridge UI
 
-**Purpose**: Web interface for bridge operations
+**Purpose**: Web interface for legacy bridge operations
 
-**Docker Image**: `docker.io/hermeznetwork/zkevm-bridge-ui:multi-network`
+**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network`
 
-**Startup Order**: Deploy after Bridge Service
+**Startup Order**: Deploy after Legacy Bridge Service
 
-**Dependencies**: Bridge Service
+**Dependencies**: Legacy Bridge Service
 
 ## Component Version Matrix
 
@@ -347,11 +355,11 @@ For networks using the standard OP Stack, the following components must be deplo
 | Component | Docker Image |
 |-----------|--------------|
 | PostgreSQL | `docker.io/bitnami/postgresql:16.2.1` |
-| Pool Manager | `docker.io/hermeznetwork/zkevm-pool-manager:v0.1.2` |
-| CDK-Erigon | `docker.io/hermeznetwork/cdk-erigon:v2.61.23` |
-| AggKit | `ghcr.io/agglayer/aggkit:0.5.1` |
-| Bridge | `docker.io/hermeznetwork/zkevm-bridge-service:v0.6.2-RC2` |
-| Bridge UI | `docker.io/hermeznetwork/zkevm-bridge-ui:multi-network` |
+| Pool Manager | `ghcr.io/0xpolygon/zkevm-pool-manager:v0.1.2` |
+| CDK-Erigon | `ghcr.io/0xpolygon/cdk-erigon:v2.61.23` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
+| Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4` |
+| Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
 ### Vanilla OP Stack Versions
 
@@ -361,9 +369,9 @@ For networks using the standard OP Stack, the following components must be deplo
 | OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1` |
 | OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.0` |
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5` |
-| AggKit | `ghcr.io/agglayer/aggkit:0.5.1` |
-| Bridge | `docker.io/hermeznetwork/zkevm-bridge-service:v0.6.2-RC2` |
-| Bridge UI | `docker.io/hermeznetwork/zkevm-bridge-ui:multi-network` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
+| Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4` |
+| Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
 ## Deployment Considerations
 
