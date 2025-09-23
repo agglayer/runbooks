@@ -369,7 +369,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 | OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1` |
 | OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.0` |
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.5.1` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
