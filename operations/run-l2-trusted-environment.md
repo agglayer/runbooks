@@ -357,7 +357,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 | PostgreSQL | `docker.io/bitnami/postgresql:16.2.1` |
 | Pool Manager | `ghcr.io/0xpolygon/zkevm-pool-manager:v0.1.2` |
 | CDK-Erigon | `ghcr.io/0xpolygon/cdk-erigon:v2.61.23` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.5.1` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
