@@ -7,7 +7,7 @@ OP Succinct supports a rolling update process when [program binaries](https://su
 
 ---
 
-## Rolling update guide
+## Update guide
 
 ⚠️ **Note:** The **Aggchain manager** address is required. This will typically be a multisig or timelock.
 
@@ -24,21 +24,21 @@ OP Succinct supports a rolling update process when [program binaries](https://su
 ---
 ### Setup
 
-1. Export env vars
-```
+Export env vars
+```shell
 export rollup_address=0x
 export l1_rpc_url=https://
 export l2_node_url=https://
 export l2_rpc_url=https://
 ```
 
-2. Confirm if you control the aggchainManager address
-```
+Confirm if you control the aggchainManager address
+```shell
 cast call $rollup_address "aggchainManager()" --rpc-url $l1_rpc_url
 ```
 
-3. Grab the current configName for future reference
-```
+Grab the current configName for future reference
+```shell
 cast call $rollup_address "selectedOpSuccinctConfigName()" --rpc-url $l1_rpc_url
 ```
 
@@ -46,23 +46,23 @@ cast call $rollup_address "selectedOpSuccinctConfigName()" --rpc-url $l1_rpc_url
 
 ### Generate new artifacts
 
-1. Generate new elfs, vkeys, and a rollup config hash by following [this guide](https://succinctlabs.github.io/op-succinct/advanced/verify-binaries.html).
+Generate new elfs, vkeys, and a rollup config hash by following [this guide](https://succinctlabs.github.io/op-succinct/advanced/verify-binaries.html).
 
 ---
 
 ### Add a new config on-chain
 
-1. Collect the necessary info
+Collect the necessary info
 
-```
+```shell
 mkdir upgrade
 ```
 
-```
+```shell
 cd upgrade
 ```
 
-```
+```shell
 cat << EOF > .env
 L1_RPC="${l1_rpc_url}"
 L1_BEACON_RPC="${l1_rpc_url}"
@@ -72,7 +72,7 @@ EOF
 ```
 
 Change the following command as needed
-```
+```shell
 docker run --rm -it \
   --platform linux/amd64 \
   -v "$(pwd)":/tmp/env \
@@ -83,7 +83,7 @@ docker run --rm -it \
 ```
 
 The command above will output a `opsuccinctl2ooconfig.json` file that looks something like this:
-```
+```json
 {
   "aggregationVkey": "0x00afb45d8064ae10aa6a1793b8f39a24c27268efae2917b5c02950b2377fbf00",
   "challenger": "0x0000000000000000000000000000000000000000",
@@ -105,12 +105,12 @@ The command above will output a `opsuccinctl2ooconfig.json` file that looks some
 ```
 
 Create a `_configName` by hashing an arbitrary string. The convention is to use the `ghcr.io/agglayer/op-succinct/op-succinct` tag. In this case
-```
+```shell
 cast keccak "v3.1.0-agglayer"
 0x622142ba8035695383551428b698950d3d4a6a53629c90a86d7192cfb221ae4e
 ```
 
-2. Using the **Aggchain manager** address, call:
+Using the **Aggchain manager** address, call:
 
 ```solidity
 function addOpSuccinctConfig(
@@ -125,16 +125,80 @@ This method can be found in the rollup contract.
 
 ---
 
-### Spin up updated infra
-
-List of components
-- [ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer](https://github.com/agglayer/op-succinct/pkgs/container/op-succinct%2Fop-succinct/515633556?tag=v3.1.0-agglayer)
-- [ghcr.io/agglayer/aggkit-prover:1.4.2](https://github.com/agglayer/provers/pkgs/container/aggkit-prover/530717765?tag=1.4.2)
-- [ghcr.io/agglayer/aggkit:0.7.0-beta8](https://github.com/agglayer/aggkit/pkgs/container/aggkit/530710287?tag=0.7.0-beta8)
-
+### Option 1 – Rolling Update
+#### Spin up updated infra
 1. Spin up a **new proposer** with the [`OP_SUCCINCT_CONFIG_NAME`](https://succinctlabs.github.io/op-succinct/proposer.html#optional-environment-variables) environment variable set to the name of the config you added. For this example, you would set `OP_SUCCINCT_CONFIG_NAME="v3.1.0-agglayer"`
 
 2. Start a new **aggkit-prover** pointing to the new proposer. You may need to adjust the config file
+> [!NOTE]
+> The new aggkit-prover instance will fail with `Error: Unable to setup aggchain proof builder`. This is expected and will be resolved as soon as we finish the upgrade
+
+3. Pre-configure **Aggsender** to point to the new prover (do not restart yet). For the new version of aggkit, you may need to adjust the config file
+```diff
+     [AggSender.AggkitProverClient]
+-    URL = https://old-prover-url:port
++    URL = https://new-prover-url:port
+     UseTLS = true
+```
+
+#### Switch over
+
+4. Stop the **Aggsender**.
+
+5. Update the selected config on-chain using the **Aggchain manager**:
+
+```solidity
+function selectOpSuccinctConfig(
+    bytes32 _configName
+)
+```
+
+6. Start the **Aggsender**.
+
+---
+### Option 2 – Direct Update
+1. Stop the **aggsender**, **aggkit-prover** and **op-succinct-proposer**
+2. Adjust the [**op-succinct-proposer**](#op-succinct-proposer) with the new `OP_SUCCINCT_CONFIG_NAME` environment variable and version
+3. Adjust the [**aggkit-prover**](#aggkit-prover) and [**aggsender**](#aggsender) config files and versions
+4. Update the selected config on-chain using the **Aggchain manager**:
+
+```solidity
+function selectOpSuccinctConfig(
+    bytes32 _configName
+)
+```
+5. Start the **aggkit-prover**, **op-succinct-proposer**. Wait until the services look stable
+6. Start the **aggsender**
+
+---
+
+### Cleanup (security step)
+
+For security, delete the old config calling using the **Aggchain manager**:
+
+```solidity
+function deleteOpSuccinctConfig(
+    bytes32 _configName
+) external onlyAggchainManager
+```
+
+---
+## Components reference
+### **op-succinct-proposer**
+Image: [ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer](https://github.com/agglayer/op-succinct/pkgs/container/op-succinct%2Fop-succinct/515633556?tag=v3.1.0-agglayer)
+
+What's new:
+- [`OP_SUCCINCT_CONFIG_NAME`](https://succinctlabs.github.io/op-succinct/proposer.html#optional-environment-variables) environment variable set to the name of the `_configName`
+
+```diff
++    OP_SUCCINCT_CONFIG_NAME: "v3.1.0-agglayer"
+```
+
+### **aggkit-prover**
+Image: [ghcr.io/agglayer/aggkit-prover:1.4.2](https://github.com/agglayer/provers/pkgs/container/aggkit-prover/530717765?tag=1.4.2)
+
+What's new:
+- Config change
 ```diff
      [aggchain-proof-service.aggchain-proof-builder]
      network-id = 0
@@ -148,14 +212,11 @@ List of components
 -    nanos = 0
 ```
 
-3. Pre-configure **Aggsender** to point to the new prover (do not restart yet). For the new version of aggkit, you may need to adjust the config file
-```diff
-     [AggSender.AggkitProverClient]
--    URL = https://old-prover-url:port
-+    URL = https://new-prover-url:port
-     UseTLS = true
-```
+### **aggsender**
+Image: [ghcr.io/agglayer/aggkit:0.7.0-beta8](https://github.com/agglayer/aggkit/pkgs/container/aggkit/530710287?tag=0.7.0-beta8)
 
+What's new:
+- Config change
 ```diff
      [AggSender]
 -    BlockFinality="FinalizedBlock"
@@ -163,35 +224,4 @@ List of components
 +    [AggSender.AgglayerClient.GRPC]
      URL = https://
      UseTLS = true
-```
-
-> [!NOTE]
-> The new aggkit-prover instance will fail with `Error: Unable to setup aggchain proof builder`. This is expected and will be resolved as soon as we finish the upgrade
-
----
-
-### Switch over
-
-6. Stop the **Aggsender**.
-
-7. Update the selected config on-chain using the **Aggchain manager**:
-
-```solidity
-function selectOpSuccinctConfig(
-    bytes32 _configName
-)
-```
-
-8. Start the **Aggsender**.
-
----
-
-### Cleanup (security step)
-
-9. For security, delete the old config calling using the **Aggchain manager**:
-
-```solidity
-function deleteOpSuccinctConfig(
-    bytes32 _configName
-) external onlyAggchainManager
 ```
