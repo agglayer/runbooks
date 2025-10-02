@@ -5,7 +5,7 @@ OP Succinct supports a rolling update process when [program binaries](https://su
 * An optimization to the range program is released
 * Some L2 parameters change
 
-> [!INFO]
+> [!NOTE]
 > In case you're migrating from [v2 to v3](v2-to-v3.md) check the guide for configuration changes
 
 ---
