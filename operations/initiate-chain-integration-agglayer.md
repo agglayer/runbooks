@@ -175,6 +175,31 @@ function initialize(
 ### For AggchainFEP Rollups
 
 ```solidity
+/// @notice Initialize function for fresh deployment
+/// @custom:security Initializes all contracts including PolygonConsensusBase
+/// @param _initParams The initialization parameters for FEP
+///    struct InitParams {
+///          uint256 l2BlockTime;
+///          bytes32 rollupConfigHash;
+///          bytes32 startingOutputRoot;
+///          uint256 startingBlockNumber;
+///          uint256 startingTimestamp;
+///          uint256 submissionInterval;
+///          address optimisticModeManager;
+///          bytes32 aggregationVkey;
+///          bytes32 rangeVkeyCommitment;
+///       }
+/// @param _signersToAdd Array of signers to add to the multisig
+/// @param _newThreshold New threshold for multisig operations
+/// @param _useDefaultVkeys Whether to use default verification keys from gateway
+/// @param _useDefaultSigners Whether to use default signers from gateway
+/// @param _initOwnedAggchainVKey The owned aggchain verification key
+/// @param _initAggchainVKeySelector The aggchain verification key selector
+/// @param _admin The admin address
+/// @param _trustedSequencer The trusted sequencer address
+/// @param _gasTokenAddress The gas token address
+/// @param _trustedSequencerURL The trusted sequencer URL
+/// @param _networkName The network name
 function initialize(
     InitParams memory _initParams,
     SignerInfo[] memory _signersToAdd,
