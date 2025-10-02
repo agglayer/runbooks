@@ -5,7 +5,7 @@
 Image: [ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer](https://github.com/agglayer/op-succinct/pkgs/container/op-succinct%2Fop-succinct/515633556?tag=v3.1.0-agglayer)
 
 What's new:
-- [`OP_SUCCINCT_CONFIG_NAME`](https://succinctlabs.github.io/op-succinct/proposer.html#optional-environment-variables) environment variable set to the name of the `_configName`
+- [`OP_SUCCINCT_CONFIG_NAME`](https://succinctlabs.github.io/op-succinct/proposer.html#optional-environment-variables) environment variable set to the value of the config name (`_configName` parameter)
 
 ```diff
 +    OP_SUCCINCT_CONFIG_NAME: "v3.1.0-agglayer"
