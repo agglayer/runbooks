@@ -2,7 +2,7 @@
 
 This document provides comprehensive instructions for integrating a chain with the Agglayer, covering both the chain attachment process and subsequent genesis file generation. The process involves two main phases:
 
-1. **Chain Integration**: Proposing and executing the `attachAggchainToAL` function from the `RollupManagerContract` using a Gnosis Safe multisig wallet
+1. **Chain Integration**: Proposing and executing the `attachAggchainToAL` function from the `AgglayerManager` contract (formerly RollupManager) using a Gnosis Safe multisig wallet
 2. **Genesis Generation**: Creating the appropriate genesis file for your network based on the client type
 
 ## Overview
@@ -45,7 +45,7 @@ Depending on your client type, you'll need:
 **For CDK-Erigon Networks:**
 - Go installed
 - Access to an L1 network RPC endpoint
-- Knowledge of the rollup manager and rollup details
+- Knowledge of the AgglayerManager and rollup details
 
 **For Vanilla Client Networks:**
 - Node.js and npm installed
@@ -60,7 +60,7 @@ The `attachAggchainToAL` function requires the following parameters:
 |-----------|------|-------------|
 | `rollupTypeID` | `uint32` | The unique identifier of the rollup type to be attached |
 | `chainID` | `uint64` | The chain ID of the chain |
-| `initializeBytesAggchain` | `bytes` | Initialization data for the chain |
+| `initializeBytesAggchain` | `bytes` | The AggchainManager EOA address that will initialize the rollup in a 2nd stage |
 
 > [!NOTE]
 > Please verify the exact function signature and parameters on Etherscan before execution:
@@ -99,7 +99,7 @@ The `attachAggchainToAL` function requires the following parameters:
 2. Fill in the required parameters:
    - **rollupTypeID**: Enter the rollup type identifier (uint32)
    - **chainID**: Enter the chain ID for the chain (uint64)
-   - **initializeBytesAggchain**: Enter the initialization data as hex-encoded bytes
+   - **initializeBytesAggchain**: Enter the AggchainManager EOA address as hex-encoded bytes
 
 > [!IMPORTANT]
 > When selecting the `rollupTypeID`, visit Etherscan to find the number of rollupTypeIds and get details about each rollupTypeId. Use the appropriate contract address:
@@ -114,14 +114,9 @@ The `attachAggchainToAL` function requires the following parameters:
 > - Verify the `forkId` in the rollupTypeId definition matches your requirements
 
 > [!IMPORTANT]
-> The `initializeBytesAggchain` parameter requires encoding the following fields in order:
-> - Chain admin address (address)
-> - Chain sequencer address (address)
-> - Chain gas token address (address, use zero address for ETH)
-> - URL to the trusted RPC node run with the sequencer (string)
-> - Chain name (string)
+> The `initializeBytesAggchain` parameter now contains a single field: the **AggchainManager EOA address**. This account will be used to initialize the rollup in a 2nd stage operation that the IP will perform themselves.
 >
-> You can encode these parameters using one of the following methods:
+> You can encode the address using:
 
 <details>
 <summary>Using JavaScript</summary>
@@ -130,45 +125,15 @@ The `attachAggchainToAL` function requires the following parameters:
 const ethers = require('ethers');
 
 /**
- * Function to encode the initialize bytes for pessimistic or state transition rollups
- * @param {String} admin Admin address
- * @param {String} trustedSequencer Trusted sequencer address
- * @param {String} gasTokenAddress Indicates the token address in mainnet that will be used as a gas token
- * @param {String} trustedSequencerURL Trusted sequencer RPC URL
- * @param {String} networkName Chain name
+ * Function to encode the AggchainManager address
+ * @param {String} aggchainManagerAddress The EOA address that will initialize the rollup
  * @returns {String} encoded value in hexadecimal string
  */
-function encodeInitializeBytes(
-    admin,
-    sequencer,
-    gasTokenAddress,
-    sequencerURL,
-    networkName,
-) {
+function encodeAggchainManagerAddress(aggchainManagerAddress) {
     return ethers.AbiCoder.defaultAbiCoder().encode(
-        ['address', 'address', 'address', 'string', 'string'],
-        [
-            admin,
-            sequencer,
-            gasTokenAddress,
-            sequencerURL,
-            networkName,
-        ],
+        ['address'],
+        [aggchainManagerAddress]
     );
-}
-```
-
-Decode with:
-
-```javascript
-function decodeTuple(tuple: any): [string, string, string, string, string] | null {
-  try {
-    const values = abiCoder.decode(["address", "address", "address", "string", "string"], tuple);
-    return values;
-  } catch (error) {
-    console.error("Error decoding the tuple:", error);
-    return null;
-  }
 }
 ```
 
@@ -178,22 +143,78 @@ function decodeTuple(tuple: any): [string, string, string, string, string] | nul
 <summary>Using cast (Foundry)</summary>
 
 ```shell
-$ cast abi-encode "encode(address,address,address,string,string)" \
-  <adminAddress> \
-  <sequencerAddress> \
-  <gasTokenAddress> \
-  "<trustedSequencerRPCURL>" \
-  "<chainName>"
-```
-
-Decode with:
-
-```shell
-$ cast decode-abi --input 'encode(address,address,address,string,string)' <bytes>
+$ cast abi-encode "encode(address)" <aggchainManagerAddress>
 ```
 
 </details>
 
+## Post-Attachment: Rollup Initialization
+
+After successful chain attachment, the IP must initialize the rollup using the AggchainManager account. The IP will call the `initialize` function on the **Rollup contract**. The initialization function varies depending on the rollup type:
+
+### For AggchainECDSAMultisig Rollups (zkEVM/Validium/PP rollups)
+
+```solidity
+function initialize(
+    address _admin,
+    address _trustedSequencer,
+    address _gasTokenAddress,
+    string memory _trustedSequencerURL,
+    string memory _networkName,
+    bool _useDefaultSigners,
+    SignerInfo[] memory _signersToAdd,
+    uint256 _newThreshold
+) external onlyAggchainManager
+```
+
+**Default Configuration**: IPs can use the trusted sequencer as the only signer by setting:
+- `_useDefaultSigners`: `true`
+- `_signersToAdd`: empty array `[]`
+- `_newThreshold`: `0`
+
+### For AggchainFEP Rollups
+
+```solidity
+/// @notice Initialize function for fresh deployment
+/// @custom:security Initializes all contracts including PolygonConsensusBase
+/// @param _initParams The initialization parameters for FEP
+///    struct InitParams {
+///          uint256 l2BlockTime;
+///          bytes32 rollupConfigHash;
+///          bytes32 startingOutputRoot;
+///          uint256 startingBlockNumber;
+///          uint256 startingTimestamp;
+///          uint256 submissionInterval;
+///          address optimisticModeManager;
+///          bytes32 aggregationVkey;
+///          bytes32 rangeVkeyCommitment;
+///       }
+/// @param _signersToAdd Array of signers to add to the multisig
+/// @param _newThreshold New threshold for multisig operations
+/// @param _useDefaultVkeys Whether to use default verification keys from gateway
+/// @param _useDefaultSigners Whether to use default signers from gateway
+/// @param _initOwnedAggchainVKey The owned aggchain verification key
+/// @param _initAggchainVKeySelector The aggchain verification key selector
+/// @param _admin The admin address
+/// @param _trustedSequencer The trusted sequencer address
+/// @param _gasTokenAddress The gas token address
+/// @param _trustedSequencerURL The trusted sequencer URL
+/// @param _networkName The network name
+function initialize(
+    InitParams memory _initParams,
+    SignerInfo[] memory _signersToAdd,
+    uint256 _newThreshold,
+    bool _useDefaultVkeys,
+    bool _useDefaultSigners,
+    bytes32 _initOwnedAggchainVKey,
+    bytes4 _initAggchainVKeySelector,
+    address _admin,
+    address _trustedSequencer,
+    address _gasTokenAddress,
+    string memory _trustedSequencerURL,
+    string memory _networkName
+) external onlyAggchainManager
+```
 
 #### 4. Submit Proposal
 
@@ -290,9 +311,9 @@ If your network runs with `cdk-erigon`, use the [cdk-contracts-tooling](https://
    # Edit rpcs.toml to include your L1 network RPC configuration
    ```
 
-3. **Import the rollup manager:**
+3. **Import the AgglayerManager:**
    ```bash
-   go run ./cmd import-rm -l1 <L1_NETWORK> -addr <ROLLUP_MANAGER_ADDRESS> -alias <ALIAS>
+   go run ./cmd import-rm -l1 <L1_NETWORK> -addr <AGGLAYER_MANAGER_ADDRESS> -alias <ALIAS>
    ```
 
    Example:
@@ -355,7 +376,7 @@ If your network runs with vanilla clients (like standard geth, op-geth, etc.), u
 
 4. **Configure the tool:**
    - Follow the tool's documentation to configure the necessary parameters
-   - Provide your L1 RPC endpoint and rollup contract details
+   - Provide your L1 RPC endpoint and AgglayerManager contract details
    - Specify your chain configuration parameters
 
 5. **Generate the genesis file:**
