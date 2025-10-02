@@ -5,6 +5,9 @@ OP Succinct supports a rolling update process when [program binaries](https://su
 * An optimization to the range program is released
 * Some L2 parameters change
 
+> [!INFO]
+> In case you're migrating from [v2 to v3](v2-to-v3.md) check the guide for configuration changes
+
 ---
 
 ## Update guide
@@ -30,6 +33,7 @@ export rollup_address=0x
 export l1_rpc_url=https://
 export l2_node_url=https://
 export l2_rpc_url=https://
+export op_succinct_version=v3.1.0-agglayer
 ```
 
 Confirm if you control the aggchainManager address
@@ -41,12 +45,6 @@ Grab the current configName for future reference
 ```shell
 cast call $rollup_address "selectedOpSuccinctConfigName()" --rpc-url $l1_rpc_url
 ```
-
----
-
-### Generate new artifacts
-
-Generate new elfs, vkeys, and a rollup config hash by following [this guide](https://succinctlabs.github.io/op-succinct/advanced/verify-binaries.html).
 
 ---
 
@@ -76,7 +74,7 @@ Change the following command as needed
 docker run --rm -it \
   --platform linux/amd64 \
   -v "$(pwd)":/tmp/env \
-  ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer \
+  ghcr.io/agglayer/op-succinct/op-succinct:${op_succinct_version} \
   fetch-l2oo-config \
   --env-file /tmp/env/.env \
   --output-dir /tmp/env
@@ -106,7 +104,7 @@ The command above will output a `opsuccinctl2ooconfig.json` file that looks some
 
 Create a `_configName` by hashing an arbitrary string. The convention is to use the `ghcr.io/agglayer/op-succinct/op-succinct` tag. In this case
 ```shell
-cast keccak "v3.1.0-agglayer"
+cast keccak "${op_succinct_version}"
 0x622142ba8035695383551428b698950d3d4a6a53629c90a86d7192cfb221ae4e
 ```
 
@@ -176,52 +174,8 @@ function selectOpSuccinctConfig(
 
 For security, delete the old config calling using the **Aggchain manager**:
 
-```solidity
+```solidity 
 function deleteOpSuccinctConfig(
     bytes32 _configName
 ) external onlyAggchainManager
-```
-
----
-## Components reference
-### **op-succinct-proposer**
-Image: [ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer](https://github.com/agglayer/op-succinct/pkgs/container/op-succinct%2Fop-succinct/515633556?tag=v3.1.0-agglayer)
-
-What's new:
-- [`OP_SUCCINCT_CONFIG_NAME`](https://succinctlabs.github.io/op-succinct/proposer.html#optional-environment-variables) environment variable set to the name of the `_configName`
-
-```diff
-+    OP_SUCCINCT_CONFIG_NAME: "v3.1.0-agglayer"
-```
-
-### **aggkit-prover**
-Image: [ghcr.io/agglayer/aggkit-prover:1.4.2](https://github.com/agglayer/provers/pkgs/container/aggkit-prover/530717765?tag=1.4.2)
-
-What's new:
-- Config change
-```diff
-     [aggchain-proof-service.aggchain-proof-builder]
-     network-id = 0
-+    proving-timeout = "1h"
-
-     [aggchain-proof-service.aggchain-proof-builder.primary-prover.network-prover]
-     proving-timeout = "1h"
-
--    [aggchain-proof-service.aggchain-proof-builder.proving-timeout]
--    secs = 3600
--    nanos = 0
-```
-
-### **aggsender**
-Image: [ghcr.io/agglayer/aggkit:0.7.0-beta8](https://github.com/agglayer/aggkit/pkgs/container/aggkit/530710287?tag=0.7.0-beta8)
-
-What's new:
-- Config change
-```diff
-     [AggSender]
--    BlockFinality="FinalizedBlock"
--    [AggSender.AgglayerClient]
-+    [AggSender.AgglayerClient.GRPC]
-     URL = https://
-     UseTLS = true
 ```
