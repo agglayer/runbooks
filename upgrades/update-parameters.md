@@ -172,7 +172,7 @@ function selectOpSuccinctConfig(
 
 ### Cleanup (security step)
 
-For security, delete the old config calling using the **Aggchain manager**:
+For security, delete the old config by calling the **Aggchain manager**:
 
 ```solidity 
 function deleteOpSuccinctConfig(
