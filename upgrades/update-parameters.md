@@ -12,9 +12,11 @@ OP Succinct supports a rolling update process when [program binaries](https://su
 
 ## Update guide
 
-⚠️ **Note:** The **Aggchain manager** address is required. This will typically be a multisig or timelock.
+> [!IMPORTANT]
+> The **Aggchain manager** address is required. This will typically be a multisig or timelock.
 
-⚠️ **Note:** The `_configName` in the contract is a `bytes32` value, derived from hashing the human-readable config name string with `keccak256`.
+> [!IMPORTANT]
+> The `_configName` in the contract is a `bytes32` value, derived from hashing the human-readable config name string with `keccak256`.
 
 * Example:
 
