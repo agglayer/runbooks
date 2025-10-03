@@ -1,4 +1,4 @@
-# Updating `OPSuccinctL2OutputOracle` Parameters
+# FEP Rollup ugrades
 
 OP Succinct supports a rolling update process when [program binaries](https://succinctlabs.github.io/op-succinct/advanced/verify-binaries.html) must be reproduced and only the `aggregationVkey`, `rangeVkeyCommitment`, or `rollupConfigHash` parameters change. For example, this could happen if:
 * The SP1 version changes
