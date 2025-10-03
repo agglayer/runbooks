@@ -1,4 +1,4 @@
-# Updating `OPSuccinctL2OutputOracle` Parameters
+# FEP Rollup upgrades
 
 OP Succinct supports a rolling update process when [program binaries](https://succinctlabs.github.io/op-succinct/advanced/verify-binaries.html) must be reproduced and only the `aggregationVkey`, `rangeVkeyCommitment`, or `rollupConfigHash` parameters change. For example, this could happen if:
 * The SP1 version changes
@@ -12,9 +12,11 @@ OP Succinct supports a rolling update process when [program binaries](https://su
 
 ## Update guide
 
-⚠️ **Note:** The **Aggchain manager** address is required. This will typically be a multisig or timelock.
+> [!IMPORTANT]
+> The **Aggchain manager** address is required. This will typically be a multisig or timelock.
 
-⚠️ **Note:** The `_configName` in the contract is a `bytes32` value, derived from hashing the human-readable config name string with `keccak256`.
+> [!IMPORTANT]
+> The `_configName` in the contract is a `bytes32` value, derived from hashing the human-readable config name string with `keccak256`.
 
 * Example:
 
