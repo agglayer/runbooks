@@ -121,6 +121,18 @@ function addOpSuccinctConfig(
 )
 ```
 
+Cast command:
+```shell
+cast send $rollup_address \
+  "addOpSuccinctConfig(bytes32,bytes32,bytes32,bytes32)" \
+  <_configName> \
+  <_rollupConfigHash> \
+  <_aggregationVkey> \
+  <_rangeVkeyCommitment> \
+  --rpc-url $l1_rpc_url \
+  --private-key $PRIVATE_KEY
+```
+
 This method can be found in the rollup contract.
 
 ---
@@ -153,6 +165,15 @@ function selectOpSuccinctConfig(
 )
 ```
 
+Cast command:
+```shell
+cast send $rollup_address \
+  "selectOpSuccinctConfig(bytes32)" \
+  <_configName> \
+  --rpc-url $l1_rpc_url \
+  --private-key $PRIVATE_KEY
+```
+
 6. Start the **Aggsender**.
 
 ---
@@ -167,6 +188,16 @@ function selectOpSuccinctConfig(
     bytes32 _configName
 )
 ```
+
+Cast command:
+```shell
+cast send $rollup_address \
+  "selectOpSuccinctConfig(bytes32)" \
+  <_configName> \
+  --rpc-url $l1_rpc_url \
+  --private-key $PRIVATE_KEY
+```
+
 5. Start the **aggkit-prover**, **op-succinct-proposer**. Wait until the services look stable
 6. Start the **aggsender**
 
@@ -180,4 +211,13 @@ For security, delete the old config by calling the **Aggchain manager**:
 function deleteOpSuccinctConfig(
     bytes32 _configName
 ) external onlyAggchainManager
+```
+
+Cast command:
+```shell
+cast send $rollup_address \
+  "deleteOpSuccinctConfig(bytes32)" \
+  <_configName> \
+  --rpc-url $l1_rpc_url \
+  --private-key $PRIVATE_KEY
 ```
