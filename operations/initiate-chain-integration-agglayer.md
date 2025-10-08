@@ -102,16 +102,13 @@ The `attachAggchainToAL` function requires the following parameters:
    - **initializeBytesAggchain**: Enter the AggchainManager EOA address as hex-encoded bytes
 
 > [!IMPORTANT]
-> When selecting the `rollupTypeID`, visit Etherscan to find the number of rollupTypeIds and get details about each rollupTypeId. Use the appropriate contract address:
+> When selecting the `rollupTypeID`, visit Etherscan to find the number of rollupTypeIds, get details about each rollupTypeId, and access each rollupTypeId's `consensusImplementation` contract. Use the appropriate contract address:
 > - **Bali**: [Number of rollupTypeIds](https://sepolia.etherscan.io/address/0xE2EF6215aDc132Df6913C8DD16487aBF118d1764#readProxyContract#F28) | [rollupTypeId details](https://sepolia.etherscan.io/address/0xE2EF6215aDc132Df6913C8DD16487aBF118d1764#readProxyContract#F29)
 > - **Cardona**: [Number of rollupTypeIds](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F28) | [rollupTypeId details](https://sepolia.etherscan.io/address/0x32d33D5137a7cFFb54c5Bf8371172bcEc5f310ff#readProxyContract#F29)
 >
 > Review the rollupTypeIds from the latest one going backwards until you find the appropriate one based on these criteria:
-> - For chains using Pessimistic Proofs (PP) with OP-FEP Aggchain proofs (CONSENSUS_TYPE = 1 and AGGCHAIN_TYPE = 1): Select a rollupTypeId with `rollupVerifierType = 2`
-> - For chains using PP to prove valid ECDSA signatures of certificates (CONSENSUS_TYPE = 0): Select a rollupTypeId with `rollupVerifierType = 1`
-> - For legacy chains using zkEVM-prover proofs without PP: Select a rollupTypeId with `rollupVerifierType = 0`
-> - Ensure the selected rollupTypeId definition does not have `obsolete = true`
-> - Verify the `forkId` in the rollupTypeId definition matches your requirements
+> - For **AggchainECDSAMultisig** rollups (zkEVM/Validium/PP rollups): Select a rollupTypeId whose consensusImplementation is defined with `AGGCHAIN_TYPE = 0x0000`
+> - For **AggchainFEP** rollups: Select a rollupTypeId whose consensusImplementation is defined with `AGGCHAIN_TYPE = 0x0001`
 
 > [!IMPORTANT]
 > The `initializeBytesAggchain` parameter now contains a single field: the **AggchainManager EOA address**. This account will be used to initialize the rollup in a 2nd stage operation that the IP will perform themselves.
@@ -155,6 +152,11 @@ After successful chain attachment, the IP must initialize the rollup using the A
 ### For AggchainECDSAMultisig Rollups (zkEVM/Validium/PP rollups)
 
 ```solidity
+struct SignerInfo {
+   address addr;
+   string url;
+}
+
 function initialize(
     address _admin,
     address _trustedSequencer,
@@ -167,10 +169,40 @@ function initialize(
 ) external onlyAggchainManager
 ```
 
-**Default Configuration**: IPs can use the trusted sequencer as the only signer by setting:
-- `_useDefaultSigners`: `true`
-- `_signersToAdd`: empty array `[]`
-- `_newThreshold`: `0`
+**Default Configuration**: IPs should set the trusted sequencer as the only signer by setting:
+- `_useDefaultSigners`: `false`
+- `_signersToAdd`: array containing the trusted sequencer signer info `[(trustedSequencerAddress, trustedSequencerURL)]`
+- `_newThreshold`: `1`
+
+**Example Call**:
+```bash
+# Example initialize() call with default configuration using cast
+cast send <ROLLUP_CONTRACT_ADDRESS> \
+  "initialize(address,address,address,string,string,bool,(address,string)[],uint256)" \
+  "0x1234567890123456789012345678901234567890" \
+  "0xAbCdEf0123456789AbCdEf0123456789AbCdEf01" \
+  "0x0000000000000000000000000000000000000000" \
+  "https://sequencer.example.com" \
+  "MyChain Network" \
+  false \
+  "[(0xAbCdEf0123456789AbCdEf0123456789AbCdEf01,https://sequencer.example.com)]" \
+  1 \
+  --private-key <AGGCHAIN_MANAGER_PRIVATE_KEY> \
+  --rpc-url <SEPOLIA_RPC_URL>
+```
+
+Where:
+- `<ROLLUP_CONTRACT_ADDRESS>`: The rollup contract address returned from the attachAggchainToAL transaction
+- `_admin`: `0x1234567890123456789012345678901234567890` (replace with actual admin address)
+- `_trustedSequencer`: `0xAbCdEf0123456789AbCdEf0123456789AbCdEf01` (replace with actual sequencer address)
+- `_gasTokenAddress`: `0x0000000000000000000000000000000000000000` (use 0x0 for ETH)
+- `_trustedSequencerURL`: `https://sequencer.example.com` (replace with actual URL)
+- `_networkName`: `MyChain Network` (replace with your network name)
+- `_useDefaultSigners`: `false` (must be false for custom signer configuration)
+- `_signersToAdd`: Array with trusted sequencer info (address and URL)
+- `_newThreshold`: `1` (single signer threshold)
+- `<AGGCHAIN_MANAGER_PRIVATE_KEY>`: Private key of the AggchainManager EOA
+- `<SEPOLIA_RPC_URL>`: Sepolia RPC endpoint
 
 ### For AggchainFEP Rollups
 
