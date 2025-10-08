@@ -174,6 +174,36 @@ function initialize(
 - `_signersToAdd`: array containing the trusted sequencer signer info `[(trustedSequencerAddress, trustedSequencerURL)]`
 - `_newThreshold`: `1`
 
+**Example Call**:
+```bash
+# Example initialize() call with default configuration using cast
+cast send <ROLLUP_CONTRACT_ADDRESS> \
+  "initialize(address,address,address,string,string,bool,(address,string)[],uint256)" \
+  "0x1234567890123456789012345678901234567890" \
+  "0xAbCdEf0123456789AbCdEf0123456789AbCdEf01" \
+  "0x0000000000000000000000000000000000000000" \
+  "https://sequencer.example.com" \
+  "MyChain Network" \
+  false \
+  "[(0xAbCdEf0123456789AbCdEf0123456789AbCdEf01,https://sequencer.example.com)]" \
+  1 \
+  --private-key <AGGCHAIN_MANAGER_PRIVATE_KEY> \
+  --rpc-url <SEPOLIA_RPC_URL>
+```
+
+Where:
+- `<ROLLUP_CONTRACT_ADDRESS>`: The rollup contract address returned from the attachAggchainToAL transaction
+- `_admin`: `0x1234567890123456789012345678901234567890` (replace with actual admin address)
+- `_trustedSequencer`: `0xAbCdEf0123456789AbCdEf0123456789AbCdEf01` (replace with actual sequencer address)
+- `_gasTokenAddress`: `0x0000000000000000000000000000000000000000` (use 0x0 for ETH)
+- `_trustedSequencerURL`: `https://sequencer.example.com` (replace with actual URL)
+- `_networkName`: `MyChain Network` (replace with your network name)
+- `_useDefaultSigners`: `false` (must be false for custom signer configuration)
+- `_signersToAdd`: Array with trusted sequencer info (address and URL)
+- `_newThreshold`: `1` (single signer threshold)
+- `<AGGCHAIN_MANAGER_PRIVATE_KEY>`: Private key of the AggchainManager EOA
+- `<SEPOLIA_RPC_URL>`: Sepolia RPC endpoint
+
 ### For AggchainFEP Rollups
 
 ```solidity
