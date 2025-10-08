@@ -171,7 +171,7 @@ function initialize(
 
 **Default Configuration**: IPs should set the trusted sequencer as the only signer by setting:
 - `_useDefaultSigners`: `false`
-- `_signersToAdd`: array containing the trusted sequencer address `[(trustedSequencerAddress, trustedSequencerURL)]`
+- `_signersToAdd`: array containing the trusted sequencer signer info `[(trustedSequencerAddress, trustedSequencerURL)]`
 - `_newThreshold`: `1`
 
 ### For AggchainFEP Rollups
