@@ -156,7 +156,7 @@ In the Agglayer architecture, a **signer** is an entity that participates in the
 - **Aggsender-proposer**: The primary sequencer that proposes certificates to be signed
 - **Aggsender-validator**: Additional validator nodes that participate in the multisig committee to sign certificates
 
-It is option to set up a committee with multiple signers for enhanced security and decentralization. For more details on setting up an aggsender committee with multiple signers, see the [Run Aggsender Committee](https://github.com/agglayer/runbooks/blob/main/operations/run-aggsender-committee.md) runbook.
+It is optional to set up a committee with multiple signers for enhanced security and decentralization. For more details on setting up an aggsender committee with multiple signers, see the [Run Aggsender Committee](https://github.com/agglayer/runbooks/blob/main/operations/run-aggsender-committee.md) runbook.
 
 Alternatively, it is also possible to keep the aggsender-proposer as the only signer in the committee. In this setup, only the trusted sequencer (aggsender-proposer) will be responsible for signing certificates. An example of this configuration is shared below.
 
