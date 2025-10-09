@@ -147,16 +147,42 @@ $ cast abi-encode "encode(address)" <aggchainManagerAddress>
 
 ## Post-Attachment: Rollup Initialization
 
-After successful chain attachment, the IP must initialize the rollup using the AggchainManager account. The IP will call the `initialize` function on the **Rollup contract**. The initialization function varies depending on the rollup type:
+After successful chain attachment, the IP must initialize the rollup using the AggchainManager account. The IP will call the `initialize` function on the **Rollup contract**.
+
+### Understanding Signers
+
+In the Agglayer architecture, a **signer** is an entity that participates in the multisig process for signing certificates that are sent to the Agglayer. A signer can be one of two types:
+
+- **Aggsender-proposer**: The primary sequencer that proposes certificates to be signed
+- **Aggsender-validator**: Additional validator nodes that participate in the multisig committee to sign certificates
+
+It is optional to set up a committee with multiple signers for enhanced security and decentralization. For more details on setting up an aggsender committee with multiple signers, see the [Run Aggsender Committee](https://github.com/agglayer/runbooks/blob/main/operations/run-aggsender-committee.md) runbook.
+
+Alternatively, it is also possible to keep the aggsender-proposer as the only signer in the committee. In this setup, only the trusted sequencer (aggsender-proposer) will be responsible for signing certificates. An example of this configuration is shared below.
+
+### SignerInfo Struct
+
+Both rollup types use the `SignerInfo` struct for the `_signersToAdd` parameter:
+
+```solidity
+struct SignerInfo {
+   address addr;  // Wallet address of the signer
+   string url;    // Aggsender-validator public endpoint (not used if signer is aggsender-proposer)
+}
+```
+
+**Field Descriptions**:
+- `addr`: The wallet address of each signer that will participate in the multisig
+- `url`: The aggsender-validator public endpoint used by the aggsender-proposer to request multisig signatures of certificates
+
+> [!IMPORTANT]
+> The **first signer should always be the aggsender-proposer itself**. Since the proposer doesn't need to call its own endpoint, the URL field for the first signer is not used. For simplicity, set it to the `trustedSequencerURL`.
+
+The initialization function varies depending on the rollup type:
 
 ### For AggchainECDSAMultisig Rollups (zkEVM/Validium/PP rollups)
 
 ```solidity
-struct SignerInfo {
-   address addr;
-   string url;
-}
-
 function initialize(
     address _admin,
     address _trustedSequencer,
@@ -169,7 +195,9 @@ function initialize(
 ) external onlyAggchainManager
 ```
 
-**Default Configuration**: IPs should set the trusted sequencer as the only signer by setting:
+#### Default Configuration
+
+IPs should set the trusted sequencer as the only signer by setting:
 - `_useDefaultSigners`: `false`
 - `_signersToAdd`: array containing the trusted sequencer signer info `[(trustedSequencerAddress, trustedSequencerURL)]`
 - `_newThreshold`: `1`
