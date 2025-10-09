@@ -6,8 +6,11 @@ This document provides instructions for running a trusted environment of an L2 n
 
 L2 trusted environments require different components and configurations based on the underlying stack:
 
-- **CDK-Erigon Stack**: Networks using `cdk-erigon` as the execution client
-- **Vanilla OP Stack**: Networks using standard OP Stack components (`op-geth`, `op-node`, `op-batcher`)
+- **AggchainECDSAMultisig**: Networks using ECDSA multisig verification
+  - **CDK-Erigon**: Networks using `cdk-erigon` as the execution client
+  - **OP Stack**: Networks using standard OP Stack components (`op-geth`, `op-node`, `op-batcher`)
+- **AggchainFEP**: Networks using Full Execution Proof (FEP)
+  - **OP Stack**: Networks using standard OP Stack components (`op-geth`, `op-node`, `op-batcher`) and proving system (`op-succinct-proposer`, `aggkit-prover`)
 
 ## Common Prerequisites
 
@@ -19,21 +22,19 @@ Before deploying any L2 trusted environment, ensure you have:
 4. **Secrets Management**: Private keys for sequencer, batcher, and other services
 5. **Persistent Storage**: For blockchain data and configuration files
 
-## CDK-Erigon Stack
-
-For networks using the CDK-Erigon stack, the following components must be deployed in this order:
-
-### 1. PostgreSQL Database
+## AggchainECDSAMultisig
+### CDK-Erigon
+#### 1. PostgreSQL Database
 
 **Purpose**: Database for legacy bridge service
 
-**Docker Image**: e.g., `docker.io/bitnami/postgresql`
+**Docker Image**: e.g., `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f`
 
 **Startup Order**: Deploy first (dependency for other services)
 
 **Configuration**: Standard PostgreSQL setup
 
-### 2. Pool Manager
+#### 2. Pool Manager
 
 **Purpose**: Transaction pool management for CDK-Erigon
 
@@ -43,7 +44,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 
 **Dependencies**: PostgreSQL, secrets
 
-### 3. CDK-Erigon Sequencer
+#### 3. CDK-Erigon Sequencer
 
 **Purpose**: Block production and sequencing
 
@@ -56,7 +57,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 - Chain specification and genesis configuration
 - L1 contract addresses
 
-### 4. CDK-Erigon RPC Node
+#### 4. CDK-Erigon RPC Node
 
 **Purpose**: JSON-RPC API server for L2 interactions
 
@@ -70,7 +71,7 @@ For networks using the CDK-Erigon stack, the following components must be deploy
 - `is_sequencer: 0`
 - RPC endpoints and API configuration
 
-### 5. Aggkit
+#### 5. Aggkit
 
 **Purpose**: Agglayer integration and certificate management
 
@@ -232,11 +233,11 @@ Agglayer URL
 
 The Aggkit bridge endpoint must be publicly resolvable on the Internet in order to work with Polygon's Bridge Hub application.
 
-### 6. Legacy Bridge Service
+#### 6. Legacy Bridge Service
 
 **Purpose**: Cross-chain asset transfers
 
-**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4`
+**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2`
 
 **Startup Order**: Deploy after CDK-Erigon RPC
 
@@ -244,7 +245,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Configuration**: L1 and L2 contract addresses, claim transaction management
 
-### 7. Legacy Bridge UI (Optional)
+#### 7. Legacy Bridge UI (Optional)
 
 **Purpose**: Web interface for legacy bridge operations
 
@@ -254,23 +255,20 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Dependencies**: Aggkit
 
-## Vanilla OP Stack
-
-For networks using the standard OP Stack, the following components must be deployed:
-
-### 1. PostgreSQL Database
+### OP Stack
+#### 1. PostgreSQL Database
 
 **Purpose**: Database for legacy bridge service
 
-**Docker Image**: e.g., `docker.io/bitnami/postgresql`
+**Docker Image**: e.g., `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f`
 
-**Startup Order**: Deploy first
+**Startup Order**: Deploy first (dependency for other services)
 
-### 2. OP-Geth (Execution Layer)
+#### 2. OP-Geth (Execution Layer)
 
 **Purpose**: Ethereum execution client (L2)
 
-**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1`
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0`
 
 **Startup Order**: Deploy after secrets
 
@@ -279,11 +277,11 @@ For networks using the standard OP Stack, the following components must be deplo
 - L2 chain ID and block time configuration
 - JSON-RPC API endpoints
 
-### 3. OP-Node (Consensus Layer)
+#### 3. OP-Node (Consensus Layer)
 
 **Purpose**: Optimism consensus client
 
-**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.0`
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2`
 
 **Startup Order**: Deploy after OP-Geth
 
@@ -294,7 +292,7 @@ For networks using the standard OP Stack, the following components must be deplo
 - L1 and L2 chain parameters
 - System configuration
 
-### 4. OP-Batcher
+#### 4. OP-Batcher
 
 **Purpose**: Batch submission to L1
 
@@ -302,9 +300,13 @@ For networks using the standard OP Stack, the following components must be deplo
 
 **Startup Order**: Deploy after OP-Geth
 
-**Dependencies**: OP-Geth, secrets
+**Dependencies**: OP-Geth, OP-Node, secrets
 
-### 5. Aggkit
+**Configuration**:
+- L2 OP-Geth URL: `http://op-geth:8545`
+- L2 OP-Node URL: `http://op-node:9545`
+
+#### 5. Aggkit
 
 **Purpose**: Agglayer integration and oracle services
 
@@ -328,17 +330,132 @@ For networks using the standard OP Stack, the following components must be deplo
 
 The Aggkit bridge endpoint must be publicly resolvable on the Internet in order to work with Polygon's Bridge Hub application.
 
-### 6. Legacy Bridge Service
+#### 6. Legacy Bridge Service
 
 **Purpose**: Cross-chain asset transfers
 
-**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4`
+**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2`
 
 **Startup Order**: Deploy after PostgreSQL and OP-Geth
 
 **Dependencies**: PostgreSQL, OP-Geth
 
-### 7. Legacy Bridge UI
+#### 7. Legacy Bridge UI
+
+**Purpose**: Web interface for legacy bridge operations
+
+**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network`
+
+**Startup Order**: Deploy after Legacy Bridge Service
+
+**Dependencies**: Legacy Bridge Service
+
+## AggchainFEP
+### OP Stack
+
+#### 1. PostgreSQL Database
+
+**Purpose**: Database for legacy bridge service
+
+**Docker Image**: e.g., `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f`
+
+**Startup Order**: Deploy first (dependency for other services)
+
+#### 2. OP-Geth (Execution Layer)
+
+**Purpose**: Ethereum execution client (L2)
+
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0`
+
+**Startup Order**: Deploy after secrets
+
+**Dependencies**: Secrets
+
+**Configuration**:
+- Archive node type
+- L2 chain ID and block time configuration
+- JSON-RPC API endpoints
+- Isthmus hard fork enabled
+
+#### 3. OP-Node (Consensus Layer)
+
+**Purpose**: Optimism consensus client
+
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2`
+
+**Startup Order**: Deploy after OP-Geth
+
+**Dependencies**: OP-Geth, secrets
+
+**Configuration**:
+- Rollup configuration JSON
+- L1 and L2 chain parameters
+- System configuration
+- Isthmus hard fork enabled
+
+#### 4. OP-Batcher
+
+**Purpose**: Batch submission to L1
+
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.12.0`
+
+**Startup Order**: Deploy after OP-Geth
+
+**Dependencies**: OP-Geth, OP-Node, secrets
+
+**Configuration**:
+- L2 OP-Geth URL: `http://op-geth:8545`
+- L2 OP-Node URL: `http://op-node:9545`
+
+#### 5. OP Succinct Proposer
+
+**Purpose**: Generates and manages proofs for L2 state transitions using OP Succinct proving system
+
+**Docker Image**: `ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer`
+
+**Startup Order**: Deploy after PostgreSQL database and secrets
+
+**Dependencies**: PostgreSQL database, secrets, OP-Node, OP-Geth
+
+**Storage**: 500Gi for proof data
+
+#### 6. Aggkit Prover
+
+**Purpose**: Manages proof generation requests and coordinates with OP Succinct proposer
+
+**Docker Image**: `ghcr.io/agglayer/aggkit-prover:1.4.2`
+
+**Startup Order**: Deploy after OP Succinct Proposer
+
+**Dependencies**: OP Succinct Proposer, OP-Geth, OP-Node
+
+**Storage**: 500Gi for prover data
+
+#### 7. Aggkit
+
+**Purpose**: Agglayer integration and oracle services
+
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.0-beta8`
+
+**Startup Order**: Deploy after OP-Batcher, OP-Geth
+
+**Dependencies**: OP-Batcher, OP-Geth
+
+**Components**:
+- `aggsender`: Certificate management
+- `aggoracle`: Oracle services for OP Stack
+
+#### 8. Legacy Bridge Service
+
+**Purpose**: Cross-chain asset transfers
+
+**Docker Image**: `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2`
+
+**Startup Order**: Deploy after PostgreSQL and OP-Geth
+
+**Dependencies**: PostgreSQL, OP-Geth
+
+#### 9. Legacy Bridge UI
 
 **Purpose**: Web interface for legacy bridge operations
 
@@ -350,32 +467,49 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 ## Component Version Matrix
 
-### CDK-Erigon Stack Versions
+### AggchainECDSAMultisig Versions
+#### CDK-Erigon
 
 | Component | Docker Image |
 |-----------|--------------|
-| PostgreSQL | `docker.io/bitnami/postgresql:16.2.1` |
+| PostgreSQL | `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f` |
 | Pool Manager | `ghcr.io/0xpolygon/zkevm-pool-manager:v0.1.2` |
 | CDK-Erigon | `ghcr.io/0xpolygon/cdk-erigon:v2.61.23` |
 | Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
-| Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4` |
+| Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
-### Vanilla OP Stack Versions
+#### OP Stack
 
 | Component | Docker Image |
 |-----------|--------------|
-| PostgreSQL | `docker.io/bitnami/postgresql:16.2.1` |
-| OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1` |
-| OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.0` |
+| PostgreSQL | `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f` |
+| OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0` |
+| OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2` |
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5` |
 | Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
-| Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2-RC4` |
+| Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
+| Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
+
+### AggchainFEP Versions
+#### OP Stack
+
+| Component | Docker Image |
+|-----------|--------------|
+| PostgreSQL | `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f` |
+| OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0` |
+| OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2` |
+| OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.12.0` |
+| OP Succinct Proposer | `ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer` |
+| Aggkit Prover | `ghcr.io/agglayer/aggkit-prover:1.4.2` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.7.0-beta8` |
+| Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
 ## Deployment Considerations
 
 ### Resource Requirements
+#### AggchainECDSAMultisig
 
 **CDK-Erigon Components:**
 - CDK-Erigon Sequencer/RPC: High CPU and memory requirements
@@ -386,6 +520,15 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 - OP-Geth: High CPU and memory (archive mode)
 - OP-Node: Moderate resources
 - OP-Batcher: Low to moderate resources
+
+#### AggchainFEP
+**OP Stack Components:**
+- OP-Geth: High CPU and memory (archive mode)
+- OP-Node: Moderate resources
+- OP-Batcher: Low to moderate resources
+- OP Succinct Proposer: High CPU and memory for proof generation
+- Aggkit Prover: Moderate to high CPU and memory
+- Storage: 500Gi for blockchain data, proof data, and certificate data
 
 ### Network Configuration
 
@@ -415,13 +558,14 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 ## Common Issues and Troubleshooting
 
-### CDK-Erigon Stack Issues
+### AggchainECDSAMultisig Issues
+#### CDK-Erigon
 
 1. **Sequencer Sync Issues**: Check L1 connectivity and contract addresses
 2. **Pool Manager Connection**: Verify database connectivity
 3. **Certificate Submission**: Check Agglayer connectivity and credentials
 
-### OP Stack Issues
+#### OP Stack
 
 1. **OP-Node Sync**: Verify rollup configuration and L1 sync
 2. **Batcher Failures**: Check L1 gas prices and wallet funding
