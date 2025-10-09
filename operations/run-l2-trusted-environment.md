@@ -300,11 +300,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Startup Order**: Deploy after OP-Geth
 
-**Dependencies**: OP-Geth, OP-Node, secrets
-
-**Configuration**:
-- L2 OP-Geth URL: `http://op-geth:8545`
-- L2 OP-Node URL: `http://op-node:9545`
+**Dependencies**: OP-Geth, secrets
 
 #### 5. Aggkit
 
@@ -401,11 +397,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Startup Order**: Deploy after OP-Geth
 
-**Dependencies**: OP-Geth, OP-Node, secrets
-
-**Configuration**:
-- L2 OP-Geth URL: `http://op-geth:8545`
-- L2 OP-Node URL: `http://op-node:9545`
+**Dependencies**: OP-Geth, secrets
 
 #### 5. OP Succinct Proposer
 
@@ -417,8 +409,6 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Dependencies**: PostgreSQL database, secrets, OP-Node, OP-Geth
 
-**Storage**: 500Gi for proof data
-
 #### 6. Aggkit Prover
 
 **Purpose**: Manages proof generation requests and coordinates with OP Succinct proposer
@@ -428,8 +418,6 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 **Startup Order**: Deploy after OP Succinct Proposer
 
 **Dependencies**: OP Succinct Proposer, OP-Geth, OP-Node
-
-**Storage**: 500Gi for prover data
 
 #### 7. Aggkit
 
