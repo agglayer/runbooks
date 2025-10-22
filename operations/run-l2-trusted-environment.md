@@ -75,7 +75,7 @@ Before deploying any L2 trusted environment, ensure you have:
 
 **Purpose**: Agglayer integration and certificate management
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.5.4`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.0`
 
 **Startup Order**: Deploy after CDK-Erigon RPC
 
@@ -199,6 +199,16 @@ SyncBlockChunkSize = 1000
 # Initial block to start syncing from
 InitialBlock = 0
 
+# L1 reorg detector configuration
+[ReorgDetectorL1]
+# Block finality requirement for reorg detector
+FinalizedBlock = LatestBlock
+
+# L1 bridge sync configuration
+[BridgeL1Sync]
+# Block finality requirement for L1 bridge sync (LatestBlock allows for faster bridges detection)
+BlockFinality = LatestBlock
+
 # REST API configuration (bridge)
 [REST]
 # Port for the bridge REST API server
@@ -306,7 +316,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Purpose**: Agglayer integration and oracle services
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.5.4`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.0`
 
 **Startup Order**: Deploy after OP-Batcher and OP-Geth
 
@@ -463,7 +473,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 | PostgreSQL | `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f` |
 | Pool Manager | `ghcr.io/0xpolygon/zkevm-pool-manager:v0.1.2` |
 | CDK-Erigon | `ghcr.io/0xpolygon/cdk-erigon:v2.61.23` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.7.0` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
@@ -475,7 +485,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 | OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0` |
 | OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2` |
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.7.0` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
@@ -490,7 +500,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.12.0` |
 | OP Succinct Proposer | `ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer` |
 | Aggkit Prover | `ghcr.io/agglayer/aggkit-prover:1.4.2` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.7.0-beta8` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.7.0` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
