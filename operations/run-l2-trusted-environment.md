@@ -71,11 +71,11 @@ Before deploying any L2 trusted environment, ensure you have:
 - `is_sequencer: 0`
 - RPC endpoints and API configuration
 
-#### 5. Aggkit
+#### 5. Aggkit (Primary Instance)
 
 **Purpose**: Agglayer integration and certificate management
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.5.4`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.0`
 
 **Startup Order**: Deploy after CDK-Erigon RPC
 
@@ -83,7 +83,15 @@ Before deploying any L2 trusted environment, ensure you have:
 
 **Components**:
 - `aggsender`: Sends certificates to Agglayer
-- `bridge`: Bridge service component
+
+> [!IMPORTANT]
+> **Two-Instance Architecture**
+>
+> Starting with Aggkit v0.7.0, IPs should run **two separate Aggkit instances**:
+> 1. **Primary Instance**: Runs `aggsender` only - handles critical certificate submission
+> 2. **Bridge Instance**: Runs `bridge` only - provides public REST API
+>
+> This separation ensures that public bridge API traffic does not impact critical certificate submission operations. See the [Run Aggkit Bridge](./run-aggkit-bridge.md) runbook for bridge deployment details.
 
 **Configuration**:
 
@@ -198,29 +206,15 @@ BlockFinality = "FinalizedBlock"
 SyncBlockChunkSize = 1000
 # Initial block to start syncing from
 InitialBlock = 0
-
-# REST API configuration (bridge)
-[REST]
-# Port for the bridge REST API server
-Port = "5577"
 ```
 </details>
 </br>
 
-**Command to run Aggkit**:
+**Command to run Aggkit (Primary Instance)**:
 
 ```bash
-aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,bridge
+aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender
 ```
-
-**Available Components**:
-- `aggsender`: Sends certificates to the Agglayer
-- `bridge`: Bridge service component
-- `aggoracle`: Oracle services (for OP Stack)
-
-**Component Selection**:
-- For CDK-Erigon: typically use `aggsender,bridge`
-- For OP Stack: typically use `aggsender,aggoracle,bridge`
 
 **Environment-specific URLs**:
 
@@ -229,11 +223,15 @@ Agglayer URL
 - Cardona: `grpc-agglayer-test.polygon.technology:443`
 - Mainnet: `grpc-agglayer.polygon.technology:443`
 
-**Networking**:
+#### 6. Aggkit Bridge (Separate Instance)
 
-The Aggkit bridge endpoint must be publicly resolvable on the Internet in order to work with Polygon's Bridge Hub application.
+Deploy the Aggkit bridge as a separate instance to provide the public bridge REST API. See the [Run Aggkit Bridge](./run-aggkit-bridge.md) runbook for complete deployment instructions.
 
-#### 6. Legacy Bridge Service
+**Key Points**:
+- Run bridge as a separate instance from the primary Aggkit
+- Bridge endpoint must be publicly accessible for Polygon's Bridge Hub
+
+#### 7. Legacy Bridge Service
 
 **Purpose**: Cross-chain asset transfers
 
@@ -245,7 +243,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Configuration**: L1 and L2 contract addresses, claim transaction management
 
-#### 7. Legacy Bridge UI (Optional)
+#### 8. Legacy Bridge UI (Optional)
 
 **Purpose**: Web interface for legacy bridge operations
 
@@ -302,11 +300,11 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Dependencies**: OP-Geth, secrets
 
-#### 5. Aggkit
+#### 5. Aggkit (Primary Instance)
 
 **Purpose**: Agglayer integration and oracle services
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.5.4`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.0`
 
 **Startup Order**: Deploy after OP-Batcher and OP-Geth
 
@@ -315,18 +313,37 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 **Components**:
 - `aggsender`: Certificate management
 - `aggoracle`: Oracle services for OP Stack
-- `bridge`: Bridge service for cross-chain asset transfers
+
+> [!IMPORTANT]
+> **Two-Instance Architecture**
+>
+> Starting with Aggkit v0.7.0, IPs should run **two separate Aggkit instances**:
+> 1. **Primary Instance**: Runs `aggsender,aggoracle` - handles critical certificate submission and oracle services
+> 2. **Bridge Instance**: Runs `bridge` only - provides public REST API
+>
+> This separation ensures that public bridge API traffic does not impact critical certificate submission operations. See the [Run Aggkit Bridge](./run-aggkit-bridge.md) runbook for bridge deployment details.
 
 **Configuration**:
 - Agglayer client URL: `grpc-agglayer[-dev|-test|].polygon.technology:443`
 - L2 RPC URL: op-geth URL
 - See Aggkit Configuration section above for detailed config file template
 
-**Networking**:
+**Command to run Aggkit (Primary Instance)**:
 
-The Aggkit bridge endpoint must be publicly resolvable on the Internet in order to work with Polygon's Bridge Hub application.
+```bash
+aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,aggoracle
+```
 
-#### 6. Legacy Bridge Service
+#### 6. Aggkit Bridge (Separate Instance)
+
+Deploy the Aggkit bridge as a separate instance to provide the public bridge REST API. See the [Run Aggkit Bridge](./run-aggkit-bridge.md) runbook for complete deployment instructions.
+
+**Key Points**:
+- Run bridge as a separate instance from the primary Aggkit
+- Bridge endpoint must be publicly accessible for Polygon's Bridge Hub
+- Can scale horizontally based on API traffic
+
+#### 7. Legacy Bridge Service
 
 **Purpose**: Cross-chain asset transfers
 
@@ -336,7 +353,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Dependencies**: PostgreSQL, OP-Geth
 
-#### 7. Legacy Bridge UI
+#### 8. Legacy Bridge UI
 
 **Purpose**: Web interface for legacy bridge operations
 
@@ -419,11 +436,11 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Dependencies**: OP Succinct Proposer, OP-Geth, OP-Node
 
-#### 7. Aggkit
+#### 7. Aggkit (Primary Instance)
 
 **Purpose**: Agglayer integration and oracle services
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.0-beta8`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.0`
 
 **Startup Order**: Deploy after OP-Batcher, OP-Geth
 
@@ -433,7 +450,34 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 - `aggsender`: Certificate management
 - `aggoracle`: Oracle services for OP Stack
 
-#### 8. Legacy Bridge Service
+> [!IMPORTANT]
+> **Two-Instance Architecture**
+>
+> Starting with Aggkit v0.7.0, IPs should run **two separate Aggkit instances**:
+> 1. **Primary Instance**: Runs `aggsender,aggoracle` - handles critical certificate submission and oracle services
+> 2. **Bridge Instance**: Runs `bridge` only - provides public REST API
+>
+> This separation ensures that public bridge API traffic does not impact critical certificate submission operations. See the [Run Aggkit Bridge](./run-aggkit-bridge.md) runbook for bridge deployment details.
+
+**Command to run Aggkit (Primary Instance)**:
+
+```bash
+aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,aggoracle
+```
+
+> [!NOTE]
+> The bridge component should be run in a separate instance. See [Run Aggkit Bridge](./run-aggkit-bridge.md) for details.
+
+#### 8. Aggkit Bridge (Separate Instance)
+
+Deploy the Aggkit bridge as a separate instance to provide the public bridge REST API. See the [Run Aggkit Bridge](./run-aggkit-bridge.md) runbook for complete deployment instructions.
+
+**Key Points**:
+- Run bridge as a separate instance from the primary Aggkit
+- Bridge endpoint must be publicly accessible for Polygon's Bridge Hub
+- Can scale horizontally based on API traffic
+
+#### 9. Legacy Bridge Service
 
 **Purpose**: Cross-chain asset transfers
 
@@ -443,7 +487,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 
 **Dependencies**: PostgreSQL, OP-Geth
 
-#### 9. Legacy Bridge UI
+#### 10. Legacy Bridge UI
 
 **Purpose**: Web interface for legacy bridge operations
 
@@ -463,7 +507,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 | PostgreSQL | `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f` |
 | Pool Manager | `ghcr.io/0xpolygon/zkevm-pool-manager:v0.1.2` |
 | CDK-Erigon | `ghcr.io/0xpolygon/cdk-erigon:v2.61.23` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.7.0` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
@@ -475,7 +519,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 | OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0` |
 | OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2` |
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.5.4` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.7.0` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
@@ -490,7 +534,7 @@ The Aggkit bridge endpoint must be publicly resolvable on the Internet in order 
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.12.0` |
 | OP Succinct Proposer | `ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer` |
 | Aggkit Prover | `ghcr.io/agglayer/aggkit-prover:1.4.2` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.7.0-beta8` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.7.0` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
