@@ -79,7 +79,7 @@ Port = 5576
 
 # L1 reorg detector configuration
 [ReorgDetectorL1]
-FinalizedBlock = "LatestBlock"
+FinalizedBlock = "FinalizedBlock"
 
 # L1 bridge sync configuration
 [BridgeL1Sync]
