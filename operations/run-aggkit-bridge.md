@@ -44,9 +44,6 @@ L1URL = "https://your-l1-rpc-endpoint.com"
 # L2 RPC URL pointing to your execution client
 L2URL = "http://execution-client:8123"
 
-# RPC URL for general chain operations
-RPCURL = "http://execution-client:8123"
-
 # Polygon bridge contract address on L2
 polygonBridgeAddr = "0x0000000000000000000000000000000000000000"
 
@@ -54,7 +51,7 @@ polygonBridgeAddr = "0x0000000000000000000000000000000000000000"
 rollupCreationBlockNumber = 0
 # Block number where the rollup manager was deployed on L1
 rollupManagerCreationBlockNumber = 0
-# Genesis block number on L1
+# Genesis block number on L1 (typically same value as rollupManagerCreationBlockNumber)
 genesisBlockNumber = 0
 
 # L1 chain configuration
@@ -63,6 +60,7 @@ chainId = 11155111  # Sepolia testnet
 polygonZkEVMGlobalExitRootAddress = "0x0000000000000000000000000000000000000000"
 polygonRollupManagerAddress = "0x0000000000000000000000000000000000000000"
 polTokenAddress = "0x0000000000000000000000000000000000000000"
+# Rollup contract address
 polygonZkEVMAddress = "0x0000000000000000000000000000000000000000"
 
 # L2 chain configuration
@@ -87,14 +85,9 @@ FinalizedBlock = "LatestBlock"
 [BridgeL1Sync]
 BlockFinality = "LatestBlock"
 
-# Bridge L2 sync configuration
-[BridgeL2Sync]
-BridgeAddr = "0x0000000000000000000000000000000000000000"
-
 # L1 info tree sync configuration
 [L1InfoTreeSync]
 SyncBlockChunkSize = 1000
-InitialBlock = 0
 
 # REST API configuration (bridge)
 [REST]
