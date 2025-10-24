@@ -121,12 +121,6 @@ SequencerPrivateKeyPassword = ""
 # Polygon bridge contract address on L2
 polygonBridgeAddr = "0x0000000000000000000000000000000000000000"
 
-# RPC URL for general chain operations (typically same as L2URL)
-RPCURL = "http://cdk-erigon-rpc:8123"
-
-# Witness service URL (optional, leave empty if not using)
-WitnessURL = ""
-
 # Block number where the rollup was created on L1
 rollupCreationBlockNumber = 0
 # Block number where the rollup manager was deployed on L1
@@ -193,19 +187,12 @@ URL = "grpc-agglayer-dev.polygon.technology:443"
 # Use TLS for secure connection
 UseTLS = "true"
 
-# Bridge L2 sync configuration
-[BridgeL2Sync]
-# Bridge contract address on L2 (should match polygonBridgeAddr for the CDK-Erigon stack)
-BridgeAddr = "0x0000000000000000000000000000000000000000"
-
 # L1 info tree sync configuration
 [L1InfoTreeSync]
 # Block finality requirement for L1 sync
 BlockFinality = "FinalizedBlock"
 # Number of blocks to sync in each chunk
 SyncBlockChunkSize = 1000
-# Initial block to start syncing from
-InitialBlock = 0
 ```
 </details>
 </br>

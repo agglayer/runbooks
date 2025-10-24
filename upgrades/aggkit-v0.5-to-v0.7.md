@@ -4,7 +4,7 @@ This document provides instructions for upgrading Aggkit from version v0.5.* to 
 
 ## Overview
 
-Aggkit v0.7.0 introduces several improvements and configuration changes. This upgrade is applicable to both CDK-Erigon and OP Stack deployments.
+Aggkit v0.7.0 introduces several improvements. This upgrade is applicable to both CDK-Erigon and OP Stack deployments.
 
 ## Prerequisites
 
@@ -38,14 +38,7 @@ The recommended approach is to:
 
 ## Upgrade Steps
 
-### Step 1: Update Configuration
-
-Update your Aggkit configuration file to include new v0.7.0 fields. The configuration schema remains backward compatible with all v0.5 settings.
-
-> [!NOTE]
-> For the complete Aggkit v0.7.0 configuration reference, see the **[Aggkit Configuration section](../operations/run-l2-trusted-environment.md)** in the Run L2 Trusted Environment runbook.
-
-### Step 2: Update Aggkit Version
+### Step 1: Update Aggkit Version
 
 Update your Aggkit deployment to version `v0.7.0`:
 
@@ -53,7 +46,7 @@ Update your Aggkit deployment to version `v0.7.0`:
 ghcr.io/agglayer/aggkit:0.7.0
 ```
 
-### Step 3: Run Aggkit
+### Step 2: Run Aggkit
 
 Run Aggkit v0.7.0 with your configuration:
 
