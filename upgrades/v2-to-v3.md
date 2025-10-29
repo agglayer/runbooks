@@ -30,7 +30,7 @@ What's new:
 ```
 
 ### **aggsender**
-Image: [ghcr.io/agglayer/aggkit:0.7.0-beta8](https://github.com/agglayer/aggkit/pkgs/container/aggkit/530710287?tag=0.7.0-beta8)
+Image: [ghcr.io/agglayer/aggkit:0.7.0](https://github.com/agglayer/aggkit/pkgs/container/aggkit/549774904?tag=0.7.0)
 
 What's new:
 - Config change
