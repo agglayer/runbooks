@@ -40,12 +40,12 @@ export op_succinct_version=v3.1.0-agglayer
 
 Confirm if you control the aggchainManager address
 ```shell
-cast call $rollup_address "aggchainManager()" --rpc-url $l1_rpc_url
+cast call $rollup_address "aggchainManager()(address)" --rpc-url $l1_rpc_url
 ```
 
 Grab the current configName for future reference
 ```shell
-cast call $rollup_address "selectedOpSuccinctConfigName()" --rpc-url $l1_rpc_url
+cast call $rollup_address "selectedOpSuccinctConfigName()(bytes32)" --rpc-url $l1_rpc_url
 ```
 
 ---
