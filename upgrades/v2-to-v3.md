@@ -44,10 +44,10 @@ What's required since 0.5.4:
      URL = https://
      UseTLS = true
 
-+	[AggSender.OptimisticModeConfig]
-+		SovereignRollupAddr = "0x"
-+		# By default use the same key that aggsender signs certs
-+		TrustedSequencerKey = "0x"
-+		OpNodeURL = "https://"
-+		RequireKeyMatchTrustedSequencer = true
++    [AggSender.OptimisticModeConfig]
++        SovereignRollupAddr = "0x"
++        # By default use the same key that aggsender signs certs
++        TrustedSequencerKey = "0x"
++        OpNodeURL = "https://"
++        RequireKeyMatchTrustedSequencer = true
 ```
