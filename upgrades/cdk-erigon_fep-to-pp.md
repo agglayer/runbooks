@@ -11,9 +11,10 @@ This document provides a comprehensive guide for upgrading from CDK Erigon FEP (
 
 Deploy Aggkit in sync only mode.
 
-* image: ghcr.io/agglayer/aggkit:0.5.1
-* command: aggkit run --cfg=/app/config/config.toml --components=l1infotreesync
-* persisted data: /app/data
+* image: ghcr.io/agglayer/aggkit:0.7.0
+* command: aggkit run --cfg=/etc/aggkit/config.toml --components=bridge
+* Persisted data directory. Ex.: /data
+* Configuration file. Ex: /etc/aggkit/config.toml
 * No environment variables
 
 Also, create the config.toml file with the following template:
@@ -21,51 +22,7 @@ Also, create the config.toml file with the following template:
 <summary>config.toml template</summary>
   
 ```toml
-PathRWData = "/app/data"
 
-L1URL = "${L1_URL}"
-L2URL = "${L2_URL}"
-
-AggLayerURL = "${AGGLAYER_URL}"
-
-NetworkID = "${ROLLUP_ID}"
-SequencerPrivateKeyPath = "/app/config/sequencer.keystore"
-SequencerPrivateKeyPassword = "${SEQ_KEYSTORE_PASSW}"
-
-polygonBridgeAddr = "${BRIDGE_ADDR}"
-
-rollupCreationBlockNumber = "${R_BLOCKNUMBER}"
-rollupManagerCreationBlockNumber = "${RM_BLOCKNUMBER}"
-genesisBlockNumber = "${GENESIS_BLOCKNUMBER}"
-
-[Log]
-Environment = "production"
-Level = "${LOG_LEVEL}"
-Outputs = ["stdout"]
-
-[L1Config]
-chainId = "${L1_CHAINID}"
-polygonZkEVMAddress = "${ROLLUP_ADDR}"
-polygonRollupManagerAddress = "${ROLLUP_MANAGER_ADDR}"
-polygonZkEVMGlobalExitRootAddress = "${L1_GER_ADDR}"
-polTokenAddress = "${POL_ADDR}"
-
-[L2Config]
-GlobalExitRootAddr = "${L2_GER_ADDR}"
-
-[L1InfoTreeSync]
-SyncBlockChunkSize = 1000
-BlockFinality = "FinalizedBlock"
-InitialBlock = "${RM_BLOCKNUMBER}"
-
-[AggSender]
-CertificateSendInterval = "1m"
-RetryCertAfterInError = true
-MaxL2BlockNumber = 0
-MaxCertSize = 0
-  [AggSender.AgglayerClient]
-  URL = "${AGGLAYER_URL}"
-  UseTLS = ${AGGLAYER_USE_TLS}
 ```
 </details>
 
@@ -81,7 +38,7 @@ This process may take a couple hours to complete, but downtime from the point of
 1. **Stop sequencing**: Stop the sequencer-sender component.
 2. **Wait for verification**: Wait until the aggregator verifies all sequenced batches. Wait until the last verification transaction is finalized.
 3. **Update components**:
-   1. Update erigon version to _hermeznetwork/cdk-erigon:v2.61.24_
+   1. Update erigon version to _hermeznetwork/cdk-erigon:v2.61.24_ or newer.
    2. Update sequencer config with:
       ```yaml
       # zkevm.executor-urls: "${STATELESS_EXECUTOR}" # Remove executors
@@ -95,8 +52,7 @@ This process may take a couple hours to complete, but downtime from the point of
       zkevm.mock-witness-generation: true
       zkevm.disable-virtual-counters: true
       ```
-   4. Update aggkit config with:
-   6. Stop the following components:
+   4. Stop the following components:
       1. dac
       2. sequence-sender
       3. aggregator
@@ -118,7 +74,7 @@ This process may take a couple hours to complete, but downtime from the point of
       [AggSender]
       MaxL2BlockNumber = 0 # <- Set the last verified L2 block number
       ```
-   4. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
+   4. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender,bridge`
    5. Start the aggkit instance with the new config and command changes.
    6. Monitor the first certificate is correctly sent to the agglayer.
    7. Once the first certificate is settled, you can rollback configuration change.
