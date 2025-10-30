@@ -22,7 +22,24 @@ Also, create the config.toml file with the following template:
 <summary>config.toml template</summary>
   
 ```toml
+NetworkID = 60                           # Network id
+PathRWData = "/data"                     # Persistent directory
+L1URL = "https://..."                    # L1_URL
+L2URL = "https://..."                    # L2_URL
+polygonBridgeAddr = "0x"                 # Bridge SC address
+rollupCreationBlockNumber = 0            # Rollup SC deployment block
+rollupManagerCreationBlockNumber = 0     # Rollup Mananger SC deployment block
+genesisBlockNumber = 0                   # Rollup Mananger SC deployment block
 
+[L1Config]
+chainId = 11155111                       # L1 chain id
+polygonZkEVMGlobalExitRootAddress = "0x" # L1 GER SC address
+polygonRollupManagerAddress = "0x"       # L1 Rollup Manager SC address
+polTokenAddress = "0x"                   # L1 POL token SC address
+polygonZkEVMAddress = "0x"               # L1 Rollup SC address
+
+[L2Config]
+GlobalExitRootAddr = "$L2_GER_ADDR"      # L2 GER SC address
 ```
 </details>
 
