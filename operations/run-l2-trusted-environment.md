@@ -345,14 +345,6 @@ Aggkit exposes Prometheus metrics for monitoring the health and performance of t
 1. Configure the `[Prometheus]` section in your Aggkit config file (see Aggkit Configuration section above)
 2. Set `Enabled = true` to expose the metrics endpoint
 3. Configure your Prometheus server to scrape metrics from `http://<aggkit-host>:<prometheus-port>/metrics` (default port: 9091)
-4. Key metrics to monitor:
-   - Certificate submission rates and success/failure counts
-   - Agglayer connection status and latency
-   - Oracle operation metrics and success rates
-   - L1/L2 sync status and block heights
-   - RPC call performance and error rates
-
-For production deployments, integrate these metrics with your monitoring stack (Prometheus + Grafana) and set up alerts for critical metrics like certificate submission failures, oracle failures, or sync lag.
 
 #### 6. Aggkit Bridge (Separate Instance)
 
@@ -492,15 +484,6 @@ Aggkit exposes Prometheus metrics for monitoring the health and performance of t
 1. Configure the `[Prometheus]` section in your Aggkit config file (see Aggkit Configuration section in the CDK-Erigon section above)
 2. Set `Enabled = true` to expose the metrics endpoint
 3. Configure your Prometheus server to scrape metrics from `http://<aggkit-host>:<prometheus-port>/metrics` (default port: 9091)
-4. Key metrics to monitor:
-   - Certificate submission rates and success/failure counts
-   - Agglayer connection status and latency
-   - Oracle operation metrics and success rates
-   - L1/L2 sync status and block heights
-   - RPC call performance and error rates
-   - Proof generation and submission metrics (FEP-specific)
-
-For production deployments, integrate these metrics with your monitoring stack (Prometheus + Grafana) and set up alerts for critical metrics like certificate submission failures, oracle failures, proof generation delays, or sync lag.
 
 > [!NOTE]
 > The bridge component should be run in a separate instance. See [Run Aggkit Bridge](./run-aggkit-bridge.md) for details.
