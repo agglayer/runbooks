@@ -160,6 +160,15 @@ Outputs = ["stderr"]
 # Port for RPC server to listen on
 Port = 5576
 
+# Prometheus metrics configuration
+[Prometheus]
+# Enable Prometheus metrics endpoint (true to expose metrics, false to disable)
+Enabled = true
+# Host address for Prometheus metrics server to listen on (0.0.0.0 for all interfaces)
+Host = "0.0.0.0"
+# Port for Prometheus metrics server to listen on
+Port = 9091
+
 # Agglayer sender configuration
 [AggSender]
 # Private key configuration for aggsender service
@@ -209,6 +218,14 @@ Agglayer URL
 - Bali: `grpc-agglayer-dev.polygon.technology:443`
 - Cardona: `grpc-agglayer-test.polygon.technology:443`
 - Mainnet: `grpc-agglayer.polygon.technology:443`
+
+**Monitoring Aggkit with Prometheus**:
+
+Aggkit exposes Prometheus metrics for monitoring the health and performance of the aggsender and other components. To enable metrics collection:
+
+1. Configure the `[Prometheus]` section in your Aggkit config file (see configuration template above)
+2. Set `Enabled = true` to expose the metrics endpoint
+3. Configure your Prometheus server to scrape metrics from `http://<aggkit-host>:<prometheus-port>/metrics` (default port: 9091)
 
 #### 6. Aggkit Bridge (Separate Instance)
 
@@ -320,6 +337,14 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 ```bash
 aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,aggoracle
 ```
+
+**Monitoring Aggkit with Prometheus**:
+
+Aggkit exposes Prometheus metrics for monitoring the health and performance of the aggsender and aggoracle components. To enable metrics collection:
+
+1. Configure the `[Prometheus]` section in your Aggkit config file (see Aggkit Configuration section above)
+2. Set `Enabled = true` to expose the metrics endpoint
+3. Configure your Prometheus server to scrape metrics from `http://<aggkit-host>:<prometheus-port>/metrics` (default port: 9091)
 
 #### 6. Aggkit Bridge (Separate Instance)
 
@@ -451,6 +476,14 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 ```bash
 aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,aggoracle
 ```
+
+**Monitoring Aggkit with Prometheus**:
+
+Aggkit exposes Prometheus metrics for monitoring the health and performance of the aggsender and aggoracle components. To enable metrics collection:
+
+1. Configure the `[Prometheus]` section in your Aggkit config file (see Aggkit Configuration section in the CDK-Erigon section above)
+2. Set `Enabled = true` to expose the metrics endpoint
+3. Configure your Prometheus server to scrape metrics from `http://<aggkit-host>:<prometheus-port>/metrics` (default port: 9091)
 
 > [!NOTE]
 > The bridge component should be run in a separate instance. See [Run Aggkit Bridge](./run-aggkit-bridge.md) for details.

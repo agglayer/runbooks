@@ -77,6 +77,15 @@ Outputs = ["stderr"]
 [RPC]
 Port = 5576
 
+# Prometheus metrics configuration
+[Prometheus]
+# Enable Prometheus metrics endpoint (true to expose metrics, false to disable)
+Enabled = true
+# Host address for Prometheus metrics server to listen on (0.0.0.0 for all interfaces)
+Host = "0.0.0.0"
+# Port for Prometheus metrics server to listen on
+Port = 9091
+
 # L1 reorg detector configuration
 [ReorgDetectorL1]
 FinalizedBlock = "FinalizedBlock"
@@ -135,6 +144,14 @@ Monitor the bridge service health:
 # Check bridge API health
 curl https://your-bridge-endpoint.com/
 ```
+
+### Prometheus Metrics
+
+The Aggkit bridge instance exposes Prometheus metrics for monitoring bridge performance and health. To enable metrics collection:
+
+1. Configure the `[Prometheus]` section in your bridge config file (see configuration template above)
+2. Set `Enabled = true` to expose the metrics endpoint
+3. Configure your Prometheus server to scrape metrics from `http://<bridge-host>:<prometheus-port>/metrics` (default port: 9091)
 
 ## Security Best Practices
 
