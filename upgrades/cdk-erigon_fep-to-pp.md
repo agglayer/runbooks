@@ -43,15 +43,12 @@ GlobalExitRootAddr = "0x..." # L2 GER SC address
 
 [AggSender]
 AggsenderPrivateKey = {Path = "/etc/aggkit/sequencer.keystore", Password = "XXXX"}
-CertificateSendInterval = 1m
-CheckSettledInterval = 5s
-MaxCertSize = 0
+CertificateSendInterval = "1m"
+CheckSettledInterval = "5s"
 SaveCertificatesToFilesPath = "/tmp"
-Mode="PessimisticProof"
 RequireNoFEPBlockGap = true
-DryRun = false
 MaxL2BlockNumber = 0
-
+MaxCertSize = 0
 ```
 </details>
 
