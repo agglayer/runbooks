@@ -22,7 +22,7 @@ Also, create the config.toml file with the following template:
 <summary>config.toml template</summary>
   
 ```toml
-NetworkID = 60                       # Network id
+NetworkID = 0                       # Network id
 PathRWData = "/data"                 # Persistent directory
 L1URL = "https://..."                # L1_URL
 L2URL = "https://..."                # L2_URL
