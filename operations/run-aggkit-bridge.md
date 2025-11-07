@@ -20,7 +20,7 @@ Running the bridge as a separate instance provides:
 
 ## Prerequisites
 
-- Aggkit v0.7.0 or later
+- Aggkit v0.7.1 or later
 - L1 and L2 RPC access
 - Bridge contract addresses
 - Public-facing infrastructure for the bridge REST API endpoint
