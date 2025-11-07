@@ -30,9 +30,9 @@ What's new:
 ```
 
 ### **aggsender**
-- Image: [ghcr.io/agglayer/aggkit:0.7.0](https://github.com/agglayer/aggkit/pkgs/container/aggkit/549774904?tag=0.7.0)
-- Config reference: https://github.com/agglayer/aggkit/blob/v0.7.0/config/default.go
-- Release notes: https://github.com/agglayer/aggkit/releases/tag/v0.7.0
+- Image: [ghcr.io/agglayer/aggkit:0.7.1](https://github.com/agglayer/aggkit/pkgs/container/aggkit/549774904?tag=0.7.1)
+- Config reference: https://github.com/agglayer/aggkit/blob/v0.7.1/config/default.go
+- Release notes: https://github.com/agglayer/aggkit/releases/tag/v0.7.1
 
 What's required since 0.5.4:
 - Config change
