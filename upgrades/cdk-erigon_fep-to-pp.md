@@ -11,9 +11,10 @@ This document provides a comprehensive guide for upgrading from CDK Erigon FEP (
 
 Deploy Aggkit in sync only mode.
 
-* image: ghcr.io/agglayer/aggkit:0.5.1
-* command: aggkit run --cfg=/app/config/config.toml --components=l1infotreesync
-* persisted data: /app/data
+* image: ghcr.io/agglayer/aggkit:0.7.0
+* command: aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender
+* Persisted data directory. Ex.: /data
+* Configuration file. Ex: /etc/aggkit/config.toml
 * No environment variables
 
 Also, create the config.toml file with the following template:
@@ -21,51 +22,37 @@ Also, create the config.toml file with the following template:
 <summary>config.toml template</summary>
   
 ```toml
-PathRWData = "/app/data"
-
-L1URL = "${L1_URL}"
-L2URL = "${L2_URL}"
-
-AggLayerURL = "${AGGLAYER_URL}"
-
-NetworkID = "${ROLLUP_ID}"
-SequencerPrivateKeyPath = "/app/config/sequencer.keystore"
-SequencerPrivateKeyPassword = "${SEQ_KEYSTORE_PASSW}"
-
-polygonBridgeAddr = "${BRIDGE_ADDR}"
-
-rollupCreationBlockNumber = "${R_BLOCKNUMBER}"
-rollupManagerCreationBlockNumber = "${RM_BLOCKNUMBER}"
-genesisBlockNumber = "${GENESIS_BLOCKNUMBER}"
-
-[Log]
-Environment = "production"
-Level = "${LOG_LEVEL}"
-Outputs = ["stdout"]
+NetworkID = 0                       # Network id
+PathRWData = "/data"                 # Persistent directory
+L1URL = "https://..."                # L1_URL
+L2URL = "https://..."                # L2_URL
+polygonBridgeAddr = "0x..."          # Bridge SC address
+rollupCreationBlockNumber = 0        # Rollup SC deployment block
+rollupManagerCreationBlockNumber = 0 # Rollup Mananger SC deployment block
+genesisBlockNumber = 0               # Rollup Mananger SC deployment block
 
 [L1Config]
-chainId = "${L1_CHAINID}"
-polygonZkEVMAddress = "${ROLLUP_ADDR}"
-polygonRollupManagerAddress = "${ROLLUP_MANAGER_ADDR}"
-polygonZkEVMGlobalExitRootAddress = "${L1_GER_ADDR}"
-polTokenAddress = "${POL_ADDR}"
+chainId = 11155111                          # L1 chain id
+polygonZkEVMGlobalExitRootAddress = "0x..." # L1 GER SC address
+polygonRollupManagerAddress = "0x..."       # L1 Rollup Manager SC address
+polTokenAddress = "0x..."                   # L1 POL token SC address
+polygonZkEVMAddress = "0x..."               # L1 Rollup SC address
 
 [L2Config]
-GlobalExitRootAddr = "${L2_GER_ADDR}"
-
-[L1InfoTreeSync]
-SyncBlockChunkSize = 1000
-BlockFinality = "FinalizedBlock"
-InitialBlock = "${RM_BLOCKNUMBER}"
+GlobalExitRootAddr = "0x..." # L2 GER SC address
 
 [AggSender]
+AggsenderPrivateKey = {Path = "/etc/aggkit/sequencer.keystore", Password = "XXXX"}
 CertificateSendInterval = "1m"
-RetryCertAfterInError = true
+CheckSettledInterval = "5s"
+SaveCertificatesToFilesPath = "/tmp"
+RequireNoFEPBlockGap = true
 MaxL2BlockNumber = 0
 MaxCertSize = 0
-  [AggSender.AgglayerClient]
-  URL = "${AGGLAYER_URL}"
-  UseTLS = ${AGGLAYER_USE_TLS}
+DryRun = true
+  [AggSender.AgglayerClient.GRPC]
+  URL = "grpc-agglayer.polygon.technology:443" # It depends on the environment.
+  UseTLS = "true"
 ```
 </details>
 
@@ -74,6 +61,12 @@ Once started, it will sync from the rollup manager deployment block. It may take
 > [!NOTE]
 > L2_URL requires **debug_** methods enabled.
 
+> [!NOTE]
+> AGGLAYER GRPC URL depends on the environmnet
+> * mainnet: "grpc-agglayer.polygon.technology:443"
+> * cardona: "grpc-agglayer-test.polygon.technology:443"
+> * bali: "grpc-agglayer-dev.polygon.technology:443"
+
 ## Upgrade procedure
 
 This process may take a couple hours to complete, but downtime from the point of view of the users should be equivalent to a simple node restart. Ensure the aggkit is fully synced with the latest block on L1.
@@ -81,7 +74,7 @@ This process may take a couple hours to complete, but downtime from the point of
 1. **Stop sequencing**: Stop the sequencer-sender component.
 2. **Wait for verification**: Wait until the aggregator verifies all sequenced batches. Wait until the last verification transaction is finalized.
 3. **Update components**:
-   1. Update erigon version to _hermeznetwork/cdk-erigon:v2.61.24_
+   1. Update erigon version to _hermeznetwork/cdk-erigon:v2.61.24_ or newer.
    2. Update sequencer config with:
       ```yaml
       # zkevm.executor-urls: "${STATELESS_EXECUTOR}" # Remove executors
@@ -95,8 +88,7 @@ This process may take a couple hours to complete, but downtime from the point of
       zkevm.mock-witness-generation: true
       zkevm.disable-virtual-counters: true
       ```
-   4. Update aggkit config with:
-   6. Stop the following components:
+   4. Stop the following components:
       1. dac
       2. sequence-sender
       3. aggregator
@@ -104,9 +96,16 @@ This process may take a couple hours to complete, but downtime from the point of
       5. provers
       6. pool-manager
 4. **Migrate to PP**:
-   1. Request Polygon (as the RollupManager Admin) to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $ROLLUP_MANAGER "initMigration(uint32,uint32, bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x`
+   1. Request Polygon (as the AgglayerManager Admin) to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $AGGLAYER_MANAGER "initMigration(uint32,uint32,bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x06e76665`
+      1. Rollup ID of the network.
+      2. Rolluptype should be latest AggchainECDSAMultisig.
+      3. Data should be initialized with `cast calldata "migrateFromLegacyConsensus()"`, `0x06e76665`. This is the function used to migrate the Aggchain from PolygonPessimisticConsensus or PolygonRollupBaseEtrog to AggchainECDSAMultisig. Specifically, this function will update the Aggchain state with the following changes:
+         1. Preserve existing admin.
+         2. Set `_initializerVersion = 1`. (aggchainECDSAMultisig)
+         3. Set `threshold = 1` and add `trustedSequencer` as the sole initial signer. Admin can later update signers and threshold via `updateSignersAndThreshold`.
+         4. Handles empty `trustedSequencerURL` by using "NO_URL" placeholder.
    2. Wait until the transaction is finalized.
-5. **Start aggsender**:
+7. **Start aggsender**:
    1. Get last l2 block verified:
       1. Set the correct ETH_RPC_URL for your network: `export ETH_RPC_URL="https://zkevm-rpc.com"`
       2. Get the last verified batch number: `cast rpc zkevm_verifiedBatchNumber`
@@ -116,12 +115,12 @@ This process may take a couple hours to complete, but downtime from the point of
    3. Update aggkit config:
       ```toml
       [AggSender]
-      MaxL2BlockNumber = 0 # <- Set the last verified L2 block number
+      MaxL2BlockNumber = 0 # Set the obtained last verified L2 block number
+      DryRun = false       # Send certificate to the agglayer
       ```
-   4. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender`
-   5. Start the aggkit instance with the new config and command changes.
-   6. Monitor the first certificate is correctly sent to the agglayer.
-   7. Once the first certificate is settled, you can rollback configuration change.
+   4. Restart the aggkit instance with the new config.
+   5. Monitor the first certificate is correctly sent to the agglayer.
+   6. Once the first certificate is settled, update the configuration to allow new certificates.
       ```toml
       [AggSender]
       MaxL2BlockNumber = 0
