@@ -111,7 +111,7 @@ This process may take a couple hours to complete, but downtime from the point of
       ```toml
       [AggSender]
       MaxL2BlockNumber = 0 # Set the obtained last verified L2 block number
-      DryRun = false       # Send certificate to agglyaer
+      DryRun = false       # Send certificate to the agglayer
       ```
    4. Restart the aggkit instance with the new config.
    5. Monitor the first certificate is correctly sent to the agglayer.
