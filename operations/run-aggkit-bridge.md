@@ -109,6 +109,8 @@ BlockFinality = "LatestBlock"
 
 ## Running the Bridge Instance
 
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.1`
+
 Start the bridge instance with only the `bridge` component:
 
 ```bash
