@@ -97,8 +97,9 @@ This process may take a couple hours to complete, but downtime from the point of
       6. pool-manager
 4. **Migrate to PP**:
    1. Request Polygon (as the AgglayerManager Admin) to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $AGGLAYER_MANAGER "initMigration(uint32,uint32,bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x06e76665`
-      1. Rolluptype should be latest MultiECDSA.
-      2. Data should be initialized with `cast calldata "migrateFromLegacyConsensus()"`, 0x06e76665.
+      1. Rollup ID of the network.
+      2. Rolluptype should be latest MultiECDSA.
+      3. Data should be initialized with `cast calldata "migrateFromLegacyConsensus()"`, 0x06e76665. This data is used to migrate from PolygonPessimisticConsensus or PolygonRollupBaseEtrog to AggchainECDSAMultisig.
    2. Wait until the transaction is finalized.
 7. **Start aggsender**:
    1. Get last l2 block verified:
