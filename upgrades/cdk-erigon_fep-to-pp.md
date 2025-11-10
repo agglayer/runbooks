@@ -12,7 +12,7 @@ This document provides a comprehensive guide for upgrading from CDK Erigon FEP (
 Deploy Aggkit in sync only mode.
 
 * image: ghcr.io/agglayer/aggkit:0.7.0
-* command: aggkit run --cfg=/etc/aggkit/config.toml --components=bridge
+* command: aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender
 * Persisted data directory. Ex.: /data
 * Configuration file. Ex: /etc/aggkit/config.toml
 * No environment variables
@@ -49,6 +49,10 @@ SaveCertificatesToFilesPath = "/tmp"
 RequireNoFEPBlockGap = true
 MaxL2BlockNumber = 0
 MaxCertSize = 0
+DryRun = true
+  [AggSender.AgglayerClient.GRPC]
+  URL = "grpc-agglayer.polygon.technology:443" # It depends on the environment.
+  UseTLS = "true"
 ```
 </details>
 
@@ -56,6 +60,12 @@ Once started, it will sync from the rollup manager deployment block. It may take
 
 > [!NOTE]
 > L2_URL requires **debug_** methods enabled.
+
+> [!NOTE]
+> AGGLAYER GRPC URL depends on the environmnet
+> * mainnet: "grpc-agglayer.polygon.technology:443"
+> * cardona: "grpc-agglayer-test.polygon.technology:443"
+> * bali: "grpc-agglayer-dev.polygon.technology:443"
 
 ## Upgrade procedure
 
@@ -89,7 +99,7 @@ This process may take a couple hours to complete, but downtime from the point of
    1. Request Polygon (as the AgglayerManager Admin) to send the transaction to perform the migration: `cast send --private-key ${ADMIN_PKEY} $AGGLAYER_MANAGER "initMigration(uint32,uint32,bytes)" ${ROLLUPID} ${ROLLUPTYPEID} 0x06e76665`
       1. Rolluptype should be latest MultiECDSA.
       2. Data should be initialized with `cast calldata "migrateFromLegacyConsensus()"`, 0x06e76665.
-   3. Wait until the transaction is finalized.
+   2. Wait until the transaction is finalized.
 7. **Start aggsender**:
    1. Get last l2 block verified:
       1. Set the correct ETH_RPC_URL for your network: `export ETH_RPC_URL="https://zkevm-rpc.com"`
@@ -100,12 +110,12 @@ This process may take a couple hours to complete, but downtime from the point of
    3. Update aggkit config:
       ```toml
       [AggSender]
-      MaxL2BlockNumber = 0 # <- Set the last verified L2 block number
+      MaxL2BlockNumber = 0 # Set the obtained last verified L2 block number
+      DryRun = false       # Send certificate to agglyaer
       ```
-   4. Update aggkit command: `aggkit run --cfg=/app/config/config.toml --components=aggsender,bridge`
-   5. Start the aggkit instance with the new config and command changes.
-   6. Monitor the first certificate is correctly sent to the agglayer.
-   7. Once the first certificate is settled, you can rollback configuration change.
+   4. Restart the aggkit instance with the new config.
+   5. Monitor the first certificate is correctly sent to the agglayer.
+   6. Once the first certificate is settled, update the configuration to allow new certificates.
       ```toml
       [AggSender]
       MaxL2BlockNumber = 0
