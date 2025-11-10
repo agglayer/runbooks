@@ -11,7 +11,7 @@ This document provides a comprehensive guide for upgrading from CDK Erigon FEP (
 
 Deploy Aggkit in sync only mode.
 
-* image: ghcr.io/agglayer/aggkit:0.7.0
+* image: ghcr.io/agglayer/aggkit:0.7.1
 * command: aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender
 * Persisted data directory. Ex.: /data
 * Configuration file. Ex: /etc/aggkit/config.toml
