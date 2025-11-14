@@ -1,5 +1,7 @@
 # PP to FEP upgrade
 
+> ⚠️ **Disclaimer**: Only AMD64 (linux/amd64) Docker images have been tested and are guaranteed to be supported. Other architectures are not officially supported.
+
 ## Requirements
 - All paths in this guide are relative to the `upgrade` directory:
 ```
@@ -46,12 +48,14 @@ export rollup_id=$(cat combined.json | jq -r .rollupID)
 # fetched from the docker images
 export aggchain_vkey=$(
   docker run --rm -it \
+    --platform linux/amd64 \
     ghcr.io/agglayer/aggkit-prover:1.1.2 \
     /usr/local/bin/aggkit-prover vkey
 )
 
 export aggchain_vkey_selector=$(
   docker run --rm -it \
+    --platform linux/amd64 \
     ghcr.io/agglayer/aggkit-prover:1.1.2 \
     /usr/local/bin/aggkit-prover vkey-selector
 )
