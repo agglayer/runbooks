@@ -36,7 +36,7 @@ export rollup_address=0x
 export l1_rpc_url=https://
 export l2_node_url=https://
 export l2_rpc_url=https://
-export op_succinct_version=v3.1.0-agglayer
+export op_succinct_version=v0.0.0
 ```
 
 Confirm if you control the aggchainManager address
@@ -120,7 +120,7 @@ The command will output a `opsuccinctl2ooconfig.json` file that looks something 
 Create a `_configName` by hashing an arbitrary string. The convention is to use the `ghcr.io/agglayer/op-succinct/op-succinct` tag. In this case
 ```shell
 cast keccak "${op_succinct_version}"
-0x622142ba8035695383551428b698950d3d4a6a53629c90a86d7192cfb221ae4e
+0x97b35dc26c2fa1d918a736f04b401fb6c6188937cd251dee73f8ba998056e85c
 ```
 
 Using the **Aggchain manager** address, call:
@@ -150,47 +150,7 @@ This method can be found in the rollup contract.
 
 ---
 
-### Option 1 – Rolling Update
-#### Spin up updated infra
-1. Spin up a **new proposer** with the [`OP_SUCCINCT_CONFIG_NAME`](https://succinctlabs.github.io/op-succinct/proposer.html#optional-environment-variables) environment variable set to the name of the config you added. For this example, you would set `OP_SUCCINCT_CONFIG_NAME="v3.1.0-agglayer"`
-
-2. Start a new **aggkit-prover** pointing to the new proposer. You may need to adjust the config file
-> [!NOTE]
-> The new aggkit-prover instance will fail with `Error: Unable to setup aggchain proof builder`. This is expected and will be resolved as soon as we finish the upgrade
-
-3. Pre-configure **Aggsender** to point to the new prover (do not restart yet). For the new version of aggkit, you may need to adjust the config file
-```diff
-     [AggSender.AggkitProverClient]
--    URL = https://old-prover-url:port
-+    URL = https://new-prover-url:port
-     UseTLS = true
-```
-
-#### Switch over
-
-4. Stop the **Aggsender**.
-
-5. Update the selected config on-chain using the **Aggchain manager**:
-
-```solidity
-function selectOpSuccinctConfig(
-    bytes32 _configName
-)
-```
-
-Cast command:
-```shell
-cast send $rollup_address \
-  "selectOpSuccinctConfig(bytes32)" \
-  <_configName> \
-  --rpc-url $l1_rpc_url \
-  --private-key $PRIVATE_KEY
-```
-
-6. Start the **Aggsender**.
-
----
-### Option 2 – Direct Update
+### Direct Update
 1. Stop the **aggsender**, **aggkit-prover** and **op-succinct-proposer**
 2. Adjust the [**op-succinct-proposer**](#op-succinct-proposer) with the new `OP_SUCCINCT_CONFIG_NAME` environment variable and version
 3. Adjust the [**aggkit-prover**](#aggkit-prover) and [**aggsender**](#aggsender) config files and versions
