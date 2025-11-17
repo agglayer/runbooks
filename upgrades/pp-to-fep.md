@@ -1,6 +1,7 @@
 # PP to FEP upgrade
 
-> ![warning] Only AMD64 (linux/amd64) Docker images have been tested and are guaranteed to be supported. Other architectures are not officially supported.
+> [!WARNING]
+> Only AMD64 (linux/amd64) Docker images have been tested and are guaranteed to be supported. Other architectures are not officially supported.
 
 ## Requirements
 - All paths in this guide are relative to the `upgrade` directory:
