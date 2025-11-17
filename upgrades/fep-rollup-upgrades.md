@@ -7,6 +7,7 @@ OP Succinct supports a rolling update process when [program binaries](https://su
 
 > [!NOTE]
 > In case you're migrating from [v2 to v3](v2-to-v3.md) check the guide for configuration changes
+> In case you're migrating from [v3.1 to v3.3](v3_1_to_v3_3.md) check the guide for configuration changes
 
 ---
 
@@ -71,7 +72,9 @@ L2_RPC="${l2_rpc_url}"
 EOF
 ```
 
-Change the following command as needed
+Run the appropriate command based on your version:
+
+**For versions <= v3.1.0-agglayer:**
 ```shell
 docker run --rm -it \
   --platform linux/amd64 \
@@ -82,7 +85,17 @@ docker run --rm -it \
   --output-dir /tmp/env
 ```
 
-The command above will output a `opsuccinctl2ooconfig.json` file that looks something like this:
+**For versions >= v3.3.0-agglayer:**
+```shell
+docker run --rm -it \
+  --env OP_SUCCINCT_L2_OUTPUT_ORACLE_CONFIG_PATH=/tmp/env/opsuccinctl2ooconfig.json \
+  --platform linux/amd64 \
+  -v "$(pwd)":/tmp/env \
+  ghcr.io/agglayer/op-succinct/op-succinct-agglayer:${op_succinct_version} \
+  /bin/bash -c "fetch-l2oo-config --env-file /tmp/env/.env"
+```
+
+The command will output a `opsuccinctl2ooconfig.json` file that looks something like this:
 ```json
 {
   "aggregationVkey": "0x00afb45d8064ae10aa6a1793b8f39a24c27268efae2917b5c02950b2377fbf00",
