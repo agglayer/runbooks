@@ -7,7 +7,7 @@ OP Succinct supports a rolling update process when [program binaries](https://su
 
 > [!NOTE]
 > In case you're migrating from [v2 to v3](v2-to-v3.md) check the guide for configuration changes
-> In case you're migrating from [v3.1 to v3.3](v3_1_to_v3_3.md) check the guide for configuration changes
+> In case you're migrating from [v3.1 to v3.4](v3_1_to_v3_4.md) check the guide for configuration changes
 
 ---
 
