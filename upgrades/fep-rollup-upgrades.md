@@ -36,7 +36,7 @@ export rollup_address=0x
 export l1_rpc_url=https://
 export l2_node_url=https://
 export l2_rpc_url=https://
-export op_succinct_version=v0.0.0
+export op_succinct_version=[replace with the target version]
 ```
 
 Confirm if you control the aggchainManager address
@@ -120,7 +120,6 @@ The command will output a `opsuccinctl2ooconfig.json` file that looks something 
 Create a `_configName` by hashing an arbitrary string. The convention is to use the `ghcr.io/agglayer/op-succinct/op-succinct` tag. In this case
 ```shell
 cast keccak "${op_succinct_version}"
-0x97b35dc26c2fa1d918a736f04b401fb6c6188937cd251dee73f8ba998056e85c
 ```
 
 Using the **Aggchain manager** address, call:
