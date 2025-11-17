@@ -1,6 +1,7 @@
 # FEP Rollup upgrades
 
-> ![warning] Only AMD64 (linux/amd64) Docker images have been tested and are guaranteed to be supported. Other architectures are not officially supported.
+> [!WARNING]
+> Only AMD64 (linux/amd64) Docker images have been tested and are guaranteed to be supported. Other architectures are not officially supported.
 
 OP Succinct supports a rolling update process when [program binaries](https://succinctlabs.github.io/op-succinct/advanced/verify-binaries.html) must be reproduced and only the `aggregationVkey`, `rangeVkeyCommitment`, or `rollupConfigHash` parameters change. For example, this could happen if:
 * The SP1 version changes
@@ -8,9 +9,8 @@ OP Succinct supports a rolling update process when [program binaries](https://su
 * Some L2 parameters change
 
 > [!NOTE]
-> In case you're migrating from [v2 to v3](v2-to-v3.md) check the guide for configuration changes
-> In case you're migrating from [v3.1 to v3.4](v3_1_to_v3_4.md) check the guide for configuration changes
-
+> - In case you're migrating from [v2 to v3](v2-to-v3.md), check the guide for configuration changes.
+> - In case you're migrating from [v3.1 to v3.4](v3_1_to_v3_4.md), check the guide for configuration changes.
 ---
 
 ## Update guide
