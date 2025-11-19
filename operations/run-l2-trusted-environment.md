@@ -190,7 +190,7 @@ Mode = "PessimisticProof"
 RequireNoFEPBlockGap = true
 
 # Agglayer client configuration
-[AggSender.AgglayerClient]
+[AggSender.AgglayerClient.GRPC]
 # Agglayer service URL (use appropriate environment: dev, test, or production)
 URL = "grpc-agglayer-dev.polygon.technology:443"
 # Use TLS for secure connection
