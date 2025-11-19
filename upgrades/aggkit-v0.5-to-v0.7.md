@@ -34,6 +34,30 @@ The recommended approach is to:
 - **From**: `ghcr.io/agglayer/aggkit:0.5.x`
 - **To**: `ghcr.io/agglayer/aggkit:0.7.1`
 
+## Configuration Changes
+
+### AggSender AgglayerClient Configuration
+
+In v0.7, the configuration section for the Agglayer client has been renamed:
+
+- **v0.5**: `[AggSender.AgglayerClient]`
+- **v0.7**: `[AggSender.AgglayerClient.GRPC]`
+
+**Example migration:**
+
+```toml
+# v0.5 configuration
+[AggSender.AgglayerClient]
+URL = "https://agglayer.example.com"
+
+# v0.7 configuration
+[AggSender.AgglayerClient.GRPC]
+URL = "https://agglayer.example.com"
+```
+
+> [!NOTE]
+> Make sure to update this section name in your Aggkit configuration file before upgrading to v0.7.1.
+
 ## Upgrade Steps
 
 ### Step 1: Update Aggkit Version
