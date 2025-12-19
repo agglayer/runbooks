@@ -51,26 +51,26 @@ A successful request should return a JSON-RPC response:
 
 ### Connection Refused
 
-Symptom: curl: (7) Failed to connect to localhost port 5576
+**Symptom:** curl: (7) Failed to connect to localhost port 5576
 
-Solutions:
+**Solutions:**
 1. Verify aggsender is running
 2. Check the configured RPC port matches your curl command
 3. Verify firewall rules allow connections to the RPC port
 
 ### RPC Method Not Found
 
-Symptom: JSON-RPC error indicating method not found
-Solutions:
+**Symptom:** JSON-RPC error indicating method not found
+**Solutions:**
 1. Confirm EnableRPC = true in configuration
 2. Restart aggsender after configuration changes
 3. Check aggsender logs for RPC initialization messages
 
 ### Certificate Not Created
 
-Symptom: Successful RPC response but no certificate generated
+**Symptom:** Successful RPC response but no certificate generated
 
-Solutions:
+**Solutions:**
 1. Check aggsender logs for epoch event processing
 2. Verify sufficient data exists to create a certificate
 3. Ensure dependent services (agglayer, L2 nodes) are operational
