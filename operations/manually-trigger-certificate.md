@@ -17,6 +17,7 @@ Before triggering a certificate, ensure the following configuration is in place:
    ```toml
    [AggSender]
    EnableRPC = true
+   ```
 
 2. Verify Aggsender is Running
 
