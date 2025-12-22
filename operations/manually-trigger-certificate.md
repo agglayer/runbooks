@@ -1,8 +1,8 @@
-# Aggsender - Manual Certificate Trigger Runbook
+# AggSender - Manual Certificate Trigger Runbook
 
 ## Overview
 
-This runbook describes how to manually trigger certificate creation in the Aggsender component. The `aggsender_triggerCertitificate` RPC method forces the publication of an epoch event, which initiates the certificate creation process.
+This runbook describes how to manually trigger certificate creation in the AggSender component. The `aggsender_triggerCertitificate` RPC method forces the publication of an epoch event, which initiates the certificate creation process.
 
 ## Prerequisites
 
@@ -10,18 +10,18 @@ This runbook describes how to manually trigger certificate creation in the Aggse
 
 Before triggering a certificate, ensure the following configuration is in place:
 
-1. **Enable RPC in Aggsender Configuration**
+1. **Enable RPC in AggSender Configuration**
 
-   Set `EnableRPC` to `true` in your aggsender configuration file:
+   Set `EnableRPC` to `true` in your AggSender configuration file:
 
    ```toml
    [AggSender]
    EnableRPC = true
    ```
 
-2. Verify Aggsender is Running
+2. Verify AggSender is Running
 
-2. Confirm the aggsender service is running and accessible on the configured port (default: 5576)
+3. Confirm the aggsender service is running and accessible on the configured port (default: 5576)
 
 ## Execution Steps
 
