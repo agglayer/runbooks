@@ -46,5 +46,5 @@ cast send --private-key [ROLLUP_ADMIN_KEY] [AGGCHAIN_FEP_CONTRACT_ADDRESS] "disa
 ```
 
 > [!warning]
-> After disabling optimistic mode op-succinct DB needs to be flushed because the already existing proven ranges may not match the Last Proven block request comming from the AggSender.
+> After disabling optimistic mode, the op-succinct DB needs to be flushed because the already existing proven ranges may not match the Last Proven block request comming from the AggSender.
 > Pending range proofs needs to be regenerated.
