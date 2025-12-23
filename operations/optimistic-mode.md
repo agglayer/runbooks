@@ -44,3 +44,7 @@ By default, optimistic mode is disabled. To switch back to validity mode, call t
 ```
 cast send --private-key [ROLLUP_ADMIN_KEY] [AGGCHAIN_FEP_CONTRACT_ADDRESS] "disableOptimisticMode()"
 ```
+
+> [!warning]
+> After disabling optimistic mode, the op-succinct DB needs to be flushed because the already existing proven ranges may not match the Last Proven block request coming from the AggSender.
+> Pending range proofs need to be regenerated.
