@@ -23,11 +23,9 @@ All erigon instances should be on the version +v2.64.0. In case your networks ha
 7. **Update permissionless**: (Optionally) Ask your partners and anyone running a permissionless instance to update to the same version as the trusted infrastructure.
 
 > [!NOTE]
-> This procedure produces full downtime between steps 2 and 6, which using k8s snapshots in the zkEVM takes about 30 minutes. But it's recommended to test in your own network before proceeding to have a clear estimation.
+> This procedure produces full downtime between steps 3 and 6, which using k8s snapshots in the zkEVM takes about 30 minutes. But it's recommended to test in your own network before proceeding to have a clear estimation.
 
-Also, SC needs to be updated ... (TBD - Carlos)
-
-The new component, the aggoracle, needs a wallet with funds on L2. You can use a new or existing wallet, you could to bridge some funds or directly transfer them from another wallet.
+Also, The new component, the aggoracle, needs a wallet with funds on L2. You can use a new or existing wallet, you could to bridge some funds or directly transfer them from another wallet. Once you have the wallet ready, you need to update the SC acordingly. To do that, (TBD - Carlos).
 
 ## Upgrade procedure
 
@@ -94,10 +92,10 @@ This process may take under 30 minutes to be completed, but downtime from the po
     4.  Do some bridges to force a new certificate is sent to the agglayer.
 
 > [!NOTE]
-> This procedure produces full downtime between steps X and Y, which using k8s snapshots in the zkEVM takes about 30 minutes. Apart from that, all permissionless needs to resync from scratch using new version and configuration. So, you may consider the aditional downtime on the permisionless instances.
+> This procedure produces full downtime between steps 3 and 7, which using k8s snapshots in the zkEVM takes about 30 minutes. Apart from that, all permissionless needs to resync from scratch using new version and configuration. So, you may consider the aditional downtime on the permisionless instances.
 
 > [!NOTE]
-> Once you finish this procedure, erigon will be able to unwind from $L2BLOCK+1 on, but not earlier. 
+> Once you finish this procedure, erigon will be able to unwind from $L2BLOCK+1 on, but not before that block. 
 
 > [!NOTE]
 > zkEVM has the config files included in the image. So, they only need to update to a valid version.
