@@ -79,8 +79,8 @@ This process may take under 30 minutes to be completed, but downtime from the po
       [AggOracle]
         [AggOracle.EVMSender]
           GlobalExitRootL2 = "{{L2Config.GlobalExitRootAddr}}"
-            [AggOracle.EVMSender.EthTxManager]
-              PrivateKeys = [{Method =  "local", Path = "/app/keystore/aggoracle.keystore", Password = "XXXX"}]
+          [AggOracle.EVMSender.EthTxManager]
+            PrivateKeys = [{Method =  "local", Path = "/app/keystore/aggoracle.keystore", Password = "XXXX"}]
       [L1InfoTreeSync]
         BlockFinality = "LatestBlock/-6"
       ```
