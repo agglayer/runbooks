@@ -75,7 +75,7 @@ Before deploying any L2 trusted environment, ensure you have:
 
 **Purpose**: Agglayer integration and certificate management
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.1`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.8.0`
 
 **Startup Order**: Deploy after CDK-Erigon RPC
 
@@ -87,7 +87,7 @@ Before deploying any L2 trusted environment, ensure you have:
 > [!IMPORTANT]
 > **Two-Instance Architecture**
 >
-> Starting with Aggkit v0.7.0, IPs should run **two separate Aggkit instances**:
+> IPs should run **two separate Aggkit instances**:
 > 1. **Primary Instance**: Runs `aggsender` only - handles critical certificate submission
 > 2. **Bridge Instance**: Runs `bridge` only - provides public REST API
 >
@@ -101,9 +101,6 @@ Aggkit requires a TOML configuration file.
 <summary>Configuration template</summary>
 
 ```toml
-# Network ID of the L2 chain
-NetworkID = 1
-
 # Path to read/write data directory
 PathRWData = "/data"
 
@@ -118,9 +115,6 @@ SequencerPrivateKeyPath = ""
 # Password for sequencer private key (leave empty if not using file-based keys)
 SequencerPrivateKeyPassword = ""
 
-# Polygon bridge contract address on L2
-polygonBridgeAddr = "0x0000000000000000000000000000000000000000"
-
 # Block number where the rollup was created on L1
 rollupCreationBlockNumber = 0
 # Block number where the rollup manager was deployed on L1
@@ -130,6 +124,8 @@ genesisBlockNumber = 0
 
 # L1 chain configuration
 [L1Config]
+# Bridge contract address on L1
+BridgeAddr = "0x0000000000000000000000000000000000000000"
 # L1 chain ID (11155111 for Sepolia, 1 for Mainnet)
 chainId = 11155111
 # Global exit root contract address on L1
@@ -143,6 +139,8 @@ polygonZkEVMAddress = "0x0000000000000000000000000000000000000000"
 
 # L2 chain configuration
 [L2Config]
+# Bridge contract address on L2
+BridgeAddr = "0x0000000000000000000000000000000000000000"
 # Global exit root contract address on L2
 GlobalExitRootAddr = "0x0000000000000000000000000000000000000000"
 
@@ -178,6 +176,10 @@ AggsenderPrivateKey = {Path = "/etc/aggkit/sequencer.keystore", Password = "***"
 CertificateSendInterval = "1m"
 # Interval for checking if certificates are settled
 CheckSettledInterval = "5s"
+# Interval for checking certificate status and retrying if needed
+CheckStatusCertificateInterval = "1m"
+# Retry certificates that are in error state
+RetryCertAfterInError = true
 # Maximum certificate size in bytes
 MaxCertSize = 8388608
 # Path to save certificate files for debugging
@@ -192,9 +194,12 @@ RequireNoFEPBlockGap = true
 # Agglayer client configuration
 [AggSender.AgglayerClient.GRPC]
 # Agglayer service URL (use appropriate environment: dev, test, or production)
+# Bali: grpc-agglayer-dev.polygon.technology:443
+# Cardona: grpc-agglayer-test.polygon.technology:443
+# Mainnet: grpc-agglayer.polygon.technology:443
 URL = "grpc-agglayer-dev.polygon.technology:443"
 # Use TLS for secure connection
-UseTLS = "true"
+UseTLS = true
 
 # L1 info tree sync configuration
 [L1InfoTreeSync]
@@ -308,7 +313,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Agglayer integration and oracle services
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.1`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.8.0`
 
 **Startup Order**: Deploy after OP-Batcher and OP-Geth
 
@@ -452,7 +457,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Agglayer integration and oracle services
 
-**Docker Image**: `ghcr.io/agglayer/aggkit:0.7.1`
+**Docker Image**: `ghcr.io/agglayer/aggkit:0.8.0`
 
 **Startup Order**: Deploy after OP-Batcher, OP-Geth
 
@@ -527,7 +532,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 | PostgreSQL | `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f` |
 | Pool Manager | `ghcr.io/0xpolygon/zkevm-pool-manager:v0.1.2` |
 | CDK-Erigon | `ghcr.io/0xpolygon/cdk-erigon:v2.61.23` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.7.1` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.8.0` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
@@ -539,7 +544,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 | OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0` |
 | OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2` |
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.7.1` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.8.0` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
@@ -554,7 +559,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 | OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.12.0` |
 | OP Succinct Proposer | `ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer` |
 | Aggkit Prover | `ghcr.io/agglayer/aggkit-prover:1.4.2` |
-| Aggkit | `ghcr.io/agglayer/aggkit:0.7.1` |
+| Aggkit | `ghcr.io/agglayer/aggkit:0.8.0` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
 
