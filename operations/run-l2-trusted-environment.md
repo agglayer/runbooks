@@ -203,10 +203,19 @@ UseTLS = true
 
 # L1 info tree sync configuration
 [L1InfoTreeSync]
-# Block finality requirement for L1 sync
+# Block finality requirement for L1 sync (FinalizedBlock, SafeBlock, LatestBlock, or LatestBlock/-6)
+# For fast L1 deposits: Set to "LatestBlock/-6" to enable ~70s L1->L2 bridge completion
+# Default "FinalizedBlock" prioritizes safety over speed (~15 min finalization)
 BlockFinality = "FinalizedBlock"
 # Number of blocks to sync in each chunk
 SyncBlockChunkSize = 1000
+
+# Bridge L1 sync configuration
+[BridgeL1Sync]
+# Block finality requirement for bridge sync (FinalizedBlock, SafeBlock, LatestBlock, or LatestBlock/-6)
+# For fast L1 deposits: Set to "LatestBlock/-6" to enable ~70s L1->L2 bridge completion
+# Must match L1InfoTreeSync.BlockFinality for consistent behavior
+BlockFinality = "FinalizedBlock"
 ```
 </details>
 </br>

@@ -26,6 +26,32 @@ v0.8.0 reorganizes several top-level parameters into appropriate subsections and
 
 See the complete v0.8 config example in [Run L2 Trusted Environment](../operations/run-l2-trusted-environment.md#5-aggkit-primary-instance).
 
+## New Features
+
+### Fast L1 Deposits
+
+v0.8.0 introduces support for faster L1 to L2 deposits by allowing IPs to configure reduced block finality requirements:
+
+**Configuration**: Set `L1InfoTreeSync` and `BridgeL1Sync` block finality to `LatestBlock/-6` to enable:
+- L1→L2 bridge completion in ~6 L1 blocks (~70 seconds)
+- Significantly faster deposit experience compared to using `FinalizedBlock`
+
+**Trade-offs**:
+- **Faster deposits**: Users see deposits bridged in ~70s instead of waiting for L1 finalization (~15 minutes)
+- **Reorg risk**: Reduced finality increases risk of chain reorganizations affecting bridge state
+
+**Example configuration**:
+```toml
+[L1InfoTreeSync]
+BlockFinality = "LatestBlock/-6"
+
+[BridgeL1Sync]
+BlockFinality = "LatestBlock/-6"
+```
+
+> [!NOTE]
+> This configuration is optional and should be evaluated based on your network's risk tolerance. The default `FinalizedBlock` setting prioritizes safety over speed.
+
 ## Upgrade Steps
 
 1. **Backup** your current config.toml
