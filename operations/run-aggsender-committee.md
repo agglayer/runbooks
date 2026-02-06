@@ -10,14 +10,14 @@ The `aggsender-validator` is responsible for validating and signing certificates
 
 The `aggsender-validator` component serves two primary deployment scenarios for Implementation Providers:
 
-1. **Integrated Deployment**: IPs running their own L2 chain include `aggsender-validator` as part of their standard AggKit deployment (with `aggsender`)
-2. **Standalone Deployment**: IPs run an isolated `aggsender-validator` instance to participate in the committee for L2 chains operated by other IPs
+1. **Proposer**: IPs running their own L2 chain include `aggsender-validator` as part of their standard AggKit deployment (with `aggsender`)
+2. **Validator**: IPs run an isolated `aggsender-validator` instance to participate in the committee for L2 chains operated by other IPs
 
 Both scenarios contribute to the decentralized validation of certificates submitted to the Agglayer.
 
 ## Deployment Scenarios
 
-### Scenario 1: Integrated Deployment (Own L2 Chain)
+### Scenario 1: Proposer (Own L2 Chain)
 
 **When to use**: You are the Implementation Provider operating your own L2 chain and want to participate in certificate validation.
 
@@ -41,7 +41,7 @@ aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,bridge
 - Requires full L2 chain access and configuration
 - Part of your standard AggKit deployment
 
-### Scenario 2: Standalone Deployment (Committee Participation)
+### Scenario 2: Validator (Committee Participation)
 
 **When to use**: You want to participate in the aggsender committee for L2 chains operated by other Implementation Providers.
 
@@ -117,12 +117,12 @@ MaxAttempts = 20
 
 ### Scenario-Specific Configuration
 
-#### Integrated Deployment
+#### Proposer
 
 For IPs running their own L2 chain, the `aggsender-validator` runs alongside the standard AggKit components. The core validator configuration above is required, plus one additional configuration change to connect the aggsender to the local validator:
 
 <details>
-<summary>Additional configuration for integrated deployment</summary>
+<summary>Additional configuration for proposer</summary>
 
 ```toml
 # Configure AggSender to communicate with local validator
@@ -143,7 +143,7 @@ The `aggsender-validator` will use the existing AggKit configuration for:
 
 Refer to the main [L2 trusted environment runbook](./run-l2-trusted-environment.md) for complete AggKit configuration.
 
-#### Standalone Deployment
+#### Validator
 
 For standalone validator instances, you need the core validator configuration plus minimal AggKit base configuration for connectivity.
 
@@ -153,11 +153,11 @@ Refer to the main [L2 trusted environment runbook](./run-l2-trusted-environment.
 
 ### Private Key Requirements
 
-**Integrated Deployment**:
+**Proposer**:
 - Aggsender private key (for certificate generation)
 - Validator private key (for certificate validation/signing)
 
-**Standalone Deployment**:
+**Validator**:
 - Validator private key only (for certificate validation/signing)
 
 ## Committee Participation
