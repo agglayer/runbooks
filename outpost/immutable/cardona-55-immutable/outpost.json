@@ -1,0 +1,15 @@
+{
+  "contracts": {
+    "timelockAddress": "0x4Ce2B873bEAE9c5E60466bC0Cf06c81935AFEB22",
+    "proxyAdminAddress": "0xBC0621142e48222FB7d3aCbF08f5FF847d690Cb7",
+    "aggOracleCommitteeAddress": "0x49cf194dEBB5ea65327be201369D9dE7D42AEbC0",
+    "aggOracleCommitteeImplementation": "0xe357393db31Df596658b4e595f337560312f2747",
+    "globalExitRootManagerL2SovereignChainAddress": "0x4c92A977426aE5F2cAe21357Ec53cdd0A0a5076e",
+    "globalExitRootManagerL2SovereignChainImplementation": "0x1D4BAbEe2066a8581a21846c0C4dE1BE620aa3A2",
+    "bridgeL2SovereignChainAddress": "0x1A2BFa66999b642C7d27F90E2Ac8F6Fa237326E6",
+    "bridgeL2SovereignChainImplementation": "0xA01C8cDe2A7605D2DADe1443453370f5d313ee0C",
+    "wrappedTokenBridgeImplementation": "0x4Dd9a89d2a6bc5f8d18d394839d622d7Fb718AF6",
+    "bridgeLib": "0x22BcA6cE9f6E673A8e44a83c1190Cf50a43522AB",
+    "WETH": "0x460fA6E12A8cD0826A28BC32E286f387C4cD70ad"
+  }
+}
