@@ -1,15 +1,15 @@
 # Aggkit Upgrade: v0.7 to v0.8
 
-Upgrade instructions for Aggkit from v0.7.x to v0.8.0.
+Upgrade instructions for Aggkit from v0.7.x to v0.8.1.
 
 ## Version
 
 - **From**: `ghcr.io/agglayer/aggkit:0.7.x`
-- **To**: `ghcr.io/agglayer/aggkit:0.8.0`
+- **To**: `ghcr.io/agglayer/aggkit:0.8.1`
 
 ## Configuration Changes
 
-v0.8.0 reorganizes several top-level parameters into appropriate subsections and adds new retry configuration:
+v0.8.1 reorganizes several top-level parameters into appropriate subsections and adds new retry configuration:
 
 | v0.7 Parameter | v0.8 Parameter | Change |
 |----------------|----------------|--------|
@@ -30,7 +30,7 @@ See the complete v0.8 config example in [Run L2 Trusted Environment](../operatio
 
 ### Fast L1 Deposits
 
-v0.8.0 introduces support for faster L1 to L2 deposits by allowing IPs to configure reduced block finality requirements:
+v0.8.1 introduces support for faster L1 to L2 deposits by allowing IPs to configure reduced block finality requirements:
 
 **Configuration**: Set `L1InfoTreeSync` and `BridgeL1Sync` block finality to `LatestBlock/-6` to enable:
 - L1→L2 bridge completion in ~6 L1 blocks (~70 seconds)
@@ -57,7 +57,7 @@ BlockFinality = "LatestBlock/-6"
 1. **Backup** your current config.toml
 2. **Update config** with the changes above
 3. **Stop** Aggkit v0.7.x instance
-4. **Update image** to `ghcr.io/agglayer/aggkit:0.8.0`
+4. **Update image** to `ghcr.io/agglayer/aggkit:0.8.1`
 5. **Start** Aggkit with updated config
 6. **Verify** logs show successful startup and certificate submissions
 
