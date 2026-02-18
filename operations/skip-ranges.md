@@ -31,10 +31,10 @@ When the proposer is attempting to prove a block range that is unprovable (due t
 4. **Start the proposer**
    - Monitor the system until the settlement moves past the offending block height.
 
-4. **Disable Optimistic Mode**
+5. **Disable Optimistic Mode**
    - Once a sufficient number of safe blocks have been finalized past the faulty block, turn off *[Optimistic mode](optimistic-mode.md)* to resume normal operation.
 
-5. **Restart the proposer**
+6. **Restart the proposer**
    - Restart `op-succinct-proposer`. It should now skip the unprovable block and continue proving subsequent blocks as expected.
 
 ---
