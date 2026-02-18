@@ -13,12 +13,17 @@ When the proposer is attempting to prove a block range that is unprovable (due t
 1. **Stop the proposer**
    - Use your orchestration tool or CLI to gracefully shut down `op-succinct-proposer`.
 
-2. **Drop the database**
+2. **Recreate the database**
+
    - Connect to the configured PostgreSQL instance backing `op-succinct-proposer`.
-   - Drop the entire database to fully reset state:
+   - Drop and recreate the database to fully reset state:
+
      ```sql
-     DROP DATABASE <db_name>;
+     DROP DATABASE IF EXISTS <db_name>;
+     CREATE DATABASE <db_name>;
      ```
+
+   - Adjust database parameters (e.g., owner, encoding, locale) as required for your environment.
 
 3. **Enable Optimistic Mode**
    - Activate *[Optimistic mode](optimistic-mode.md)* to allow the chain to progress even without proof for the current block.
