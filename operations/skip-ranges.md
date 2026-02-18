@@ -11,23 +11,25 @@ When the proposer is attempting to prove a block range that is unprovable (due t
 ## Step-by-Step Recovery Procedure
 
 1. **Stop the proposer**
-   - Use your orchestration tool or CLI to gracefully shut down the `op-succinct` proposer process.
+   - Use your orchestration tool or CLI to gracefully shut down `op-succinct-proposer`.
 
 2. **Remove the failed block entry**
-   - Manually delete or clear the internal record or cache of the failed block.
-   - Access the configured PostgreSQL Database of the op-succinct and delete the record corresponding to the failed entry:
+   - Access the configured PostgreSQL Database of the op-succinct and 
+      - Delete the record corresponding to the failed entry:
       `DELETE FROM requests WHERE status = 6`
-   - This ensures the proposer does not reattempt the same block upon restart.
+      - Alternatively, drop the entire database
 
 3. **Enable Optimistic Mode**
    - Activate *[Optimistic mode](optimistic-mode.md)* to allow the chain to progress even without proof for the current block.
+
+4. **Start the proposer**
    - Monitor the system until the settlement moves past the offending block height.
 
 4. **Disable Optimistic Mode**
    - Once a sufficient number of safe blocks have been finalized past the faulty block, turn off *[Optimistic mode](optimistic-mode.md)* to resume normal operation.
 
 5. **Restart the proposer**
-   - Relaunch the proposer service. It should now skip the unprovable block and continue proving subsequent blocks as expected.
+   - Restart `op-succinct-proposer`. It should now skip the unprovable block and continue proving subsequent blocks as expected.
 
 ---
 
