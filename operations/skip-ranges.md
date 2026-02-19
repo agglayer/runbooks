@@ -14,7 +14,7 @@ When the proposer is attempting to prove a block range that is unprovable (due t
    - Use your orchestration tool or CLI to gracefully shut down `op-succinct-proposer`.
 
 2. **Recreate the database**
-   - Connect to the configured PostgreSQL instance backing `op-succinct`.
+   - Connect to the configured PostgreSQL instance backing `op-succinct-proposer`.
    - **Option A — Drop and recreate (full reset):**
 
      ```sql
