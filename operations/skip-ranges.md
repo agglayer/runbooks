@@ -17,14 +17,12 @@ When the proposer is attempting to prove a block range that is unprovable (due t
    - Connect to the configured PostgreSQL instance backing `op-succinct-proposer`.
    - Ensure that `<db_name>` **exactly matches the database name specified in the `DATABASE_URL` environment variable** used by `op-succinct-proposer` (see reference: https://github.com/agglayer/op-succinct/blob/main/book/validity/proposer.md?plain=1#L43).
    - **Option A — Drop and recreate (full reset):**
-
      ```sql
      DROP DATABASE IF EXISTS <db_name>;
      CREATE DATABASE <db_name>;
      ```
 
    - **Option B — Rename existing database (if you prefer not to drop it):**
-
      ```sql
      ALTER DATABASE <db_name> RENAME TO <db_name>_backup;
      CREATE DATABASE <db_name>;
