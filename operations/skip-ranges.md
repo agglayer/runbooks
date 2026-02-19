@@ -15,6 +15,7 @@ When the proposer is attempting to prove a block range that is unprovable (due t
 
 2. **Recreate the database**
    - Connect to the configured PostgreSQL instance backing `op-succinct-proposer`.
+   - Ensure that `<db_name>` **exactly matches the database name specified in the `DATABASE_URL` environment variable** used by `op-succinct-proposer` (see reference: https://github.com/agglayer/op-succinct/blob/main/book/validity/proposer.md?plain=1#L43).
    - **Option A — Drop and recreate (full reset):**
 
      ```sql
