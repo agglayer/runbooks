@@ -17,7 +17,7 @@
 
 #### Proposer
 
-See [Proposer](../operations/run-aggsender-committee.md#scenario-1-proposer-own-l2-chain).
+See [Proposer](https://github.com/agglayer/aggkit/blob/develop/docs/aggsender.md).
 
 | Config | Value | Reference |
 |--------|-------|-----------|
@@ -25,7 +25,7 @@ See [Proposer](../operations/run-aggsender-committee.md#scenario-1-proposer-own-
 
 #### Validator
 
-See [Validator](../operations/run-aggsender-committee.md#scenario-2-validator-committee-participation).
+See [Validator](https://github.com/agglayer/aggkit/blob/develop/docs/aggsender_validator.md).
 
 | Config | Value | Reference |
 |--------|-------|-----------|
@@ -33,7 +33,7 @@ See [Validator](../operations/run-aggsender-committee.md#scenario-2-validator-co
 
 ### Aggoracle
 
-See [AggOracle Committee](../operations/run-aggoracle-committee.md#mode-2-aggoracle-committee-decentralized).
+See [AggOracle Committee](https://github.com/agglayer/aggkit/blob/develop/docs/aggoracle.md).
 
 | Config | Value | Reference |
 |--------|-------|-----------|
