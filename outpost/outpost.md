@@ -1,5 +1,4 @@
 # Outpost Configuration Reference
-
 ## Data Sources
 
 | Data | File |
@@ -7,33 +6,59 @@
 | L1 info | `combined.json` |
 | L2 info | `outpost.json` |
 
-## AggKit Configuration
+## Overview
 
+![Outpost Setup Overview](images/outpost-setup-overview.svg)
+
+The outpost setup consists of four core components:
+
+1. **Layer 1** — Sepolia or Ethereum mainnet
+2. **[Agglayer](https://www.agglayer.dev/)** — Aggregation layer
+3. **[Outpost](https://github.com/agglayer/agglayer-contracts/tree/develop/tools/deployOutpostChain)** — The bridge between Agglayer and non-native rollups
+4. **Layer 2** — A non-native Agglayer rollup
+
+The diagram below provides a detailed view of the outpost architecture:
+
+![Outpost Overview](images/outpost-overview.svg)
+
+**On Layer 2:**
+- Polygon Outpost smart contracts are deployed
+- Runs within a trusted environment
+
+**The outpost consists of:**
+- **[zkEVM Bridge](https://github.com/0xPolygon/zkevm-bridge-service)** — Enables asset bridging between Ethereum L1 and L2 networks connected to the Agglayer
+- **[AggKit](https://github.com/agglayer/aggkit)** — Modular framework for connecting networks to the Agglayer
+- **RPC Node** — Synchronizes state from the trusted environment
+
+To enhance security, multiple AggKit instances can be distributed across different entities to form a committee.
+
+## AggKit Configuration
+AggKit can run different processes: AggOracle, AggSender, AggSender Validator, and Bridge. The core ones for outposts are:
+
+- **[AggSender (Proposer)](https://github.com/agglayer/aggkit/blob/develop/docs/aggsender.md)** — Acts as certificate proposer and submits to the Agglayer
+- **[AggSender Validator](https://github.com/agglayer/aggkit/blob/develop/docs/aggsender_validator.md)** — Provides certificate validation
+- **[AggOracle](https://github.com/agglayer/aggkit/blob/develop/docs/aggoracle.md)** — Propagates Global Exit Root (GER) from L1 to the L2 sovereign chain
+
+### AggSender
+![AggSender Overview](images/aggsender-overview.svg)
+
+#### Common Configuration
 | Config | Value | Reference |
 |--------|-------|-----------|
 | `AggOracle.EVMSender.EthTxManager.Etherman.L1ChainID` | Must match the **outpost chain**, not the rollup chain ID | [default.go#L137](https://github.com/agglayer/aggkit/blob/develop/config/default.go#L137) |
 
-### Aggsender
-
 #### Proposer
-
-See [Proposer](https://github.com/agglayer/aggkit/blob/develop/docs/aggsender.md).
-
 | Config | Value | Reference |
 |--------|-------|-----------|
 | `AggSender.ValidatorClient.UseTLS` | `true` | [default.go#L267](https://github.com/agglayer/aggkit/blob/develop/config/default.go#L267) |
 
 #### Validator
-
-See [Validator](https://github.com/agglayer/aggkit/blob/develop/docs/aggsender_validator.md).
-
 | Config | Value | Reference |
 |--------|-------|-----------|
 | `Validator.EnableRPC` | `true` (must be publicly reachable) | [default.go#L297](https://github.com/agglayer/aggkit/blob/develop/config/default.go#L297) |
 
-### Aggoracle
-
-See [AggOracle Committee](https://github.com/agglayer/aggkit/blob/develop/docs/aggoracle.md).
+### AggOracle
+![AggOracle Overview](images/aggoracle-committee-overview.svg)
 
 | Config | Value | Reference |
 |--------|-------|-----------|
