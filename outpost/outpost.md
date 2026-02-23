@@ -10,25 +10,26 @@
 
 ![Outpost Setup Overview](images/outpost-setup-overview.svg)
 
-The outpost setup consists of four core components:
+The outpost setup consists of three core components:
 
 1. **Layer 1** — Sepolia or Ethereum mainnet
 2. **[Agglayer](https://www.agglayer.dev/)** — Aggregation layer
-3. **[Outpost](https://github.com/agglayer/agglayer-contracts/tree/develop/tools/deployOutpostChain)** — The bridge between Agglayer and non-native rollups
-4. **Layer 2** — A non-native Agglayer rollup
+3. **Layer 2:**
+   - **[Polygon smart contracts](https://github.com/agglayer/agglayer-contracts/tree/develop/tools/deployOutpostChain)**
+   - **Agglayer components**: The bridge between Agglayer and non-native chain
+   - **Trusted environment** — A non-native Agglayer chain
 
 The diagram below provides a detailed view of the outpost architecture:
 
 ![Outpost Overview](images/outpost-overview.svg)
 
 **On Layer 2:**
-- Polygon Outpost smart contracts are deployed
-- Runs within a trusted environment
-
-**The outpost consists of:**
-- **[zkEVM Bridge](https://github.com/0xPolygon/zkevm-bridge-service)** — Enables asset bridging between Ethereum L1 and L2 networks connected to the Agglayer
-- **[AggKit](https://github.com/agglayer/aggkit)** — Modular framework for connecting networks to the Agglayer
-- **RPC Node** — Synchronizes state from the trusted environment
+- **Trusted environment** — The collection of components to run a non-native Agglayer chain
+- **[Polygon smart contracts](https://github.com/agglayer/agglayer-contracts/tree/develop/tools/deployOutpostChain)** — Deployed on the L2 chain
+- **Agglayer components:**
+  - **[zkEVM Bridge](https://github.com/0xPolygon/zkevm-bridge-service)** — Enables asset bridging between Ethereum L1 and L2 networks connected to the Agglayer
+  - **[AggKit](https://github.com/agglayer/aggkit)** — Modular framework for connecting networks to the Agglayer
+  - **RPC Node** — Synchronizes state from the trusted environment
 
 To enhance security, multiple AggKit instances can be distributed across different entities to form a committee.
 
