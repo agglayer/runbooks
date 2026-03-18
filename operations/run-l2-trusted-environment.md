@@ -284,7 +284,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Ethereum execution client (L2)
 
-**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0`
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101605.0`
 
 **Startup Order**: Deploy after secrets
 
@@ -297,7 +297,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Optimism consensus client
 
-**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2`
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.16.5`
 
 **Startup Order**: Deploy after OP-Geth
 
@@ -312,7 +312,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Batch submission to L1
 
-**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5`
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.16.2`
 
 **Startup Order**: Deploy after OP-Geth
 
@@ -404,7 +404,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Ethereum execution client (L2)
 
-**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0`
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101605.0`
 
 **Startup Order**: Deploy after secrets
 
@@ -420,7 +420,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Optimism consensus client
 
-**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2`
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.16.5`
 
 **Startup Order**: Deploy after OP-Geth
 
@@ -436,7 +436,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Batch submission to L1
 
-**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.12.0`
+**Docker Image**: `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.16.2`
 
 **Startup Order**: Deploy after OP-Geth
 
@@ -446,7 +446,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Generates and manages proofs for L2 state transitions using OP Succinct proving system
 
-**Docker Image**: `ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer`
+**Docker Image**: `ghcr.io/agglayer/op-succinct/op-succinct:v3.5.0-agglayer`
 
 **Startup Order**: Deploy after PostgreSQL database and secrets
 
@@ -456,7 +456,7 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 
 **Purpose**: Manages proof generation requests and coordinates with OP Succinct proposer
 
-**Docker Image**: `ghcr.io/agglayer/aggkit-prover:1.4.2`
+**Docker Image**: `ghcr.io/agglayer/aggkit-prover:1.9.2`
 
 **Startup Order**: Deploy after OP Succinct Proposer
 
@@ -550,9 +550,9 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 | Component | Docker Image |
 |-----------|--------------|
 | PostgreSQL | `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f` |
-| OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0` |
-| OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2` |
-| OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.11.5` |
+| OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101605.0` |
+| OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.16.5` |
+| OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.16.2` |
 | Aggkit | `ghcr.io/agglayer/aggkit:0.8.1` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
@@ -563,11 +563,11 @@ Deploy the Aggkit bridge as a separate instance to provide the public bridge RES
 | Component | Docker Image |
 |-----------|--------------|
 | PostgreSQL | `bitnamisecure/postgresql@sha256:05f12b9dc62012ac6987bf3160241d2cbdeb60cf6d245f772d8582f89371929f` |
-| OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101602.0` |
-| OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2` |
-| OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.12.0` |
-| OP Succinct Proposer | `ghcr.io/agglayer/op-succinct/op-succinct:v3.1.0-agglayer` |
-| Aggkit Prover | `ghcr.io/agglayer/aggkit-prover:1.4.2` |
+| OP-Geth | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101605.0` |
+| OP-Node | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.16.5` |
+| OP-Batcher | `us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:v1.16.2` |
+| OP Succinct Proposer | `ghcr.io/agglayer/op-succinct/op-succinct:v3.5.0-agglayer` |
+| Aggkit Prover | `ghcr.io/agglayer/aggkit-prover:1.9.2` |
 | Aggkit | `ghcr.io/agglayer/aggkit:0.8.1` |
 | Legacy Bridge | `ghcr.io/0xpolygon/zkevm-bridge-service:v0.6.2` |
 | Legacy Bridge UI | `ghcr.io/0xpolygon/zkevm-bridge-ui:multi-network` |
