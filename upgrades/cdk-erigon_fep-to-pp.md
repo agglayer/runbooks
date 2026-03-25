@@ -11,7 +11,7 @@ This document provides a comprehensive guide for upgrading from CDK Erigon FEP (
 
 Deploy Aggkit in sync only mode.
 
-* image: ghcr.io/agglayer/aggkit:0.7.1
+* image: ghcr.io/agglayer/aggkit:0.8.1
 * command: aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender
 * Persisted data directory. Ex.: /data
 * Configuration file. Ex: /etc/aggkit/config.toml
@@ -22,16 +22,15 @@ Also, create the config.toml file with the following template:
 <summary>config.toml template</summary>
   
 ```toml
-NetworkID = 0                       # Network id
 PathRWData = "/data"                 # Persistent directory
 L1URL = "https://..."                # L1_URL
 L2URL = "https://..."                # L2_URL
-polygonBridgeAddr = "0x..."          # Bridge SC address
 rollupCreationBlockNumber = 0        # Rollup SC deployment block
 rollupManagerCreationBlockNumber = 0 # Rollup Mananger SC deployment block
 genesisBlockNumber = 0               # Rollup Mananger SC deployment block
 
 [L1Config]
+BridgeAddr = "0x..."                        # L1 bridge contract address
 chainId = 11155111                          # L1 chain id
 polygonZkEVMGlobalExitRootAddress = "0x..." # L1 GER SC address
 polygonRollupManagerAddress = "0x..."       # L1 Rollup Manager SC address
@@ -39,12 +38,15 @@ polTokenAddress = "0x..."                   # L1 POL token SC address
 polygonZkEVMAddress = "0x..."               # L1 Rollup SC address
 
 [L2Config]
+BridgeAddr = "0x..."         # L2 bridge contract address
 GlobalExitRootAddr = "0x..." # L2 GER SC address
 
 [AggSender]
 AggsenderPrivateKey = {Path = "/etc/aggkit/sequencer.keystore", Password = "XXXX"}
 CertificateSendInterval = "1m"
+CheckStatusCertificateInterval = "1m"
 CheckSettledInterval = "5s"
+RetryCertAfterInError = true
 SaveCertificatesToFilesPath = "/tmp"
 RequireNoFEPBlockGap = true
 MaxL2BlockNumber = 0
