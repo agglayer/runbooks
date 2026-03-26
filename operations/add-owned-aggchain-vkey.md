@@ -83,7 +83,7 @@ If this returns a non-zero value, the selector already has a VKey. Use `updateOw
 
 Using the **Aggchain manager** address, call:
 
-Cast command:
+**EOA:**
 
 ```shell
 cast send $rollup_address \
@@ -92,6 +92,12 @@ cast send $rollup_address \
   $aggchain_vkey \
   --rpc-url $l1_rpc_url \
   --private-key $PRIVATE_KEY
+```
+
+**Multisig:** generate the calldata and submit it through your multisig:
+
+```shell
+cast calldata "addOwnedAggchainVKey(bytes4,bytes32)" $aggchain_vkey_selector $aggchain_vkey
 ```
 
 ---
