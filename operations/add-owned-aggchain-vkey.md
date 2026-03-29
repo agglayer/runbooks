@@ -67,7 +67,7 @@ Confirm `useDefaultVkeys` is `false`:
 cast call $rollup_address "useDefaultVkeys()(bool)" --rpc-url $l1_rpc_url
 ```
 
-If it returns `true`, the rollup is using VKeys from the `AgglayerGateway` (managed by Polygon). You must first disable the flag by calling `disableUseDefaultVkeysFlag()` with the **Aggchain manager** before proceeding.
+If it returns `true`, the rollup is using `aggchainVKey` from the `AgglayerGateway` (managed by Polygon). This is the default and expected state for chains that rely on Polygon. If you intend to keep using the gateway defaults and believe the `aggchainVKey` there is outdated, contact the Polygon team instead of proceeding with this runbook. If you need to manage your own `aggchainVKey`, first disable the flag by calling `disableUseDefaultVkeysFlag()` with the **Aggchain manager** before proceeding.
 
 Check that the selector does **not** already have a VKey registered (should return `0x0000...`):
 
