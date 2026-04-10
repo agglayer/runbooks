@@ -22,8 +22,9 @@ This document explains how to deploy an L2 using the OP Stack's `op-deployer` to
 Set the following environment variables before proceeding:
 
 ```shell
-export l1_chain_id=11155111
-export l2_chain_id=0
+# 11155111 for Sepolia
+export l1_chain_id=<your-l1-chain_id>
+export l2_chain_id=<l2ChainID-from-combined.json>
 export l1_rpc_url="https://<your_l1_rpc>"
 export l1_rpc_url_wss="wss://<your_l1_rpc>"
 export deployer_private_key=0x... # private key of DEPLOYER_ADDRESS

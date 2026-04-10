@@ -2,7 +2,7 @@
 
 This document explains how to add and select an op-succinct (L2 output) configuration on-chain using the Aggchain manager.
 
-> **Note:** You need to perform this process for every new version of the op-proposer-succinct component you intend to deploy on your network.
+> **Note:** You need to perform this process for every new version of the op-succinct-proposer component you intend to deploy on your network.
 
 ## TL;DR
 
