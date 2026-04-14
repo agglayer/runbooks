@@ -106,7 +106,8 @@ Delete `op-geth` and `op-node-reth`.
 
 1. Point `op-node` to `op-reth`
 2. Disable P2P on `op-reth` and `op-node` (reverse of [step 2](#2-enable-p2p-on-op-geth-and-op-node))
-3. Start `op-reth`, `op-node`, and `op-batcher`
-4. Update `aggkit`, `zkevm-bridge`, `op-succinct-proposer`, and `aggkit-prover` to point to `op-reth` and start them.
+3. Remove the synchronization flags from `op-reth` and `op-node` that were added in [step 5](#5-run-op-reth--op-node)
+4. Start `op-reth`, `op-node`, and `op-batcher`
+5. Update `aggkit`, `zkevm-bridge`, `op-succinct-proposer`, and `aggkit-prover` to point to `op-reth` and start them.
 
 > ⚠️ **Important:** The `--rpc.eth-proof-window` flag must be set to a high value, as it is required by
