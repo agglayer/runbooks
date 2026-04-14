@@ -110,4 +110,4 @@ Delete `op-geth` and `op-node-reth`.
 4. Start `op-reth`, `op-node`, and `op-batcher`
 5. Update `aggkit`, `zkevm-bridge`, `op-succinct-proposer`, and `aggkit-prover` to point to `op-reth` and start them.
 
-> ⚠️ **Important:** The `--rpc.eth-proof-window` flag must be set to a high value, as it is required by
+> ⚠️ **Important:** Set `--rpc.eth-proof-window` to a sufficiently high value on `op-reth`. The `op-succinct-proposer` requires access to historical state proofs, which are pruned by default.
