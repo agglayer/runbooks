@@ -4,24 +4,26 @@ This document describes the initial step of requesting and receiving rollup crea
 
 ## TL;DR
 
-1. Submit a request to Polygon Labs via the Support Portal
-2. Receive `combined.json` with core deployment details after approval
+1. The IP proposes the `attachAggchainToAL()` transaction on Gnosis Safe
+2. Polygon Labs executes the transaction
+3. Polygon Labs shares `combined.json` with core deployment details
 
-## Step 1: Submit a Request
+## Step 1: Propose the `attachAggchainToAL()` Transaction
 
-To initiate the rollup creation:
+The **Implementation Partner (IP)** proposes the `attachAggchainToAL()` transaction on the Gnosis Safe UI.
 
-1. The **Implementation Partner (IP)** must submit a request to Polygon Labs.
-2. Use the [Polygon Support Portal](https://polygon.atlassian.net/servicedesk/customer/portal/22) to raise a support ticket.
+Follow the instructions in the [Chain Integration Process](../../operations/initiate-chain-integration-agglayer.md#part-1-chain-integration-process) runbook.
 
-## Step 2: Setup by Polygon Labs
+## Step 2: Transaction Execution by Polygon Labs
 
-Once approved:
+Once the transaction is proposed:
 
-- Polygon Labs provisions your Rollup.
-- A transaction is recorded (e.g., [example transaction](https://sepolia.etherscan.io/tx/0x9ff8f3556bc6b1f8b9b71fffc9e9434fdf0ae7d0d525b75611cce452c9cdb305)).
+- Polygon Labs reviews and executes the transaction.
+- A transaction is recorded on-chain (e.g., [example transaction](https://sepolia.etherscan.io/tx/0x9ff8f3556bc6b1f8b9b71fffc9e9434fdf0ae7d0d525b75611cce452c9cdb305)).
 
-### Files You Will Receive
+## Step 3: Receive Deployment Artifacts
+
+After execution, Polygon Labs will share the following file:
 
 - `combined.json` - Core deployment details
 
