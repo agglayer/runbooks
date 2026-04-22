@@ -92,9 +92,9 @@ Scale down `aggkit`, `zkevm-bridge`, `op-succinct-proposer`, and `aggkit-prover`
 cast rpc admin_stopSequencer --rpc-url <op-node-rpc-url>
 ```
 
-### 8. Wait for finalization
+### 8. Wait for op-reth to catch up with op-geth
 
-Wait until all safe blocks are finalized.
+Wait until `op-reth` returns the same safe blocks as `op-geth`.
 
 ### 9. Scale down op-batcher and op-node
 
