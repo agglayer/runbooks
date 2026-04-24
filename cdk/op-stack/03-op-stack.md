@@ -46,10 +46,52 @@ docker run --rm -v "$(pwd)/deployer:/deployer" --entrypoint /usr/local/bin/op-de
 		--workdir /deployer
 ```
 
-Edit the generated `deployer/intent.toml` with your deployment parameters. You will need to generate new addresses for:
+Edit the generated `deployer/intent.toml` with your deployment parameters. You will particularly need to generate new addresses for:
 
 - `unsafeBlockSigner` (SEQUENCER_ADDRESS)
 - `batcher` (BATCHER_ADDRESS)
+
+Here's an `intent.toml` example file with the right modifications:
+
+```toml
+configType = "standard-overrides"
+opDeployerVersion = "<generated>"
+l1ChainID = <your-l1-chain_id>
+opcmAddress = "<generated>"
+fundDevAccounts = true
+l1ContractsLocator = "embedded"
+l2ContractsLocator = "embedded"
+
+[globalDeployOverrides]
+  l2BlockTime = 1
+
+[[chains]]
+  id = "<generated>"
+  baseFeeVaultRecipient = "<l2ChainID-from-combined.json>"
+  l1FeeVaultRecipient = "<ADMIN_ADDR>"
+  sequencerFeeVaultRecipient = "<ADMIN_ADDR>"
+  operatorFeeVaultRecipient = "<ADMIN_ADDR>"
+  eip1559DenominatorCanyon = 250
+  eip1559Denominator = 50
+  eip1559Elasticity = 6
+  gasLimit = 60000000
+  operatorFeeScalar = 0
+  operatorFeeConstant = 0
+  useRevenueShare = true
+  chainFeesRecipient = "<ADMIN_ADDR>"
+  minBaseFee = 0
+  daFootprintGasScalar = 0
+  [chains.roles]
+    l1ProxyAdminOwner = "<ADMIN_ADDR>"
+    l2ProxyAdminOwner = "<ADMIN_ADDR>"
+    systemConfigOwner = "<ADMIN_ADDR>"
+    unsafeBlockSigner = "<SEQUENCER_ADDRESS>"
+    batcher = "<BATCHER_ADDRESS>"
+    proposer = "<ADMIN_ADDR>"
+    challenger = "<ADMIN_ADDR>"
+
+
+```
 
 ## Step 2: Deploy L1 Contracts
 
