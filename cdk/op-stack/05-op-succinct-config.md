@@ -9,7 +9,7 @@ This document explains how to add and select an op-succinct (L2 output) configur
 1. Export RPC endpoints, rollup address, and manager private key
 2. Use the op-succinct container to produce `opsuccinctl2ooconfig.json`
 3. Call `addOpSuccinctConfig` with the config values
-4. Call `selectOpSuccinctConfig` to activate the configuration
+4. Call `selectOpSuccinctConfig` to activate the configuration — on first deployment this is all that's needed; on updates, also stop services, adjust configs, and restart services
 
 ## Step 1: Setup Environment Variables
 
@@ -102,12 +102,20 @@ cast send $rollup_address \
 
 ## Step 4: Select Configuration On-Chain
 
-Activate the new configuration by calling `selectOpSuccinctConfig`.
+There are two paths depending on whether this is the initial deployment or an update to an already-running network.
+
+### 4.A: First Deployment
+
+If you have not yet started the **aggsender**, **aggkit-prover** and **op-succinct-proposer** for this network, you only need to select the configuration on-chain. The services will pick it up when they start for the first time.
+
+Update the selected config on-chain using the **Aggchain manager**:
 
 **Function signature:**
 
 ```solidity
-function selectOpSuccinctConfig(bytes32 _configName)
+function selectOpSuccinctConfig(
+    bytes32 _configName
+)
 ```
 
 **Example using `cast`:**
@@ -119,3 +127,35 @@ cast send $rollup_address \
   --rpc-url $l1_rpc_url \
   --private-key $aggchain_manager_private_key
 ```
+
+You can now proceed to start the services as described in their respective runbooks.
+
+### 4.B: Update an Existing Deployment
+
+If the **aggsender**, **aggkit-prover** and **op-succinct-proposer** are already running, follow these steps to roll out the new op-succinct configuration:
+
+1. Stop the **aggsender**, **aggkit-prover** and **op-succinct-proposer**
+2. Adjust the [**op-succinct-proposer**](07-polygon-stack-fep.md#op-succinct-proposer) with the new `OP_SUCCINCT_CONFIG_NAME` environment variable and version
+3. Adjust the [**aggkit-prover**](07-polygon-stack-fep.md#aggkit-prover) and [**aggsender**](06-polygon-stack-common.md#aggkit) config files and versions if necessary
+4. Update the selected config on-chain using the **Aggchain manager**:
+
+   **Function signature:**
+
+   ```solidity
+   function selectOpSuccinctConfig(
+       bytes32 _configName
+   )
+   ```
+
+   **Example using `cast`:**
+
+   ```shell
+   cast send $rollup_address \
+     "selectOpSuccinctConfig(bytes32)" \
+     $config_name \
+     --rpc-url $l1_rpc_url \
+     --private-key $aggchain_manager_private_key
+   ```
+
+5. Start the **aggkit-prover** and **op-succinct-proposer**. Wait until the services are healthy
+6. Start the **aggsender**
