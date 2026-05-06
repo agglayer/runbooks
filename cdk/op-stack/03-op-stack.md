@@ -67,7 +67,7 @@ l2ContractsLocator = "embedded"
 
 [[chains]]
   id = "<generated>"
-  baseFeeVaultRecipient = "<l2ChainID-from-combined.json>"
+  baseFeeVaultRecipient = "<ADMIN_ADDR>"
   l1FeeVaultRecipient = "<ADMIN_ADDR>"
   sequencerFeeVaultRecipient = "<ADMIN_ADDR>"
   operatorFeeVaultRecipient = "<ADMIN_ADDR>"
