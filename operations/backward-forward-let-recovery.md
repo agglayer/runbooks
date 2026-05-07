@@ -297,7 +297,7 @@ The field names must match Aggkit's Go JSON tags, for example `dest_network` and
 Validate the file by making the CLI load it in diagnose-only mode:
 
 ```sh
-export CERT_EXITS_FILE=/secure/path/certificate_exits_override.json
+export CERT_EXITS_FILE=/secure/path/certificate-exits.json
 
 backward-forward-let --cfg "$CFG" \
   --cert-exits-file "$CERT_EXITS_FILE" \
@@ -307,7 +307,7 @@ backward-forward-let --cfg "$CFG" \
 If the file is malformed, the CLI exits before recovery, for example:
 
 ```text
-Error: load certificate exits override: override file /secure/path/certificate_exits_override.json: heights map is missing
+Error: load certificate exits override: override file /secure/path/certificate-exits.json: heights map is missing
 ```
 
 If the cert-ID map is not authoritative or is incomplete, stop and return to the AggLayer admin owner. Fully automatic `(network_id,height) -> certID` discovery is not implemented in this tool.
