@@ -39,9 +39,9 @@ backward-forward-let --cfg /etc/aggkit/base.toml --cfg /etc/aggkit/recovery.toml
 
 Stop and collect the escalation data below if any of these happen:
 
-- `backward-forward-let --help` does not show `--diagnose-only`, `--cert-exits-file`, `cert-status`, and `export-cert-exits`.
+- `backward-forward-let --help` does not show `--diagnose-only`, `--cert-exits-file`, and `cert-status`.
 - Any command exits with an error you cannot directly resolve from this runbook.
-- The diagnosis says certificate exits are missing and you cannot obtain an approved cert-ID map from the AggLayer admin owner, or cannot generate the override with the documented single exporter command.
+- The diagnosis says certificate exits are missing and you cannot obtain an approved cert-ID map from the AggLayer admin owner, or cannot generate the AggLayer certificate file with the documented script.
 - The diagnosis fails with `bridge service data not ready for recovery` after bridge-service indexing has had time to catch up.
 - The recovery prompt or recovery plan is not what you expected.
 - Any transaction fails, receipt status is not `1`, the CLI reports a final LER/deposit-count mismatch, or the bridge remains in emergency state.
@@ -164,7 +164,8 @@ NOTE: For heights with UNKNOWN cert IDs, ask the agglayer admin to look up
   or check aggsender submission logs for the certificate ID at that height.
 
 Preferred batch export path:
-  1. Build an authoritative cert ID map from agglayer admin data:
+  1. Ask the agglayer admin owner to resolve an authoritative cert ID map
+     from agglayer state, then fetch raw admin_getCertificate responses:
      {
        "network_id": <L2NetworkID>,
        "certificates": {
@@ -172,15 +173,16 @@ Preferred batch export path:
          "41": "<CertID>"
        }
      }
-  2. Export the override JSON:
-     backward-forward-let --cfg <config> export-cert-exits \
-       --agglayer-admin-url <agglayer-admin-url> \
-       --cert-ids-file <cert-ids.json> \
-       --out <certificate-exits.json>
+  2. Store the raw agglayer responses in an agglayer certificate file:
+     {
+       "network_id": <L2NetworkID>,
+       "certificates": {
+         "<height>": {"jsonrpc":"2.0","result":[<Certificate>, <CertificateHeader|null>]}
+       }
+     }
 
-The exporter calls admin_getCertificate for each cert ID, validates network/height,
-preserves empty bridge-exit lists, writes a source manifest, and prints the
-diagnosis/recovery follow-up commands.
+The --cert-exits-file loader accepts either this raw agglayer certificate file
+or the Aggkit-native heights-to-bridge_exits override format.
 
 Manual admin API shape for each KNOWN cert ID:
   POST http://<agglayer-admin-url>/
@@ -189,16 +191,16 @@ Manual admin API shape for each KNOWN cert ID:
   {"jsonrpc":"2.0","method":"admin_getCertificate","params":["<CertID>"],"id":1}
 
   The response is [Certificate, CertificateHeader|null].
-  Use export-cert-exits to extract and re-marshal the "bridge_exits" field.
+  It can be stored directly under the matching height key in --cert-exits-file.
 
 Re-run the tool with:
-  backward-forward-let --cfg <config> --cert-exits-file <path-to-override.json>
+  backward-forward-let --cfg <config> --cert-exits-file <path-to-agglayer-certificates.json>
 
 No recovery transactions were sent.
 Provide the missing certificate exits with --cert-exits-file, then rerun diagnosis.
 ```
 
-Follow the fallback flow below, then rerun diagnosis with the generated override file.
+Follow the fallback flow below, then rerun diagnosis with the generated AggLayer certificate file.
 
 ### Output: Bridge-Service Data Not Ready
 
@@ -218,15 +220,26 @@ If the same deposit count remains missing after indexing should be complete, sto
 
 ## Fallback: Certificate Exits File
 
-Use `--cert-exits-file` only when the CLI reports missing certificate exits. The file supplies pre-extracted `bridge_exits` keyed by certificate height, and the CLI uses it only as fallback for heights AggSender cannot serve.
+Use `--cert-exits-file` only when the CLI reports missing certificate exits. The file may contain raw AggLayer `admin_getCertificate` responses keyed by certificate height, or pre-extracted `bridge_exits` in Aggkit's native fallback format. The CLI uses it only as fallback for heights AggSender cannot serve.
 
 The approved path is:
 
-1. Ask the AggLayer admin owner for an authoritative JSON cert-ID map for every missing height reported by diagnosis. The owner may produce it from an approved DB lookup or batch export, for example from the AggLayer `certificate_per_network_cf` data. This repository does not contain the environment-specific command for that lookup; do not invent one during an incident.
-2. Run `backward-forward-let export-cert-exits` once against the approved map and read-only AggLayer Admin API.
-3. Re-run diagnosis with the generated override file.
+1. Send the missing height range and network ID to the AggLayer admin owner.
+2. The AggLayer admin owner resolves those heights to certificate IDs from AggLayer state and exports the raw AggLayer certificates with the script below.
+3. Re-run diagnosis with the generated AggLayer certificate file as `--cert-exits-file`.
 
-Input cert-ID map shape:
+### AggLayer Admin: Export Certificates
+
+The fallback data must come from AggLayer state, not from guessed IDs or hand-written bridge exits.
+
+Inputs from the recovery operator:
+
+- `network_id`: the `BackwardForwardLET.L2NetworkID` from the affected Aggkit config.
+- Missing certificate heights from the diagnosis output.
+- The read-only AggLayer Admin API URL.
+- Any required Admin API auth header, for example `Authorization: Bearer <token>`.
+
+For each missing height, resolve `(network_id, height) -> certificate_id` from the AggLayer state DB `certificate_per_network_cf` mapping or an owner-approved equivalent export. The cert-ID map must have this shape:
 
 ```json
 {
@@ -238,36 +251,108 @@ Input cert-ID map shape:
 }
 ```
 
-Generate the override and source manifest:
+Then run this shell script to fetch the raw AggLayer `admin_getCertificate` responses and write the file that Aggkit can load directly:
 
 ```sh
-export AGGLAYER_ADMIN_URL="<read-only agglayer admin JSON-RPC URL>"
-export CERT_IDS_FILE=/secure/path/cert-ids.json
-export CERT_EXITS_FILE=/secure/path/certificate-exits.json
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
-backward-forward-let --cfg "$CFG" export-cert-exits \
-  --agglayer-admin-url "$AGGLAYER_ADMIN_URL" \
-  --cert-ids-file "$CERT_IDS_FILE" \
-  --out "$CERT_EXITS_FILE" \
-  | tee "$OUT/export-cert-exits.txt"
+export AGGLAYER_ADMIN_URL="${AGGLAYER_ADMIN_URL:?set read-only AggLayer Admin API URL}"
+export CERT_IDS_FILE="${CERT_IDS_FILE:?set path to cert-ids.json}"
+export AGGLAYER_CERTS_FILE="${AGGLAYER_CERTS_FILE:?set output path for agglayer-certificates.json}"
+# Optional, for IAP or other protected admin endpoints:
+# export AGGLAYER_ADMIN_AUTH_HEADER="Authorization: Bearer $JWT"
+
+NETWORK_ID="$(jq -r '.network_id' "$CERT_IDS_FILE")"
+test "$NETWORK_ID" != "null" -a "$NETWORK_ID" != "0"
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp" "$tmp.next"' EXIT
+
+jq -n \
+  --argjson network_id "$NETWORK_ID" \
+  '{network_id: $network_id, description: "raw agglayer admin_getCertificate responses", certificates: {}}' \
+  > "$tmp"
+
+while IFS= read -r height; do
+  cert_id="$(jq -r --arg h "$height" '.certificates[$h]' "$CERT_IDS_FILE")"
+  jq -e -n --arg cert_id "$cert_id" '$cert_id | test("^0x[0-9a-fA-F]{64}$")' >/dev/null
+
+  request="$(jq -n --arg cert_id "$cert_id" \
+    '{jsonrpc:"2.0", id:1, method:"admin_getCertificate", params:[$cert_id]}')"
+
+  curl_headers=(-H "Content-Type: application/json")
+  if [ -n "${AGGLAYER_ADMIN_AUTH_HEADER:-}" ]; then
+    curl_headers+=(-H "$AGGLAYER_ADMIN_AUTH_HEADER")
+  fi
+
+  response="$(curl -fsS -X POST "$AGGLAYER_ADMIN_URL" "${curl_headers[@]}" -d "$request")"
+
+  jq -e \
+    --argjson network_id "$NETWORK_ID" \
+    --argjson height "$height" \
+    '.error == null
+     and .result[0].network_id == $network_id
+     and .result[0].height == $height
+     and (.result[0].bridge_exits | type == "array")' \
+    <<<"$response" >/dev/null
+
+  jq --arg h "$height" --argjson response "$response" \
+    '.certificates[$h] = $response' "$tmp" > "$tmp.next"
+  mv "$tmp.next" "$tmp"
+done < <(jq -r '.certificates | keys[]' "$CERT_IDS_FILE" | sort -n)
+
+mv "$tmp" "$AGGLAYER_CERTS_FILE"
+trap - EXIT
+
+jq -e \
+  --argjson network_id "$NETWORK_ID" \
+  '.network_id == $network_id
+   and (.certificates | type == "object")
+   and ([.certificates[] | (.result[0].network_id == $network_id and (.result[0].bridge_exits | type == "array"))] | all)' \
+  "$AGGLAYER_CERTS_FILE" >/dev/null
+
+sha256sum "$CERT_IDS_FILE" "$AGGLAYER_CERTS_FILE"
 ```
 
-Representative exporter output:
+The output file is intentionally AggLayer-shaped. `backward-forward-let` accepts this format directly:
 
-```text
-Exported certificate exits override.
-Network ID: 1
-Certificates exported: 2
-Override file: /secure/path/certificate-exits.json
-Source manifest: /secure/path/certificate-exits.json.manifest.json
-Next:
-  backward-forward-let --cfg <config> --cert-exits-file /secure/path/certificate-exits.json --diagnose-only
-  backward-forward-let --cfg <config> --cert-exits-file /secure/path/certificate-exits.json
+```json
+{
+  "network_id": 1,
+  "description": "raw agglayer admin_getCertificate responses",
+  "certificates": {
+    "42": {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": [
+        {
+          "network_id": 1,
+          "height": 42,
+          "bridge_exits": []
+        },
+        null
+      ]
+    }
+  }
+}
 ```
 
-The exporter calls `admin_getCertificate`, validates the certificate `network_id`, height, and calculated certificate ID, preserves empty bridge-exit lists as `[]`, writes the override JSON, and writes a source manifest. Stop if any of those checks fail.
+Hand off `AGGLAYER_CERTS_FILE` through the approved incident channel, plus the command output, checksums, state DB source used for the cert-ID lookup, network ID, exported height range, and operator/ticket reference. Do not include AggLayer Admin API tokens, database credentials, or private endpoint secrets.
 
-Expected override shape:
+Run diagnosis with the AggLayer certificate file:
+
+```sh
+export CERT_EXITS_FILE=/secure/path/agglayer-certificates.json
+
+backward-forward-let --cfg "$CFG" \
+  --cert-exits-file "$CERT_EXITS_FILE" \
+  --diagnose-only | tee "$OUT/diagnosis.with-cert-exits.txt"
+```
+
+The CLI validates the file network ID, each certificate height, and each certificate network ID, then extracts `bridge_exits` internally. Empty bridge-exit lists are preserved as `[]`. Stop if any of those checks fail.
+
+Alternative Aggkit-native override shape:
 
 ```json
 {
@@ -292,25 +377,15 @@ Expected override shape:
 }
 ```
 
-The field names must match Aggkit's Go JSON tags, for example `dest_network` and `dest_address`. Do not copy `admin_getCertificate` payloads into this file by hand; use `export-cert-exits` so empty exits and field names are preserved correctly.
-
-Validate the file by making the CLI load it in diagnose-only mode:
-
-```sh
-export CERT_EXITS_FILE=/secure/path/certificate-exits.json
-
-backward-forward-let --cfg "$CFG" \
-  --cert-exits-file "$CERT_EXITS_FILE" \
-  --diagnose-only | tee "$OUT/diagnosis.with-cert-exits.txt"
-```
+This format is still accepted, but the AggLayer admin handoff should prefer the raw `certificates` format above. Do not copy `admin_getCertificate` payloads into the `heights` shape by hand.
 
 If the file is malformed, the CLI exits before recovery, for example:
 
 ```text
-Error: load certificate exits override: override file /secure/path/certificate-exits.json: heights map is missing
+Error: load certificate exits override: agglayer certificates file /secure/path/agglayer-certificates.json: height key 42 does not match certificate height 43
 ```
 
-If the cert-ID map is not authoritative or is incomplete, stop and return to the AggLayer admin owner. Fully automatic `(network_id,height) -> certID` discovery is not implemented in this tool.
+If the cert-ID map is not authoritative or is incomplete, stop and return to the AggLayer admin owner. `backward-forward-let` validates and extracts certificate exits from provided AggLayer certificate data; it does not discover `(network_id,height) -> certID` itself.
 
 Proceed only after diagnosis prints `Status: Recovery required` and a recovery plan.
 
@@ -539,12 +614,11 @@ Collect this before escalation:
 - The config file path and a redacted copy of relevant non-secret config values.
 - Last settled height, certificate ID, LER, deposit count, latest pending status, and latest pending error from `cert-status`.
 - The diagnosis `Divergence Point`, divergent leaf count, extra L2 bridge count, and undercollateralized token summary.
-- For missing certificate exits: the reported missing heights, which cert IDs were auto-resolved, which remained `UNKNOWN`, the owner/ticket for the authoritative cert-ID map, and checksums of the cert-ID map, override file, and source manifest:
+- For missing certificate exits: the reported missing heights, which cert IDs were auto-resolved, which remained `UNKNOWN`, the owner/ticket for the authoritative cert-ID map, and checksums of the cert-ID map and AggLayer certificate file:
 
 ```sh
 sha256sum "$CERT_IDS_FILE" | tee "$OUT/cert-ids-file.sha256"
 sha256sum "$CERT_EXITS_FILE" | tee "$OUT/cert-exits-file.sha256"
-sha256sum "$CERT_EXITS_FILE.manifest.json" | tee "$OUT/cert-exits-manifest.sha256"
 ```
 
 - For bridge-service indexing failures: the missing `DC=<number>` from the error, when it was first seen, and whether it changed after retry.
