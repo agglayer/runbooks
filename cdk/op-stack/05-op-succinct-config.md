@@ -1,8 +1,12 @@
-# OP Succinct Configuration
+# OP Succinct Configuration _(FEP only)_
 
 This document explains how to add and select an op-succinct (L2 output) configuration on-chain using the Aggchain manager.
 
-> **Note:** You need to perform this process for every new version of the op-succinct-proposer component you intend to deploy on your network.
+> [!IMPORTANT]  
+> This step only relates to AggchainFEP networks.
+
+> [!NOTE]
+> You need to perform this process for every new version of the op-succinct-proposer component you intend to deploy on your network.
 
 ## TL;DR
 
