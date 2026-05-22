@@ -85,7 +85,7 @@ l2ContractsLocator = "embedded"
     l1ProxyAdminOwner = "<ADMIN_ADDR>"
     l2ProxyAdminOwner = "<ADMIN_ADDR>"
     systemConfigOwner = "<ADMIN_ADDR>"
-    unsafeBlockSigner = "<SEQUENCER_ADDRESS>"
+    unsafeBlockSigner = "<BATCHER_ADDRESS>"
     batcher = "<BATCHER_ADDRESS>"
     proposer = "<ADMIN_ADDR>"
     challenger = "<ADMIN_ADDR>"
@@ -106,7 +106,7 @@ docker run --rm -v "$(pwd)/deployer:/deployer" --entrypoint /usr/local/bin/op-de
 		--private-key ${deployer_private_key}
 ```
 
-This writes the deployer state to `deployer/state.json` and related artifacts.
+This writes the deployer state to `deployer/state.json`.
 
 ## Step 3: Merge OP + Polygon Genesis with Pre-deployed Contracts
 
