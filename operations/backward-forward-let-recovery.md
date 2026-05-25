@@ -12,6 +12,7 @@ You need:
 - A `backward-forward-let` binary from the same Aggkit version as the affected deployment.
 - Network access to the L2 RPC, AggLayer gRPC, bridge-service REST API, and AggSender JSON-RPC configured for that deployment.
 - Read-only AggLayer Admin API access only if the CLI reports missing certificate exits.
+- `bash`, `curl`, `jq`, and `sha256sum` available on the workstation that generates missing-certificate fallback data.
 - Role credentials configured in the Aggkit config for:
   - `BackwardForwardLET.GERRemoverKey`
   - `BackwardForwardLET.EmergencyPauserKey`
@@ -60,6 +61,7 @@ mkdir -p "$OUT"
 
 backward-forward-let --version | tee "$OUT/version.txt"
 backward-forward-let --help | tee "$OUT/help.txt"
+command -v bash curl jq sha256sum | tee "$OUT/fallback-tooling.txt"
 backward-forward-let --cfg "$CFG" cert-status | tee "$OUT/cert-status.before.txt"
 ```
 
@@ -157,7 +159,7 @@ Missing certificates (2 heights):
 NOTE: After an aggsender DB wipe, this missing range may span the full settled history
   (for example heights 0..latest). This is expected for the fallback path.
   Do not fetch large ranges one-by-one manually; use a script or ask the agglayer admin
-  for a batch export of cert IDs / bridge exits when many heights are missing.
+  for a batch export of cert IDs / raw certificates when many heights are missing.
 
 NOTE: For heights with UNKNOWN cert IDs, ask the agglayer admin to look up
   (network_id, height) in the agglayer's certificate_per_network_cf column family,
@@ -222,22 +224,23 @@ If the same deposit count remains missing after indexing should be complete, sto
 
 Use `--cert-exits-file` only when the CLI reports missing certificate exits. The file may contain raw AggLayer `admin_getCertificate` responses keyed by certificate height, or pre-extracted `bridge_exits` in Aggkit's native fallback format. The CLI uses it only as fallback for heights AggSender cannot serve.
 
-The approved path is:
+The approved path is a two-party handoff:
 
-1. Send the missing height range and network ID to the AggLayer admin owner.
-2. The AggLayer admin owner resolves those heights to certificate IDs from AggLayer state and exports the raw AggLayer certificates with the script below.
-3. Re-run diagnosis with the generated AggLayer certificate file as `--cert-exits-file`.
+1. Recovery operator sends the exact missing heights and network ID to the AggLayer admin owner. If the CLI reports a full-history range such as `0..latest`, the request must say the range is inclusive and must name `latest`.
+2. AggLayer admin owner resolves exactly those heights to certificate IDs from AggLayer state.
+3. AggLayer admin owner runs the export script below and returns the generated AggLayer certificate file, checksums, state DB source, height list/range, and ticket/operator reference.
+4. Recovery operator re-runs diagnosis with the generated AggLayer certificate file as `--cert-exits-file`.
 
 ### AggLayer Admin: Export Certificates
 
 The fallback data must come from AggLayer state, not from guessed IDs or hand-written bridge exits.
 
-Inputs from the recovery operator:
+Recovery operator sends these inputs to the AggLayer admin owner:
 
 - `network_id`: the `BackwardForwardLET.L2NetworkID` from the affected Aggkit config.
-- Missing certificate heights from the diagnosis output.
+- Exact missing certificate heights from the diagnosis output. Use a list for sparse heights; use an inclusive range only when every height in that range is required.
 - The read-only AggLayer Admin API URL.
-- Any required Admin API auth header, for example `Authorization: Bearer <token>`.
+- Whether the endpoint requires an auth header. Do not send reusable API tokens or private credentials through the incident channel.
 
 For each missing height, resolve `(network_id, height) -> certificate_id` from the AggLayer state DB `certificate_per_network_cf` mapping or an owner-approved equivalent export. The cert-ID map must have this shape:
 
@@ -251,11 +254,13 @@ For each missing height, resolve `(network_id, height) -> certificate_id` from t
 }
 ```
 
-Then run this shell script to fetch the raw AggLayer `admin_getCertificate` responses and write the file that Aggkit can load directly:
+AggLayer admin owner runs this shell script to fetch the raw AggLayer `admin_getCertificate` responses and write the file that Aggkit can load directly:
 
 ```sh
 #!/usr/bin/env bash
 set -Eeuo pipefail
+
+command -v bash curl jq sha256sum >/dev/null
 
 export AGGLAYER_ADMIN_URL="${AGGLAYER_ADMIN_URL:?set read-only AggLayer Admin API URL}"
 export CERT_IDS_FILE="${CERT_IDS_FILE:?set path to cert-ids.json}"
@@ -314,6 +319,14 @@ jq -e \
 
 sha256sum "$CERT_IDS_FILE" "$AGGLAYER_CERTS_FILE"
 ```
+
+Required admin output:
+
+- `AGGLAYER_CERTS_FILE`, the generated JSON file.
+- `sha256sum` output for `CERT_IDS_FILE` and `AGGLAYER_CERTS_FILE`.
+- State DB source or owner-approved export source used for the cert-ID lookup.
+- The exact network ID and height list/range exported.
+- Operator/ticket reference for the lookup and export.
 
 The output file is intentionally AggLayer-shaped. `backward-forward-let` accepts this format directly:
 
