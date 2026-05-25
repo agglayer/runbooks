@@ -235,6 +235,8 @@ The approved path is a two-party handoff:
 
 The fallback data must come from AggLayer state, not from guessed IDs or hand-written bridge exits.
 
+Read-only AggLayer Admin API access is necessary but not sufficient when certificate IDs are unknown. `admin_getCertificate` fetches a certificate by certificate ID; it does not, by itself, resolve `(network_id, height) -> certificate_id`. Unknown height-to-ID mappings must come from AggLayer state DB `certificate_per_network_cf`, an owner-approved equivalent export, or a documented deployment-specific source.
+
 Recovery operator sends these inputs to the AggLayer admin owner:
 
 - `network_id`: the `BackwardForwardLET.L2NetworkID` from the affected Aggkit config.
@@ -392,6 +394,17 @@ Alternative Aggkit-native override shape:
 
 This format is still accepted, but the AggLayer admin handoff should prefer the raw `certificates` format above. Do not copy `admin_getCertificate` payloads into the `heights` shape by hand.
 
+Keep the two file shapes separate:
+
+- Use the raw `certificates` shape when storing complete `admin_getCertificate` responses.
+- Use the native `heights` shape only when storing already-extracted `bridge_exits`.
+
+Do not append a raw JSON-RPC response under `heights`, and do not append a bridge-exit array under `certificates`. If a runbook or helper updates an existing fallback file, first check which top-level key it uses:
+
+```sh
+jq -r 'if has("certificates") then "certificates" elif has("heights") then "heights" else "unknown" end' "$CERT_EXITS_FILE"
+```
+
 If the file is malformed, the CLI exits before recovery, for example:
 
 ```text
@@ -421,6 +434,25 @@ Latest settled LER: 0x1111000000000000000000000000000000000000000000000000000000
 Latest settled deposit count: 129
 Latest pending certificate: none
 Wait complete: no open pending certificate.
+```
+
+This wait may be quiet while a certificate remains `Pending` or `Candidate`. If you need timestamped evidence during the wait, use explicit polling instead:
+
+```sh
+for attempt in $(seq 1 6); do
+  ts="$(date -u +%Y%m%dT%H%M%SZ)"
+  backward-forward-let --cfg "$CFG" cert-status \
+    | tee "$OUT/cert-status.no-pending-sample-$ts.txt"
+
+  if grep -q "Latest pending certificate: none" "$OUT/cert-status.no-pending-sample-$ts.txt"; then
+    cp "$OUT/cert-status.no-pending-sample-$ts.txt" "$OUT/cert-status.no-pending.txt"
+    break
+  fi
+
+  sleep 300
+done
+
+test -f "$OUT/cert-status.no-pending.txt"
 ```
 
 Run recovery interactively:
@@ -487,6 +519,16 @@ Proceed with recovery? [y/N] n
 Aborted.
 ```
 
+If the terminal, SSH session, or operator workflow is interrupted after answering `y`, do not immediately rerun recovery. First inspect:
+
+```sh
+tail -n 120 "$OUT/recovery.txt"
+pgrep -af 'backward-forward-let|tools/backward_forward_let' || true
+backward-forward-let --cfg "$CFG" cert-status | tee "$OUT/cert-status.after-interruption.txt"
+```
+
+If `recovery.txt` already contains `Recovery completed successfully.` and shows `DeactivateEmergencyState confirmed`, continue with verification. If it stopped after `ActivateEmergencyState`, `BackwardLET`, or a `ForwardLET` transaction, confirm which transactions were mined and whether the bridge is still in emergency state before rerunning. Do not rerun blindly; a second run may see a partially recovered state.
+
 ## Verify
 
 After recovery, coordinate AggSender certificate production with the deployment owner.
@@ -523,7 +565,19 @@ If `aggsender_status` shows `running=true` but the status is stuck in startup or
 Wipe the affected deployment's AggSender local DB, then restart AggSender.
 ```
 
-Do not improvise the DB path or service-control command from this public runbook. Record the operator, ticket, exact DB-wipe/restart command or runbook used, and timestamp in the evidence directory. After DevOps confirms the DB wipe and restart, rerun `aggsender_status`; it must leave the stale initial-status error before you continue polling for the follow-up certificate.
+Do not improvise the DB path or service-control command from this public runbook. Record the operator, ticket, exact DB-wipe/restart command or runbook used, and timestamp in the evidence directory:
+
+```sh
+cat > "$OUT/aggsender-db-wipe-restart-handoff.txt" <<'EOF'
+operator:
+ticket_or_change_reference:
+db_wipe_command_or_runbook:
+restart_command_or_runbook:
+timestamp_utc:
+EOF
+```
+
+If another operator performs the action, ask for the command, runbook link, automation job URL, or ticket reference; do not record only "done". After DevOps confirms the DB wipe and restart, rerun `aggsender_status`; it must leave the stale initial-status error before you continue polling for the follow-up certificate.
 
 If the DB wipe clears the stale certificate error but AggSender remains in `starting_claim_syncer_stage`, check logs before polling indefinitely. After a DB wipe and restart, local bridge-sync state may still be catching up. During that catch-up window, AggSender can temporarily fail to resolve the latest settled certificate's `NewLocalExitRoot`, for example:
 
