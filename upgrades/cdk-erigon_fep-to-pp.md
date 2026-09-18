@@ -7,7 +7,16 @@ This document provides a comprehensive guide for upgrading from CDK Erigon FEP (
 - Neither pool-manager nor executors required to be run in the trusted infrastructure.
 - Changing cdk-node component for aggkit to verify batches and submit certificates to the Agglayer.
 
+> [!WARNING]
+> **Following this runbook drops the network's data-availability (DA) capabilities.** A PP
+> network no longer posts batch data to L1 (calldata/blobs) nor to a DAC — those are rollup
+> features that are lost when switching to PP. As a consequence the **sequencer becomes a single
+> point of failure**: if the operator does not keep proper backups, replica nodes, etc., the L2
+> data cannot be reconstructed.
+
 ## Prerequisites
+
+### Deploy Aggkit in sync only mode
 
 Deploy Aggkit in sync only mode.
 
@@ -69,6 +78,67 @@ Once started, it will sync from the rollup manager deployment block. It may take
 > * cardona: "grpc-agglayer-test.polygon.technology:443"
 > * bali: "grpc-agglayer-dev.polygon.technology:443"
 
+### Reconcile pending batches (`lastBatchSequenced` vs `lastVerifiedBatch`)
+
+> [!IMPORTANT]
+> The migration transaction `initMigration` (see step 4 of the Upgrade procedure) **only succeeds
+> when `lastBatchSequenced == lastVerifiedBatch`**. Run this pre-flight check first — if there are
+> sequenced-but-unverified batches, the migration will revert until the gap is closed.
+
+Read both counters from the **Rollup Manager** on L1:
+
+```bash
+export ETH_RPC_URL="https://..."      # L1 RPC
+export ROLLUP_MANAGER="0x..."          # L1 Rollup Manager SC
+export ROLLUP="0x..."                  # L1 Rollup SC
+export ROLLUP_ID=1                      # NetworkID / rollupID (replace with your value)
+
+# lastVerifiedBatch — dedicated getter on the Rollup Manager:
+export LAST_VERIFIED_BATCH=$(cast call $ROLLUP_MANAGER \
+  "getLastVerifiedBatch(uint32)(uint64)" $ROLLUP_ID | awk '{print $1}')
+
+# lastBatchSequenced — field 6 of the rollup-data tuple on the Rollup Manager:
+export LAST_BATCH_SEQUENCED=$(cast call $ROLLUP_MANAGER \
+  "rollupIDToRollupData(uint32)(address,uint64,address,uint64,bytes32,uint64,uint64,uint64,uint64,uint64,uint64,uint8)" \
+  $ROLLUP_ID | sed -n '6p' | awk '{print $1}')
+
+echo "lastBatchSequenced=$LAST_BATCH_SEQUENCED  lastVerifiedBatch=$LAST_VERIFIED_BATCH"
+```
+
+If `lastBatchSequenced == lastVerifiedBatch`, there is nothing to reconcile — continue with the
+Upgrade procedure.
+
+If `lastBatchSequenced > lastVerifiedBatch`, there are sequenced batches that were never verified.
+You must close the gap **before** migrating by rolling the pending batches back.
+
+#### Rollback the pending batches (`rollbackBatches`)
+
+Discard the sequenced-but-unverified batches so both counters line up at
+`lastVerifiedBatch`. `rollbackBatches(IPolygonRollupBase rollupContract, uint64 targetBatch)` on the
+Rollup Manager is a single L1 transaction (callable by `_UPDATE_ROLLUP_ROLE` or the rollup admin)
+that rewinds `lastBatchSequenced`, `totalSequencedBatches`, the `sequencedBatches` entries and
+`lastAccInputHash`; it leaves `lastLocalExitRoot` and `lastVerifiedBatch` untouched, so the bootstrap
+certificate still targets the same LER.
+
+1. **Stop the sequencer** so no new batches are sequenced during the rollback and after the rollback.
+2. **Trigger the rollback** on L1 (`targetBatch = lastVerifiedBatch`). The caller must hold
+   `_UPDATE_ROLLUP_ROLE` **or** be the rollup admin — this may be a different account than the
+   AgglayerManager admin (`$ADMIN_PKEY`) used for `initMigration`:
+   ```bash
+   # ROLLBACK_PKEY must hold _UPDATE_ROLLUP_ROLE or be the rollup admin
+   cast send --private-key $ROLLBACK_PKEY $ROLLUP_MANAGER \
+     "rollbackBatches(address,uint64)" $ROLLUP $LAST_VERIFIED_BATCH
+   ```
+   Wait until the transaction is finalized, then re-check that `lastBatchSequenced == lastVerifiedBatch`.
+
+Then continue with the Upgrade procedure below.
+
+> [!NOTE]
+> cdk-erigon does **not** drop L2 blocks when it observes the `RollbackBatches` event on L1, so the
+> L2 chain is not reorged by the rollback and blocks after `lastVerifiedBatch` remain; their bridge
+> exits settle in the PP certificates after the migration. Validate this on a shadow fork before
+> running it against a live network.
+
 ## Upgrade procedure
 
 This process may take a couple hours to complete, but downtime from the point of view of the users should be equivalent to a simple node restart. Ensure the aggkit is fully synced with the latest block on L1.
@@ -119,7 +189,15 @@ This process may take a couple hours to complete, but downtime from the point of
       [AggSender]
       MaxL2BlockNumber = 0 # Set the obtained last verified L2 block number
       DryRun = false       # Send certificate to the agglayer
+      MaxCertSize = 0      # Do not cap the certificate size (default is 8MB)
+      MaxL2BlockRange = 0  # Do not cap the block range (already the default value)
       ```
+      > [!IMPORTANT]
+      > To guarantee the **bootstrap certificate covers the full `[1, N]` range** (where `N` is the
+      > last verified L2 block) **in a single, non-split certificate**, both of these limits must be
+      > disabled:
+      > * `MaxCertSize = 0` — otherwise the default 8MB cap can split the bootstrap cert.
+      > * `MaxL2BlockRange = 0` — this is already the default, but set it explicitly to be safe.
    4. Restart the aggkit instance with the new config.
    5. Monitor the first certificate is correctly sent to the agglayer.
    6. Once the first certificate is settled, update the configuration to allow new certificates.
