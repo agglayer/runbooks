@@ -91,15 +91,18 @@ Read both counters from the **Rollup Manager** on L1:
 export ETH_RPC_URL="https://..."      # L1 RPC
 export ROLLUP_MANAGER="0x..."          # L1 Rollup Manager SC
 export ROLLUP="0x..."                  # L1 Rollup SC
-export ROLLUP_ID=<n>                    # NetworkID / rollupID
+export ROLLUP_ID=1                      # NetworkID / rollupID (replace with your value)
 
 # lastVerifiedBatch — dedicated getter on the Rollup Manager:
-cast call $ROLLUP_MANAGER "getLastVerifiedBatch(uint32)(uint64)" $ROLLUP_ID
+export LAST_VERIFIED_BATCH=$(cast call $ROLLUP_MANAGER \
+  "getLastVerifiedBatch(uint32)(uint64)" $ROLLUP_ID | awk '{print $1}')
 
 # lastBatchSequenced — field 6 of the rollup-data tuple on the Rollup Manager:
-cast call $ROLLUP_MANAGER \
+export LAST_BATCH_SEQUENCED=$(cast call $ROLLUP_MANAGER \
   "rollupIDToRollupData(uint32)(address,uint64,address,uint64,bytes32,uint64,uint64,uint64,uint64,uint64,uint64,uint8)" \
-  $ROLLUP_ID | sed -n '6p'
+  $ROLLUP_ID | sed -n '6p' | awk '{print $1}')
+
+echo "lastBatchSequenced=$LAST_BATCH_SEQUENCED  lastVerifiedBatch=$LAST_VERIFIED_BATCH"
 ```
 
 If `lastBatchSequenced == lastVerifiedBatch`, there is nothing to reconcile — continue with the
@@ -118,9 +121,12 @@ that rewinds `lastBatchSequenced`, `totalSequencedBatches`, the `sequencedBatche
 certificate still targets the same LER.
 
 1. **Stop the sequencer** so no new batches are sequenced during the rollback and after the rollback.
-2. **Trigger the rollback** on L1 (`targetBatch = lastVerifiedBatch`):
+2. **Trigger the rollback** on L1 (`targetBatch = lastVerifiedBatch`). The caller must hold
+   `_UPDATE_ROLLUP_ROLE` **or** be the rollup admin — this may be a different account than the
+   AgglayerManager admin (`$ADMIN_PKEY`) used for `initMigration`:
    ```bash
-   cast send --private-key $ADMIN_PKEY $ROLLUP_MANAGER \
+   # ROLLBACK_PKEY must hold _UPDATE_ROLLUP_ROLE or be the rollup admin
+   cast send --private-key $ROLLBACK_PKEY $ROLLUP_MANAGER \
      "rollbackBatches(address,uint64)" $ROLLUP $LAST_VERIFIED_BATCH
    ```
    Wait until the transaction is finalized, then re-check that `lastBatchSequenced == lastVerifiedBatch`.
