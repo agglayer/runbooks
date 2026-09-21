@@ -71,8 +71,10 @@ The `[AggSender]` section is already in the template so that nothing has to be a
 is not read while `aggsender` is not in `--components`.
 
 > [!NOTE]
-> Add `l1bridgesync`, `l2gersync` and `bridge` to `--components` as well if the bridge REST API is
-> wanted during the sync; `aggsender` itself does not need them.
+> The bridge REST API is already served in this phase: `l2bridgesync` in `--components` is enough
+> to bind it (`hasBridgeComponent` in aggkit's `cmd/run.go`), so `/bridge/v1/sync-status` reports
+> the L2 bridge syncer here. Add `l1bridgesync`, `l2gersync` or `bridge` only if the L1 and GER
+> endpoints are needed; `aggsender` does not need them.
 
 > [!IMPORTANT]
 > Do **not** start `aggsender` before the migration. Its default `Mode = "Auto"` resolves the mode
@@ -102,18 +104,29 @@ different finality: `l1infotreesync` follows the **finalized** L1 block, `l2brid
 **latest** L2 block.
 
 ```bash
+export PATH_RW_DATA="/data" # PathRWData, as set in the config template
+
 # L1 info tree sync vs finalized L1 block
-sqlite3 -readonly /data/L1InfoTreeSync.sqlite "select max(num) from block;"
+sqlite3 -readonly "$PATH_RW_DATA/L1InfoTreeSync.sqlite" ".timeout 5000" "select max(num) from block;"
 cast block finalized -f number --rpc-url $L1_URL
 
 # L2 bridge sync vs latest L2 block
-sqlite3 -readonly /data/bridgel2sync.sqlite "select max(num) from block;"
+sqlite3 -readonly "$PATH_RW_DATA/bridgel2sync.sqlite" ".timeout 5000" "select max(num) from block;"
 cast block latest -f number --rpc-url $L2_URL
 ```
 
 Both pairs should be within a few blocks of each other and the gap should not grow between two
-consecutive checks. Keep the syncers running from here on — they stay live through the rest of the
-procedure.
+consecutive checks.
+
+> [!NOTE]
+> Aggkit keeps these databases open in WAL mode, so a read can still land during a checkpoint and
+> fail with `database is locked`. `.timeout 5000` makes `sqlite3` wait instead of failing
+> immediately; if the error shows up anyway, just retry the query.
+
+Leave **this same aggkit instance** running from here on, through the batch reconciliation and
+`initMigration`. It is the instance that gets restarted with `aggsender` added in step 7 of the
+Upgrade procedure — do not start a second aggkit process on the same `PathRWData`, the two would
+fight over the sqlite databases.
 
 ### Reconcile pending batches (`lastBatchSequenced` vs `lastVerifiedBatch`)
 
@@ -231,19 +244,23 @@ This process may take a couple hours to complete, but downtime from the point of
       MaxCertSize = 0      # Do not cap the certificate size (default is 8MB)
       MaxL2BlockRange = 0  # Do not cap the block range (already the default value)
       ```
+      `Mode` can be left unset: the aggchain contract is in place after `initMigration`, so the
+      default `Auto` resolves to `PessimisticProof` on its own.
+
       > [!IMPORTANT]
       > To guarantee the **bootstrap certificate covers the full `[1, N]` range** (where `N` is the
       > last verified L2 block) **in a single, non-split certificate**, both of these limits must be
       > disabled:
       > * `MaxCertSize = 0` — otherwise the default 8MB cap can split the bootstrap cert.
       > * `MaxL2BlockRange = 0` — this is already the default, but set it explicitly to be safe.
-      > [!NOTE]
-      > `Mode` can be left unset. The aggchain contract is in place after `initMigration`, so the
-      > default `Auto` now resolves to `PessimisticProof` on its own.
-   3. Restart the aggkit instance adding the `aggsender` component:
-      `aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender` (plus any other component
-      that was already running). `aggsender` starts `l1infotreesync` and `l2bridgesync` itself and
-      reuses their databases, so there is no resync.
+   3. Restart **the same** aggkit instance, adding `aggsender` to the component list it was already
+      running:
+      `aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,l1infotreesync,l2bridgesync`.
+      The syncers reuse their databases, so there is no resync.
+      > [!IMPORTANT]
+      > Keep the other components listed. `aggsender` starts `l1infotreesync` and `l2bridgesync`
+      > itself, but it is **not** part of the bridge-service gate, so restarting with
+      > `--components=aggsender` alone silently drops the bridge REST API.
       > [!TIP]
       > To inspect the bootstrap certificate before it reaches the agglayer, do this first restart
       > with `DryRun = true`: aggsender builds and signs the certificate, logs
