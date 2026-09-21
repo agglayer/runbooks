@@ -94,6 +94,27 @@ Once started, it will sync from the rollup manager deployment block. It may take
 > * cardona: "grpc-agglayer-test.polygon.technology:443"
 > * bali: "grpc-agglayer-dev.polygon.technology:443"
 
+#### Check the syncers have caught up
+
+`aggsender` must not be started until both syncers are at the tip. They have no progress RPC, so
+compare the last block each one stored with the corresponding chain head — note the two use a
+different finality: `l1infotreesync` follows the **finalized** L1 block, `l2bridgesync` the
+**latest** L2 block.
+
+```bash
+# L1 info tree sync vs finalized L1 block
+sqlite3 -readonly /data/L1InfoTreeSync.sqlite "select max(num) from block;"
+cast block finalized -f number --rpc-url $L1_URL
+
+# L2 bridge sync vs latest L2 block
+sqlite3 -readonly /data/bridgel2sync.sqlite "select max(num) from block;"
+cast block latest -f number --rpc-url $L2_URL
+```
+
+Both pairs should be within a few blocks of each other and the gap should not grow between two
+consecutive checks. Keep the syncers running from here on — they stay live through the rest of the
+procedure.
+
 ### Reconcile pending batches (`lastBatchSequenced` vs `lastVerifiedBatch`)
 
 > [!IMPORTANT]
@@ -193,7 +214,10 @@ This process may take a couple hours to complete, but downtime from the point of
          3. Set `threshold = 1` and add `trustedSequencer` as the sole initial signer. Admin can later update signers and threshold via `updateSignersAndThreshold`.
          4. Handles empty `trustedSequencerURL` by using "NO_URL" placeholder.
    2. Wait until the transaction is finalized.
-7. **Start aggsender**:
+7. **Start aggsender**: only once **both** conditions hold — the `initMigration` transaction of
+   step 4 is finalized, and the syncers are still caught up (re-run the check from the
+   Prerequisites; they have kept running while the sequencer was stopped, so the L2 side should be
+   at the tip and the L1 side within finality distance).
    1. Get last l2 block verified:
       1. Set the correct ETH_RPC_URL for your network: `export ETH_RPC_URL="https://zkevm-rpc.com"`
       2. Get the last verified batch number: `cast rpc zkevm_verifiedBatchNumber`
