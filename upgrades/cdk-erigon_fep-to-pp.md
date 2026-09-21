@@ -58,7 +58,6 @@ CertificateSendInterval = "1m"
 CheckStatusCertificateInterval = "1m"
 CheckSettledInterval = "5s"
 RetryCertAfterInError = true
-SaveCertificatesToFilesPath = "/tmp"
 RequireNoFEPBlockGap = true
 MaxL2BlockNumber = 0
 MaxCertSize = 0
