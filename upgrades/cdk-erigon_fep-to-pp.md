@@ -256,11 +256,11 @@ This process may take a couple hours to complete, but downtime from the point of
    3. Restart **the same** aggkit instance, adding `aggsender` to the component list it was already
       running:
       `aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender,l1infotreesync,l2bridgesync`.
-      The syncers reuse their databases, so there is no resync.
-      > [!IMPORTANT]
-      > Keep the other components listed. `aggsender` starts `l1infotreesync` and `l2bridgesync`
-      > itself, but it is **not** part of the bridge-service gate, so restarting with
-      > `--components=aggsender` alone silently drops the bridge REST API.
+      The syncers reuse their databases, so there is no resync. Keep the other components on the
+      command line: `aggsender` starts `l1infotreesync` and `l2bridgesync` itself, but it is **not**
+      part of the bridge-service gate, so restarting with `--components=aggsender` alone silently
+      drops the bridge REST API.
+
       > [!TIP]
       > To inspect the bootstrap certificate before it reaches the agglayer, do this first restart
       > with `DryRun = true`: aggsender builds and signs the certificate, logs
