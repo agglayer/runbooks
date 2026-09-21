@@ -18,10 +18,12 @@ This document provides a comprehensive guide for upgrading from CDK Erigon FEP (
 
 ### Deploy Aggkit in sync only mode
 
-Deploy Aggkit in sync only mode.
+Deploy Aggkit with the syncers only — **not** the `aggsender` component. These are exactly the
+syncers `aggsender` depends on, and they write to `PathRWData`, so when `aggsender` is started
+after the migration it finds everything already synced and has nothing to catch up on.
 
 * image: ghcr.io/agglayer/aggkit:0.8.1
-* command: aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender
+* command: aggkit run --cfg=/etc/aggkit/config.toml --components=l1infotreesync,l2bridgesync
 * Persisted data directory. Ex.: /data
 * Configuration file. Ex: /etc/aggkit/config.toml
 * No environment variables
@@ -60,12 +62,27 @@ SaveCertificatesToFilesPath = "/tmp"
 RequireNoFEPBlockGap = true
 MaxL2BlockNumber = 0
 MaxCertSize = 0
-DryRun = true
   [AggSender.AgglayerClient.GRPC]
   URL = "grpc-agglayer.polygon.technology:443" # It depends on the environment.
   UseTLS = "true"
 ```
 </details>
+
+The `[AggSender]` section is already in the template so that nothing has to be added later, but it
+is not read while `aggsender` is not in `--components`.
+
+> [!NOTE]
+> Add `l1bridgesync`, `l2gersync` and `bridge` to `--components` as well if the bridge REST API is
+> wanted during the sync; `aggsender` itself does not need them.
+
+> [!IMPORTANT]
+> Do **not** start `aggsender` before the migration. Its default `Mode = "Auto"` resolves the mode
+> by calling `CONSENSUS_TYPE()` / `AGGCHAIN_TYPE()` on the rollup contract, which the legacy
+> contract does not implement, so aggkit exits at startup with:
+> `aggsender mode is AUTO, but can't get contract mode from rollup contract: failed to get consensus
+> type from contract: execution reverted`.
+> Running it early requires pinning `Mode = "PessimisticProof"`, and it buys nothing — the syncers
+> above already do all the catching up.
 
 Once started, it will sync from the rollup manager deployment block. It may take a few hours to complete.
 
@@ -184,11 +201,10 @@ This process may take a couple hours to complete, but downtime from the point of
       3. Get the last block hash from previous batch: `cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]`
       4. Get the block number from previous block hash: `cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number`
       5. Convert the block number from HEX to DEC: `printf "%d\n" $(cast rpc eth_getBlockByHash $(cast rpc zkevm_getBatchByNumber $(cast rpc zkevm_verifiedBatchNumber) --json | jq -r .blocks[-1]) | jq -r .number)`
-   3. Update aggkit config:
+   2. Update aggkit config:
       ```toml
       [AggSender]
       MaxL2BlockNumber = 0 # Set the obtained last verified L2 block number
-      DryRun = false       # Send certificate to the agglayer
       MaxCertSize = 0      # Do not cap the certificate size (default is 8MB)
       MaxL2BlockRange = 0  # Do not cap the block range (already the default value)
       ```
@@ -198,9 +214,22 @@ This process may take a couple hours to complete, but downtime from the point of
       > disabled:
       > * `MaxCertSize = 0` — otherwise the default 8MB cap can split the bootstrap cert.
       > * `MaxL2BlockRange = 0` — this is already the default, but set it explicitly to be safe.
-   4. Restart the aggkit instance with the new config.
-   5. Monitor the first certificate is correctly sent to the agglayer.
-   6. Once the first certificate is settled, update the configuration to allow new certificates.
+      > [!NOTE]
+      > `Mode` can be left unset. The aggchain contract is in place after `initMigration`, so the
+      > default `Auto` now resolves to `PessimisticProof` on its own.
+   3. Restart the aggkit instance adding the `aggsender` component:
+      `aggkit run --cfg=/etc/aggkit/config.toml --components=aggsender` (plus any other component
+      that was already running). `aggsender` starts `l1infotreesync` and `l2bridgesync` itself and
+      reuses their databases, so there is no resync.
+      > [!TIP]
+      > To inspect the bootstrap certificate before it reaches the agglayer, do this first restart
+      > with `DryRun = true`: aggsender builds and signs the certificate, logs
+      > `building certificate for Type: ... FromBlock: 1, ToBlock: <N>` and
+      > `certificate ready to be sent to AggLayer: ...`, and then warns
+      > `dry run mode enabled, skipping sending certificate` instead of sending it. Set
+      > `DryRun = false` and restart again to send it for real.
+   4. Monitor the first certificate is correctly sent to the agglayer.
+   5. Once the first certificate is settled, update the configuration to allow new certificates.
       ```toml
       [AggSender]
       MaxL2BlockNumber = 0
