@@ -170,7 +170,7 @@ that rewinds `lastBatchSequenced`, `totalSequencedBatches`, the `sequencedBatche
 `lastAccInputHash`; it leaves `lastLocalExitRoot` and `lastVerifiedBatch` untouched, so the bootstrap
 certificate still targets the same LER.
 
-1. **Stop the sequencer** so no new batches are sequenced during the rollback and after the rollback.
+1. **Stop the sequencer-sender** so no new batches are sequenced during the rollback and after the rollback.
 2. **Trigger the rollback** on L1 (`targetBatch = lastVerifiedBatch`). The caller must hold
    `_UPDATE_ROLLUP_ROLE` **or** be the rollup admin — this may be a different account than the
    AgglayerManager admin (`$ADMIN_PKEY`) used for `initMigration`:
