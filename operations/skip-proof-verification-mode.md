@@ -41,6 +41,7 @@ What is and is not enforced once the mode is live:
 - **`op-succinct-proposer` ≥ `v3.14.1`**.
 - Access to the **Aggchain manager** of the `AggchainFEP` contract (EOA key or multisig).
 - `cast` CLI ([Foundry](https://book.getfoundry.sh/getting-started/installation)).
+- `jq`.
 
 ---
 
@@ -80,6 +81,20 @@ export standard_selector=0x000B0001
 
 ## 2. Register **both** owned vkeys
 
+`addOwnedAggchainVKey` reverts with `OwnedAggchainVKeyAlreadyAdded` if a key is already set — e.g. on a
+chain coming out of [recovery](./recover-halted-fep-chain.md). Check each selector first:
+
+```shell
+cast call $rollup_address "ownedAggchainVKeys(bytes4)(bytes32)" $noop_selector     --rpc-url $l1_rpc_url
+cast call $rollup_address "ownedAggchainVKeys(bytes4)(bytes32)" $standard_selector --rpc-url $l1_rpc_url
+```
+
+|        Owned vkey         |          Action           |
+| :-----------------------: | :-----------------------: |
+| `0x000…000`               | `addOwnedAggchainVKey`    |
+| equals the expected vkey  | skip                      |
+| different                 | `updateOwnedAggchainVKey` |
+
 ```shell
 cast send --private-key $aggchain_manager_key $rollup_address \
   "addOwnedAggchainVKey(bytes4,bytes32)" $noop_selector $noop_vkey --rpc-url $l1_rpc_url
@@ -94,22 +109,21 @@ cast send --private-key $aggchain_manager_key $rollup_address \
 > you would have to toggle `enableUseDefaultVkeysFlag()` / `disableUseDefaultVkeysFlag()` on every mode
 > change. Owning both keeps in-flight certificates and the way back working.
 
-See [Add Owned Aggchain VKey](./add-owned-aggchain-vkey.md) for the full semantics of this call
-(`updateOwnedAggchainVKey` if a key is already registered for the selector).
+See [Add Owned Aggchain VKey](./add-owned-aggchain-vkey.md) for the full semantics of these calls.
 
 ---
 
 ## 3. Disable the default vkeys
 
 ```shell
-cast send --private-key $aggchain_manager_key $rollup_address \
-  "disableUseDefaultVkeysFlag()" --rpc-url $l1_rpc_url
+cast call $rollup_address "useDefaultVkeys()(bool)" --rpc-url $l1_rpc_url
 ```
 
-Verify:
+Only if it returns `true` (the call reverts with `UseDefaultVkeysAlreadyDisabled` otherwise):
 
 ```shell
-cast call $rollup_address "useDefaultVkeys()(bool)" --rpc-url $l1_rpc_url   # false
+cast send --private-key $aggchain_manager_key $rollup_address \
+  "disableUseDefaultVkeysFlag()" --rpc-url $l1_rpc_url
 ```
 
 ---
@@ -126,17 +140,24 @@ exercise would stay untested.
 
 > [!WARNING]
 > After disabling optimistic mode the op-succinct DB must be flushed, because existing proven ranges
-> may not match the last-proven block the aggsender requests.
+> may not match the last-proven block the aggsender requests. Do it in step 5, **with the proposer
+> stopped** — flushing a running real-mode proposer lets it rebuild the ranges with paid proofs.
 
 ---
 
 ## 5. Switch `op-succinct-proposer` to mock mode — **before** the prover
 
+1. **Stop aggkit.** It stays stopped until step 6 completes, so no certificate request lands while the
+   proposer and the prover run in mismatched modes.
+2. **Stop `op-succinct-proposer`.**
+3. **Flush the op-succinct DB** (required if optimistic mode was disabled in step 4).
+4. Set mock mode and start the proposer:
+
 ```shell
 OP_SUCCINCT_MOCK=true
 ```
 
-Restart the proposer and confirm its startup line reports `mock: true`:
+Confirm its startup line reports `mock: true`:
 
 ```
 INFO Validity proposer configuration loaded  … range_proof_interval=1800 submission_interval=1800 mock=true …
@@ -169,6 +190,8 @@ and the resulting certificate can only be verified by a mock verifier.
 
 **Restart the prover.** The config is read at startup only — a config change without a restart silently
 keeps the old mode.
+
+**Then start aggkit.**
 
 ---
 
@@ -301,13 +324,17 @@ cast call $rollup_address "opSuccinctConfigs(bytes32)(bytes32,bytes32,bytes32)" 
 
 ## Switching back to `mode = "standard"`
 
-Reverse order — proposer first, prover second:
+Reverse order, with aggkit paused throughout — otherwise a request arriving while the proposer is
+real and the prover is still in `skip-proof-verification` starts a paid aggregation proof that is then
+discarded:
 
-1. Set `OP_SUCCINCT_MOCK=false`, **flush the op-succinct DB**, restart `op-succinct-proposer`, and wait
-   for it to start producing real range proofs.
-2. Set `mode = "standard"` and restart `aggkit-prover`.
-3. Confirm `Aggchain vkey selector in effect  vkey_selector=0x000b0001  proposer_mode=network`.
-4. Leave `useDefaultVkeys = false` as long as you own both vkeys. Only call
+1. **Stop aggkit.**
+2. Stop `op-succinct-proposer`, **flush the op-succinct DB**, set `OP_SUCCINCT_MOCK=false`, and start it.
+   Wait for it to produce real range proofs.
+3. Set `mode = "standard"` and restart `aggkit-prover`.
+4. Confirm `Aggchain vkey selector in effect  vkey_selector=0x000b0001  proposer_mode=network`.
+5. **Start aggkit.**
+6. Leave `useDefaultVkeys = false` as long as you own both vkeys. Only call
    `enableUseDefaultVkeysFlag()` if you want to return to the gateway defaults, and wait for any
    in-flight noop certificate to settle first.
 

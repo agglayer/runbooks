@@ -19,7 +19,8 @@ rather than from L2, re-anchoring the chain onto the settled state so normal set
 
 ## Confirm the diagnosis first
 
-Do not run this runbook on a chain that is merely slow. Confirm all three:
+Do not run this runbook on a chain that is merely slow. Export the variables from
+[Prerequisites](#prerequisites) first, then confirm all three:
 
 **1. The agglayer reports `Aggchain hash mismatch`:**
 
@@ -36,20 +37,34 @@ cast rpc --rpc-url $agglayer_rpc interop_getLatestKnownCertificateHeader $networ
 output against the L2 node:
 
 ```shell
-idx=$(cast call $rollup_address "latestOutputIndex()(uint256)" --rpc-url $l1_rpc_url)
-cast call $rollup_address "getL2Output(uint256)" $idx --rpc-url $l1_rpc_url
-blk=$(cast call $rollup_address "latestBlockNumber()(uint256)" --rpc-url $l1_rpc_url)
+idx=$(cast call $rollup_address "latestOutputIndex()(uint256)" --rpc-url $l1_rpc_url | awk '{print $1}')
+blk=$(cast call $rollup_address "latestBlockNumber()(uint256)" --rpc-url $l1_rpc_url | awk '{print $1}')
+
+# L1 settled output root
+cast call $rollup_address "getL2Output(uint256)((bytes32,uint128,uint128))" $idx --rpc-url $l1_rpc_url \
+  | tr -d '()' | cut -d, -f1
+
+# L2 output root at the same block
 cast rpc optimism_outputAtBlock $(cast to-hex $blk) --rpc-url $l2_op_node_rpc | jq -r .outputRoot
 ```
 
+> [!NOTE]
+> `cast` appends a scientific-notation hint to large integers (`3104 [3.104e3]`); the `awk` strips it
+> so the value can be reused.
+
 A mismatch here is the reorg. Run the same check on a **second, independently synced L2 node** before
 concluding — a single unhealthy node can produce a false positive (see
-[Troubleshooting](#the-l2-node-cannot-serve-state-at-the-anchor)).
+[Troubleshooting → *The L2 node cannot serve state at the anchor*](#troubleshooting)).
 
 **3. The local exit roots still agree.** This decides whether you need LET recovery first:
 
 ```shell
-cast call $rollup_manager "rollupIDToRollupData(uint32)" $network_id --rpc-url $l1_rpc_url  # lastLocalExitRoot
+# L1 lastLocalExitRoot (5th return value)
+cast call $rollup_manager \
+  "rollupIDToRollupDataDeserialized(uint32)(address,uint64,address,uint64,bytes32,uint64,uint64,uint64,uint64,uint64,uint64,uint8)" \
+  $network_id --rpc-url $l1_rpc_url | sed -n 5p
+
+# L2 bridge root
 cast call $l2_bridge_address "getRoot()(bytes32)" --rpc-url $l2_rpc_url
 ```
 
@@ -64,13 +79,16 @@ If they differ, reconcile with [Backward/Forward LET recovery](./backward-forwar
 - Access to the **Aggchain manager** of the `AggchainFEP` contract.
 - An L2 execution node that can serve the **end block** of the recovery range.
 - `cast` CLI ([Foundry](https://book.getfoundry.sh/getting-started/installation)).
+- `jq`.
 
 ```shell
 export rollup_address=0x              # AggchainFEP proxy
 export rollup_manager=0x
 export network_id=
 export l1_rpc_url=https://
-export l2_rpc_url=https://
+export l2_rpc_url=https://            # L2 execution node
+export l2_op_node_rpc=https://        # L2 op-node (serves optimism_outputAtBlock)
+export l2_bridge_address=0x           # L2 sovereign bridge
 export agglayer_rpc=https://
 export aggchain_manager_key=0x
 ```
@@ -95,10 +113,32 @@ export noop_selector=0xFFFF0001
 
 ## 2. Register the noop vkey and disable the default vkeys
 
+Both calls revert if the state is already set (`OwnedAggchainVKeyAlreadyAdded`,
+`UseDefaultVkeysAlreadyDisabled`) — e.g. on a chain that previously ran
+`skip-proof-verification`. Check first:
+
+```shell
+cast call $rollup_address "ownedAggchainVKeys(bytes4)(bytes32)" $noop_selector --rpc-url $l1_rpc_url
+cast call $rollup_address "useDefaultVkeys()(bool)" --rpc-url $l1_rpc_url
+```
+
+|      Owned noop vkey       |                                     Action                                      |
+| :------------------------: | :-----------------------------------------------------------------------------: |
+| `0x000…000`                | `addOwnedAggchainVKey`                                                          |
+| equals `$noop_vkey`        | skip                                                                            |
+| different                  | `updateOwnedAggchainVKey`                                                       |
+
 ```shell
 cast send --private-key $aggchain_manager_key $rollup_address \
   "addOwnedAggchainVKey(bytes4,bytes32)" $noop_selector $noop_vkey --rpc-url $l1_rpc_url
+# or, if a different key is registered:
+cast send --private-key $aggchain_manager_key $rollup_address \
+  "updateOwnedAggchainVKey(bytes4,bytes32)" $noop_selector $noop_vkey --rpc-url $l1_rpc_url
+```
 
+Disable the defaults only if `useDefaultVkeys()` returned `true`:
+
+```shell
 cast send --private-key $aggchain_manager_key $rollup_address \
   "disableUseDefaultVkeysFlag()" --rpc-url $l1_rpc_url
 ```
@@ -118,8 +158,11 @@ See [Add Owned Aggchain VKey](./add-owned-aggchain-vkey.md) for the full semanti
 The stuck certificate is `InError` and the aggsender holds a cached aggchain proof for it. Until that
 is dropped, it keeps resending the same certificate and never calls the prover again.
 
-**Delete the aggsender DB only — not the syncer DBs** — then restart aggkit and let the aggsender
-resync from the agglayer.
+1. **Stop aggkit.**
+2. **Delete the aggsender DB only — not the syncer DBs.**
+3. **Leave aggkit stopped** until the prover is running in `recovery` (step 4). If it starts against a
+   prover still in `standard`, it immediately requests and caches another standard proof — recreating
+   the state you just cleared.
 
 > [!WARNING]
 > Deleting the bridge/GER syncer DBs forces a full L2 resync and is not needed here.
@@ -148,6 +191,8 @@ WARN Recovery mode: nothing is verified, the pre-root is taken from the latest L
 INFO Aggchain vkey selector in effect  vkey_selector=0xffff0001  proposer_mode=none
 ```
 
+**Only now start aggkit.** The aggsender resyncs from the agglayer and requests the recovery proof.
+
 ---
 
 ## 5. Watch the recovery certificate settle
@@ -173,31 +218,39 @@ cast call $rollup_address "latestBlockNumber()(uint256)"  --rpc-url $l1_rpc_url
 `latestBlockNumber` should jump to the recovery `end_block`, and the settlement's `aggchainData` word 0
 should be `0xFFFF0001`.
 
-> [!NOTE]
+> [!IMPORTANT]
 > `recovery` is self-chaining: each subsequent certificate anchors on the previous L1 output, so the
-> mode keeps producing certificates indefinitely with no constraints verified. Move off it as soon as
-> the chain is re-anchored.
+> mode keeps producing certificates indefinitely with no constraints verified. **Stop aggkit as soon as
+> the recovery certificate settles**, and keep it stopped through step 6.
 
 ---
 
 ## 6. Return to `mode = "standard"`
 
+With aggkit still stopped, register the standard vkey:
+
 ```shell
-aggkit-prover vkey                 # standard aggchain vkey
-aggkit-prover vkey-selector        # e.g. 0x000B0001
+export standard_vkey=$(aggkit-prover vkey)
+export standard_selector=$(aggkit-prover vkey-selector)    # e.g. 0x000B0001
+
+cast call $rollup_address "ownedAggchainVKeys(bytes4)(bytes32)" $standard_selector --rpc-url $l1_rpc_url
 ```
+
+Then `addOwnedAggchainVKey` if it is `0x000…000`, skip if it already equals `$standard_vkey`, or
+`updateOwnedAggchainVKey` if it differs — same table as [step 2](#2-register-the-noop-vkey-and-disable-the-default-vkeys):
 
 ```shell
 cast send --private-key $aggchain_manager_key $rollup_address \
   "addOwnedAggchainVKey(bytes4,bytes32)" $standard_selector $standard_vkey --rpc-url $l1_rpc_url
 ```
 
-Then:
+Then switch the services, aggsender last:
 
 1. Start `op-succinct-proposer` (real mode, `OP_SUCCINCT_MOCK=false`) and let it build range proofs
    from the new `latestBlockNumber`.
 2. Set `mode = "standard"` and restart the prover.
 3. Confirm `Aggchain vkey selector in effect  vkey_selector=0x000b0001  proposer_mode=network`.
+4. **Start aggkit.**
 
 Once a few certificates have settled in `standard`, you may move to the cheaper
 [`skip-proof-verification` mode](./skip-proof-verification-mode.md).
