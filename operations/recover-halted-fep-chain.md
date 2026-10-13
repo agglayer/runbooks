@@ -197,7 +197,8 @@ INFO Aggchain vkey selector in effect  vkey_selector=0xffff0001  proposer_mode=n
 
 ## 5. Watch the recovery certificate settle
 
-The prover logs the inputs it assembled, all taken from L1:
+The prover logs the inputs it assembled. The pre-root and the contract parameters come from L1;
+`claim_root` and `claim_block_num` come from the L2 output at the end block:
 
 ```
 INFO Retrieving chain data for the recovery aggchain proof
@@ -246,7 +247,7 @@ cast send --private-key $aggchain_manager_key $rollup_address \
 
 Then switch the services, aggsender last:
 
-1. Start `op-succinct-proposer` (real mode, `OP_SUCCINCT_MOCK=false`) and let it build range proofs
+1. Start `op-succinct-proposer` (real mode, `OP_SUCCINCT_MOCK=false` in its environment) and let it build range proofs
    from the new `latestBlockNumber`.
 2. Set `mode = "standard"` and restart the prover.
 3. Confirm `Aggchain vkey selector in effect  vkey_selector=0x000b0001  proposer_mode=network`.

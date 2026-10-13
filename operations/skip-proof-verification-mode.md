@@ -151,11 +151,14 @@ exercise would stay untested.
    proposer and the prover run in mismatched modes.
 2. **Stop `op-succinct-proposer`.**
 3. **Flush the op-succinct DB** (required if optimistic mode was disabled in step 4).
-4. Set mock mode and start the proposer:
+4. Set mock mode in the proposer's **deployment environment** (env file, Helm values, …) and start it:
 
-```shell
+```env
 OP_SUCCINCT_MOCK=true
 ```
+
+   If you launch the proposer from a shell instead, use `export OP_SUCCINCT_MOCK=true` — a bare
+   assignment is not passed to the process.
 
 Confirm its startup line reports `mock: true`:
 
@@ -329,7 +332,7 @@ real and the prover is still in `skip-proof-verification` starts a paid aggregat
 discarded:
 
 1. **Stop aggkit.**
-2. Stop `op-succinct-proposer`, **flush the op-succinct DB**, set `OP_SUCCINCT_MOCK=false`, and start it.
+2. Stop `op-succinct-proposer`, **flush the op-succinct DB**, set `OP_SUCCINCT_MOCK=false` in its environment, and start it.
    Wait for it to produce real range proofs.
 3. Set `mode = "standard"` and restart `aggkit-prover`.
 4. Confirm `Aggchain vkey selector in effect  vkey_selector=0x000b0001  proposer_mode=network`.
