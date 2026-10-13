@@ -64,12 +64,17 @@ cast call $rollup_manager \
   "rollupIDToRollupDataDeserialized(uint32)(address,uint64,address,uint64,bytes32,uint64,uint64,uint64,uint64,uint64,uint64,uint8)" \
   $network_id --rpc-url $l1_rpc_url | sed -n 5p
 
-# L2 bridge root
-cast call $l2_bridge_address "getRoot()(bytes32)" --rpc-url $l2_rpc_url
+# L2 bridge root at the last settled block ($blk from check 2)
+cast call $l2_bridge_address "getRoot()(bytes32)" --block $blk --rpc-url $l2_rpc_url
 ```
 
-If they differ, reconcile with [Backward/Forward LET recovery](./backward-forward-let-recovery.md)
-**before** continuing. If they match, proceed.
+Compare at the settled block, not at `latest`: the live L2 root legitimately includes bridge exits
+created after the last settled certificate.
+
+If they match, proceed. If they differ, do **not** start an LET recovery on that basis alone — run the
+diagnosis from [Backward/Forward LET recovery](./backward-forward-let-recovery.md)
+(`backward-forward-let --diagnose-only`) and branch on its output: `NoDivergence` → proceed with this
+runbook; `Status: Recovery required` → complete the LET recovery first.
 
 ---
 
@@ -105,8 +110,8 @@ aggkit-prover vkey-selector --noop    # 0xFFFF0001
 ```
 
 ```shell
-export noop_vkey=0x
-export noop_selector=0xFFFF0001
+export noop_vkey=$(aggkit-prover vkey --noop)
+export noop_selector=$(aggkit-prover vkey-selector --noop)
 ```
 
 ---
@@ -250,7 +255,8 @@ Then switch the services, aggsender last:
 1. Start `op-succinct-proposer` (real mode, `OP_SUCCINCT_MOCK=false` in its environment) and let it build range proofs
    from the new `latestBlockNumber`.
 2. Set `mode = "standard"` and restart the prover.
-3. Confirm `Aggchain vkey selector in effect  vkey_selector=0x000b0001  proposer_mode=network`.
+3. Confirm `Aggchain vkey selector in effect  proposer_mode=network` with `vkey_selector` equal to
+   `$standard_selector`.
 4. **Start aggkit.**
 
 Once a few certificates have settled in `standard`, you may move to the cheaper

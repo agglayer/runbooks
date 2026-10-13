@@ -67,11 +67,15 @@ aggkit-prover vkey-selector --noop # 0xFFFF0001
 ```
 
 ```shell
-export noop_vkey=0x
-export noop_selector=0xFFFF0001
-export standard_vkey=0x
-export standard_selector=0x000B0001
+export noop_vkey=$(aggkit-prover vkey --noop)
+export noop_selector=$(aggkit-prover vkey-selector --noop)
+export standard_vkey=$(aggkit-prover vkey)
+export standard_selector=$(aggkit-prover vkey-selector)
 ```
+
+> [!IMPORTANT]
+> Capture the values from the image rather than copying an example: the first two bytes of the
+> standard selector are the program version and change between prover releases.
 
 > [!NOTE]
 > The noop selector reserves aggchain vkey version `0xFFFF`, so it can never collide with a real
@@ -335,7 +339,8 @@ discarded:
 2. Stop `op-succinct-proposer`, **flush the op-succinct DB**, set `OP_SUCCINCT_MOCK=false` in its environment, and start it.
    Wait for it to produce real range proofs.
 3. Set `mode = "standard"` and restart `aggkit-prover`.
-4. Confirm `Aggchain vkey selector in effect  vkey_selector=0x000b0001  proposer_mode=network`.
+4. Confirm `Aggchain vkey selector in effect  proposer_mode=network` with `vkey_selector` equal to
+   `$standard_selector`.
 5. **Start aggkit.**
 6. Leave `useDefaultVkeys = false` as long as you own both vkeys. Only call
    `enableUseDefaultVkeysFlag()` if you want to return to the gateway defaults, and wait for any
