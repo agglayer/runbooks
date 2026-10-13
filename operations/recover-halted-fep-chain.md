@@ -80,7 +80,7 @@ runbook; `Status: Recovery required` → complete the LET recovery first.
 
 ## Prerequisites
 
-- **`aggkit-prover` ≥ `2.2.0-rc.3`** (`ghcr.io/agglayer/aggkit-prover:2.2.0-rc.3`).
+- **`aggkit-prover` ≥ `v2.2.0`** (`ghcr.io/agglayer/aggkit-prover:2.2.0`).
 - Access to the **Aggchain manager** of the `AggchainFEP` contract.
 - An L2 execution node that can serve the **end block** of the recovery range.
 - `cast` CLI ([Foundry](https://book.getfoundry.sh/getting-started/installation)).

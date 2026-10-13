@@ -37,7 +37,7 @@ What is and is not enforced once the mode is live:
 
 ## Prerequisites
 
-- **`aggkit-prover` ≥ `2.2.0-rc.3`** (`ghcr.io/agglayer/aggkit-prover:2.2.0-rc.3`).
+- **`aggkit-prover` ≥ `v2.2.0`** (`ghcr.io/agglayer/aggkit-prover:2.2.0`).
 - **`op-succinct-proposer` ≥ `v3.14.1`**.
 - Access to the **Aggchain manager** of the `AggchainFEP` contract (EOA key or multisig).
 - `cast` CLI ([Foundry](https://book.getfoundry.sh/getting-started/installation)).
