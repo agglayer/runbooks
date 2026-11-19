@@ -534,6 +534,22 @@ If `recovery.txt` already contains `Recovery completed successfully.` and shows 
 
 After recovery, coordinate AggSender certificate production with the deployment owner.
 
+### Local Balance Tree
+
+`forwardLET` does not update the L2 bridge Local Balance Tree (LBT). Divergent leaves (plan step `ForwardLET` or `ForwardLET #1`, `agglayer but not L2`) are therefore not debited on L2, and the next certificate can fail with `BalanceUnderflowInBridgeExit`. Replayed L2 bridges (`ForwardLET #2`) need no fix.
+
+If the recovery injected divergent leaves, before resuming AggSender:
+
+1. Activate the emergency state right after the CLI finishes (the CLI deactivates it on exit).
+2. For each token, compute the current `localBalanceTree(keccak256(abi.encodePacked(originNetwork, originTokenAddress)))` minus the sum of its divergent leaf amounts:
+    - Asset leaves: key `(originNetwork, originTokenAddress)`. Skip tokens whose `originNetwork` is the L2 network ID.
+    - Message leaves: key `(0, 0x0000000000000000000000000000000000000000)` (ETH).
+3. If any result is negative, stop and escalate.
+4. Save the old and new amounts, then call `setLocalBalanceTree(originNetworks, originTokenAddresses, amounts)` with the GER remover key. On a retry, check whether that call was already mined before recomputing.
+5. Deactivate the emergency state.
+
+The AggLayer admin can provide the full settled LBT of the network if needed.
+
 For normal recovery where AggSender was only paused and its local DB still matches the
 latest AggLayer-settled certificate, resume AggSender certificate submission.
 
