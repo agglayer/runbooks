@@ -40,6 +40,7 @@ backward-forward-let --cfg /etc/aggkit/base.toml --cfg /etc/aggkit/recovery.toml
 
 Stop and collect the escalation data below if any of these happen:
 
+- The L2 bridge `emergencyBridgePauser()` or `emergencyBridgeUnpauser()` is `address(0)`. `BackwardLET`, `ForwardLET` and `setLocalBalanceTree` only run in emergency state, which a zero pauser can never activate, and a zero unpauser can never deactivate. Recovery then needs a bridge contract upgrade.
 - `backward-forward-let --help` does not show `--diagnose-only`, `--cert-exits-file`, and `cert-status`.
 - Any command exits with an error you cannot directly resolve from this runbook.
 - The diagnosis says certificate exits are missing and you cannot obtain an approved cert-ID map from the AggLayer admin owner, or cannot generate the AggLayer certificate file with the documented script.
