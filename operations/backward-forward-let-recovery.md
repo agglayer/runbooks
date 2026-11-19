@@ -535,21 +535,19 @@ After recovery, coordinate AggSender certificate production with the deployment 
 
 ### Local Balance Tree
 
-`forwardLET` adds leaves without updating the L2 bridge Local Balance Tree (LBT), and the CLI does not reconcile it. When the recovery re-added exits that were never bridged on the L2 (they are in the settled LER but missing on L2, for example after an L2 reorg), the pessimistic proof already debited them but the L2 LBT did not. The L2 then allows exits the proof rejects, and the next certificate fails with `BalanceUnderflowInBridgeExit`.
+`forwardLET` does not update the L2 bridge Local Balance Tree (LBT). Divergent leaves (plan step `ForwardLET` or `ForwardLET #1`, `agglayer but not L2`) are therefore not debited on L2, and the next certificate can fail with `BalanceUnderflowInBridgeExit`. Replayed L2 bridges (`ForwardLET #2`) need no fix.
 
-Only the divergent leaves (the plan step `inject N divergent leaf(ves) (agglayer but not L2)`, printed as `ForwardLET` or `ForwardLET #1`) are missing their L2 debit. The real L2 bridges replayed by `ForwardLET #2` were already debited when they were bridged. Do not copy the AggLayer settled balance into the L2 LBT: it does not include the L2 exits and claims that are not settled yet.
+If the recovery injected divergent leaves, before resuming AggSender:
 
-If the recovery injected any divergent leaf, before resuming AggSender:
-
-1. Activate the emergency state immediately after the CLI finishes. The CLI always deactivates it on exit, and until the LBT is fixed the L2 allows exits the pessimistic proof rejects.
-2. For each token, read the L2 bridge `localBalanceTree(keccak256(abi.encodePacked(originNetwork, originTokenAddress)))` and subtract the sum of the divergent leaf amounts for that token, in raw token units:
-    - Asset leaves debit `(originNetwork, originTokenAddress)`. Skip leaves whose `originNetwork` is the L2 network ID: the L2 does not track its own tokens (`setLocalBalanceTree` reverts with `InvalidLBTLeaf`).
-    - Message leaves debit their `amount` from `(0, 0x0000000000000000000000000000000000000000)` (ETH).
-3. If any divergent sum is greater than the current balance, stop and escalate with the bridge in emergency state and AggSender paused.
-4. Save the current balances and the new amounts to the evidence directory, then call `setLocalBalanceTree(originNetworks, originTokenAddresses, amounts)` with the GER remover key and save the transaction hash. On a retry, check for that transaction's `SetLocalBalanceTree` events before recomputing: a second subtraction would understate the LBT.
+1. Activate the emergency state right after the CLI finishes (the CLI deactivates it on exit).
+2. For each token, compute the current `localBalanceTree(keccak256(abi.encodePacked(originNetwork, originTokenAddress)))` minus the sum of its divergent leaf amounts:
+    - Asset leaves: key `(originNetwork, originTokenAddress)`. Skip tokens whose `originNetwork` is the L2 network ID.
+    - Message leaves: key `(0, 0x0000000000000000000000000000000000000000)` (ETH).
+3. If any result is negative, stop and escalate.
+4. Save the old and new amounts, then call `setLocalBalanceTree(originNetworks, originTokenAddresses, amounts)` with the GER remover key. On a retry, check whether that call was already mined before recomputing.
 5. Deactivate the emergency state.
 
-If needed, the AggLayer admin can provide the full settled LBT of the network to cross-check the result.
+The AggLayer admin can provide the full settled LBT of the network if needed.
 
 For normal recovery where AggSender was only paused and its local DB still matches the
 latest AggLayer-settled certificate, resume AggSender certificate submission.
